@@ -96,8 +96,8 @@ def performattack(scene,slot):
             resistance = defendingBeast.coldRES
         elif (attack.element == "shock"):
             resistance = defendingBeast.shockRES
-        dmg = min( round(attackingBeast.ATK * attack.power * (1-resistance) * totalModifier) , defendingBeast.HP)
-
+        dmg = round(attackingBeast.ATK * attack.power * (1-resistance) * totalModifier)
+    dmg = min( dmg, defendingBeast.HP )
     #resolve attack
     defendingBeast.HP -= dmg
 
