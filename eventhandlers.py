@@ -1,4 +1,4 @@
-from math import floor
+from math import floor,ceil
 from classes import Beast, Attack
 from random import random
 
@@ -101,7 +101,7 @@ def performattack(scene,slot):
     #resolve attack
     defendingBeast.HP -= dmg
 
-    healthpercentage = floor(dmg/defendingBeast.maxHP*100)
+    healthpercentage = ceil(dmg/defendingBeast.maxHP*100)
     print("> " + defendingBeast.name + " took " + str(dmg) + " (" + str(healthpercentage) + "%) damage! ", end="")
     if (crit):
         print("Critical hit! ")
