@@ -4,9 +4,14 @@ from scenemanager import Scene
 from random import shuffle
 import eventhandlers
 import pygame
+import os
 #from pygame.locals import *
 
 pygame.init()
+screen = pygame.display.set_mode((480,360))
+screen.fill(pygame.Color(80,158,40))
+pygame.display.flip()
+
 
 Attack1 = Attack(name="Slam",power=1.00,element="physical",accuracy=0.90)
 Attack2 = Attack(name="Ray of Fire",power=0.80,element="heat",accuracy=1.00)
