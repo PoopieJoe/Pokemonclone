@@ -14,11 +14,6 @@ import renderer
 
 pygame.init()
 screen = pygame.display.set_mode(renderer.screenDims)
-screen.fill(renderer.backgroundColor)
-
-renderer.renderTextAtPos(screen,"Battle title",(screen.get_width()/2,0),"topCentre")
-
-pygame.display.flip()
 
 Attack1 = Attack(name="Slam",power=1.00,element="physical",accuracy=0.90)
 Attack2 = Attack(name="Ray of Fire",power=0.80,element="heat",accuracy=1.00)
@@ -36,7 +31,10 @@ scene.addBeast(beast = Beast1,slot = 1)
 scene.addBeast(beast = Beast2,slot = 3)
 
 scene.setupBattle()
+renderer.drawScene(screen,scene)
+pygame.display.flip()
 
+scene.beasts[3].HP = int(scene.beasts[3].HP/2)
 renderer.drawScene(screen,scene)
 pygame.display.flip()
 input("Press ENTER...")
