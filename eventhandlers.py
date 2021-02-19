@@ -1,15 +1,35 @@
 from math import floor,ceil
 from classes import Beast, Attack
 from random import random
+import pygame
+import renderer
 
 Elements = ["none","physical","heat","cold","shock"]
 attackroll_randmod = 0.1 #attacks deal randomly between 90% and 110% dmg
 critchance = 0.05 #5% critchance
 
-def moveselect(scene,slot):
+def moveselect(scene,slot,surface):
     scene.printScene()
     beast = scene.beasts[slot]
-    #show status
+
+    renderer.drawScene(surface,scene)
+    renderer.drawMoveselect(surface,beast)
+    pygame.display.flip()
+
+    selected_move = Attack()
+    selected_slot = 0
+    move_selected = False
+    while(not move_selected):
+        pass
+
+
+    print("> " + beast.name + " (Slot " + str(slot) + ") will use " + selected_move.name + " on " + scene.beasts[selected_slot].name + " (Slot " + str(selected_slot) + ")!")
+    beast.selected_attack = [selected_move,selected_slot]
+    scene.turnTracker[slot] = 0
+    beast.clearflag(1)
+    return
+
+""" #show status
     print("\n> " + beast.name.ljust(16," ") + str(beast.HP).ljust(3," ") + "/" + str(beast.maxHP).ljust(3," ") + " HP (" + str(floor(beast.HP/beast.maxHP*100)).ljust(3," ") + "%)")
 
     #move select
@@ -43,18 +63,13 @@ def moveselect(scene,slot):
         print("Slot 1: " + scene.beasts[1].name.ljust(16," ") + ", Slot 2: " + scene.beasts[2].name.ljust(16," "))
         print("> Team B: ", end = "")
         print("Slot 3: " + scene.beasts[3].name.ljust(16," ") + ", Slot 4: " + scene.beasts[4].name.ljust(16," "))
-        selected_slot = int(input("Select target slot: ").strip())
-
-    print("> " + beast.name + " (Slot " + str(slot) + ") will use " + selected_move.name + " on " + scene.beasts[selected_slot].name + " (Slot " + str(selected_slot) + ")!")
-
-    beast.selected_attack = [selected_move,selected_slot]
-    scene.turnTracker[slot] = 0
-    beast.clearflag(1)
-    return
+        selected_slot = int(input("Select target slot: ").strip()) """
 
 def performattack(scene,slot):
     attackingBeast = scene.beasts[slot]
     defendingBeast = scene.beasts[attackingBeast.selected_attack[1]]
+
+    attackingBeast.clearflag(0)
     attack = attackingBeast.selected_attack[0]
 
     print("\n> " + attackingBeast.name + " used " + attack.name + " on " + defendingBeast.name + "!")
@@ -63,7 +78,6 @@ def performattack(scene,slot):
     if ( random() >= (attack.accuracy) ):
         print("> The attack missed!")
         attackingBeast.selected_attack = [Attack(),0]
-        attackingBeast.clearflag(0)
         return
 
     #if hit, calculate dmg
@@ -115,5 +129,4 @@ def performattack(scene,slot):
         #Secondary effects go here
         pass
     attackingBeast.selected_attack = [Attack(),0]
-    attackingBeast.clearflag(0)
     return

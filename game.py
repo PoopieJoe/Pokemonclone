@@ -11,10 +11,10 @@ import eventhandlers
 import renderer
 #from pygame.locals import *
 
-
 pygame.init()
 screen = pygame.display.set_mode(renderer.screenDims)
 
+#Build database and import beasts - move this somewhere else
 Attack1 = Attack(name="Slam",power=1.00,element="physical",accuracy=0.90)
 Attack2 = Attack(name="Ray of Fire",power=0.80,element="heat",accuracy=1.00)
 
@@ -24,13 +24,14 @@ Beast1 = Beast("Greg", maxHP = 110, ATK = 100, DEF = 100, heatRES = 0.30, coldRE
 Beast1.equipItem(Equipment1)
 
 Beast2 = Beast("Bob", maxHP = 34, ATK = 100, DEF = 100, heatRES = 0.30, coldRES = -0.20, shockRES = 0, SPE = 100)
-Beast1.equipItem(Equipment1)
+Beast2.equipItem(Equipment1)
 
 Beast3 = Beast("Micheala", maxHP = 92, ATK = 112, DEF = 100, heatRES = 0, coldRES = 0, shockRES = 0, SPE = 105)
-Beast2.equipItem(Equipment1)
+Beast3.equipItem(Equipment1)
 
 Beast4 = Beast("Larissa", maxHP = 186, ATK = 112, DEF = 100, heatRES = 0, coldRES = 0, shockRES = 0, SPE = 105)
-Beast2.equipItem(Equipment1)
+Beast4.equipItem(Equipment1)
+#end of database
 
 scene = Scene()
 scene.addBeast(beast = Beast1,slot = 1)
@@ -43,13 +44,11 @@ renderer.drawScene(screen,scene)
 pygame.display.flip()
 
 scene.beasts[1].HP = int(round(scene.beasts[1].maxHP*(0.67)))
-scene.beasts[2].HP = int(round(scene.beasts[2].maxHP*(0.01)))
+scene.beasts[2].HP = int(round(scene.beasts[2].maxHP*(0.07)))
 scene.beasts[3].HP = int(round(scene.beasts[3].maxHP*(0.43)))
 scene.beasts[4].HP = int(round(scene.beasts[4].maxHP*(0.99)))
 renderer.drawScene(screen,scene)
 pygame.display.flip()
-input("Press ENTER...")
-sys.exit()
 
 battle_active = True
 winner = 0
@@ -74,9 +73,15 @@ while (battle_active):
 
     #resolve events
     for flag_id, sublist in enumerate(flaglist,start=0):
-        resolve_function = [eventhandlers.moveselect,eventhandlers.performattack][flag_id]
-        for slot in sublist:
-            resolve_function(scene,slot)
+        if (flag_id == 0):
+            for slot in sublist:
+                eventhandlers.moveselect(scene,slot,screen)
+        if (flag_id == 1):
+            for slot in sublist:
+                eventhandlers.performattack(scene,slot)
+
+    #progress game one tick
+    scene.tick()
     
     #check if only one teams beasts are remaining (that teams wins, and the battle ends)
     if (not (scene.beasts[1].isalive or scene.beasts[2].isalive)):
@@ -86,8 +91,6 @@ while (battle_active):
         battle_active = False
         winner = "A"
 
-    #progress game one tick
-    scene.tick()
 
 scene.printScene()
 print("Team " + winner + " wins!")
