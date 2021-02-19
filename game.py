@@ -1,12 +1,19 @@
-from classes import *
-from printdetails import printFullBeastStatus
-from scenemanager import Scene
+"""
+here's ur damn docstring
+"""
+
+import sys
 from random import shuffle
-import eventhandlers
 import pygame
+from classes import Beast, Equipment, Attack
+from scenemanager import Scene
+import eventhandlers
+import renderer
 #from pygame.locals import *
 
+
 pygame.init()
+screen = pygame.display.set_mode(renderer.screenDims)
 
 Attack1 = Attack(name="Slam",power=1.00,element="physical",accuracy=0.90)
 Attack2 = Attack(name="Ray of Fire",power=0.80,element="heat",accuracy=1.00)
@@ -24,6 +31,15 @@ scene.addBeast(beast = Beast1,slot = 1)
 scene.addBeast(beast = Beast2,slot = 3)
 
 scene.setupBattle()
+renderer.drawScene(screen,scene)
+pygame.display.flip()
+
+scene.beasts[3].HP = int(scene.beasts[3].HP/2)
+renderer.drawScene(screen,scene)
+pygame.display.flip()
+input("Press ENTER...")
+sys.exit()
+
 battle_active = True
 winner = 0
 while (battle_active):
