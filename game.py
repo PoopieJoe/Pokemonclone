@@ -23,18 +23,29 @@ Equipment1 = Equipment(name="Metal chestplate",attacks=[Attack1,Attack2],statbon
 Beast1 = Beast("Greg", maxHP = 110, ATK = 100, DEF = 100, heatRES = 0.30, coldRES = -0.20, shockRES = 0, SPE = 100)
 Beast1.equipItem(Equipment1)
 
-Beast2 = Beast("Micheala", maxHP = 92, ATK = 112, DEF = 100, heatRES = 0, coldRES = 0, shockRES = 0, SPE = 105)
+Beast2 = Beast("Bob", maxHP = 34, ATK = 100, DEF = 100, heatRES = 0.30, coldRES = -0.20, shockRES = 0, SPE = 100)
+Beast1.equipItem(Equipment1)
+
+Beast3 = Beast("Micheala", maxHP = 92, ATK = 112, DEF = 100, heatRES = 0, coldRES = 0, shockRES = 0, SPE = 105)
+Beast2.equipItem(Equipment1)
+
+Beast4 = Beast("Larissa", maxHP = 186, ATK = 112, DEF = 100, heatRES = 0, coldRES = 0, shockRES = 0, SPE = 105)
 Beast2.equipItem(Equipment1)
 
 scene = Scene()
 scene.addBeast(beast = Beast1,slot = 1)
-scene.addBeast(beast = Beast2,slot = 3)
+scene.addBeast(beast = Beast2,slot = 2)
+scene.addBeast(beast = Beast3,slot = 3)
+scene.addBeast(beast = Beast4,slot = 4)
 
 scene.setupBattle()
 renderer.drawScene(screen,scene)
 pygame.display.flip()
 
-scene.beasts[3].HP = int(scene.beasts[3].HP/2)
+scene.beasts[1].HP = int(round(scene.beasts[1].maxHP*(0.67)))
+scene.beasts[2].HP = int(round(scene.beasts[2].maxHP*(0.01)))
+scene.beasts[3].HP = int(round(scene.beasts[3].maxHP*(0.43)))
+scene.beasts[4].HP = int(round(scene.beasts[4].maxHP*(0.99)))
 renderer.drawScene(screen,scene)
 pygame.display.flip()
 input("Press ENTER...")

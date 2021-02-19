@@ -8,10 +8,14 @@ pygame.init()
 
 screenDims = (1280,720)
 
-DEFAULTFONT = pygame.font.SysFont(None,int(screenDims[1]/(360/50)))
-NAMEFONT = pygame.font.SysFont(None,int(screenDims[1]/(360/20)))
+DEFAULTFONTSIZE = int(screenDims[1]/(360/50))
+DEFAULTFONT = pygame.font.SysFont(None,DEFAULTFONTSIZE)
+NAMEFONTSIZE = int(screenDims[1]/(360/20))
+NAMEFONT = pygame.font.SysFont(None,NAMEFONTSIZE)
 BACKGROUNDCOLOR = pygame.Color(80,158,40)
 BACKGROUND = pygame.surface.Surface(screenDims).fill(BACKGROUNDCOLOR)
+HPBACKGROUNDCOLOR = pygame.Color(180,180,180)
+HPFOREGROUNDCOLOR = pygame.Color(180,0,0)
 
 def renderTextAtPos(surface,text,pos,alignment="topLeft",font=None,color=pygame.Color(255,255,255)):
     if (font==None):
@@ -35,10 +39,34 @@ def renderTextAtPos(surface,text,pos,alignment="topLeft",font=None,color=pygame.
 
 def drawScene(surface,scene):
     surface.fill(BACKGROUNDCOLOR)
-    slot1Text = scene.beasts[1].name + " " + str(scene.beasts[1].HP) + "/" + str(scene.beasts[1].maxHP) + " HP (" + str(floor(scene.beasts[1].HP/scene.beasts[1].maxHP*100)) + "%)"
-    slot3Text = scene.beasts[3].name + " " + str(scene.beasts[3].HP) + "/" + str(scene.beasts[3].maxHP) + " HP (" + str(floor(scene.beasts[3].HP/scene.beasts[3].maxHP*100)) + "%)"
-    
-    renderTextAtPos(screen,"Battle title",(screen.get_width()/2,0),"topCentre")
-    renderTextAtPos(surface,slot1Text,(0,int(screenDims[1]*(0.6))),"centreLeft",font=NAMEFONT)
-    renderTextAtPos(surface,slot3Text,(screenDims[0]*(0.6),int(screenDims[1]*(0.2))),"centreLeft",font=NAMEFONT)
+    renderTextAtPos(surface,"Battle title",(surface.get_width()/2,0),"topCentre")
+
+    slotreltextpos = [  
+        (0,0),
+        (0.05,0.6),
+        (0.05,0.7),
+        (0.6,0.2),
+        (0.6,0.3)
+    ]
+
+    for slot, beast in enumerate(scene.beasts[1:],start=1):
+        if beast.isalive:
+            healthfrac = beast.HP/beast.maxHP
+            slottext = beast.name + " " + str(beast.HP) + "/" + str(beast.maxHP) + " HP (" + str(max(round(healthfrac*100),1)) + "%)"
+            textpos = multtuple(slotreltextpos[slot],screenDims)
+
+            HPbaroffset = (0,int(NAMEFONTSIZE)/2)
+            Hpbarwidth = int(screenDims[0]*(0.33))
+            Hpbarheight = int(screenDims[1]*(0.02))
+            HPbarposition = addtuple(textpos,HPbaroffset)
+
+            pygame.draw.rect(surface,HPBACKGROUNDCOLOR,(HPbarposition,(Hpbarwidth,Hpbarheight)))
+            pygame.draw.rect(surface,HPFOREGROUNDCOLOR,(HPbarposition,(Hpbarwidth*healthfrac,Hpbarheight)))
+            renderTextAtPos(surface,slottext,textpos,"centreLeft",font=NAMEFONT)
     return
+
+def addtuple(xs,ys):
+     return tuple(x + y for x, y in zip(xs, ys))
+    
+def multtuple(xs,ys):
+    return tuple(x * y for x, y in zip(xs, ys))
