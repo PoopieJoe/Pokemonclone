@@ -136,3 +136,5 @@ dmypy.json
 # Ignore all local history of files
 **/.history
 .json
+.vscode/launch.json
+.vscode/settings.json
