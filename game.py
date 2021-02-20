@@ -6,13 +6,13 @@ import sys
 from random import shuffle
 import pygame
 from classes import Beast, Equipment, Attack
-from scenemanager import Scene
+from scenemanager import Scene, fetchFlags
 import eventhandlers
-import renderer
-#from pygame.locals import *
+import ui
+from pygame.locals import *
 
 pygame.init()
-screen = pygame.display.set_mode(renderer.screenDims)
+screen = pygame.display.set_mode(ui.screenDims)
 
 #Build database and import beasts - move this somewhere else
 Attack1 = Attack(name="Slam",power=1.00,element="physical",accuracy=0.90)
@@ -40,48 +40,77 @@ scene.addBeast(beast = Beast3,slot = 3)
 scene.addBeast(beast = Beast4,slot = 4)
 
 scene.setupBattle()
-renderer.drawScene(screen,scene)
+ui.drawScene(screen,scene)
 pygame.display.flip()
 
 scene.beasts[1].HP = int(round(scene.beasts[1].maxHP*(0.67)))
 scene.beasts[2].HP = int(round(scene.beasts[2].maxHP*(0.07)))
 scene.beasts[3].HP = int(round(scene.beasts[3].maxHP*(0.43)))
 scene.beasts[4].HP = int(round(scene.beasts[4].maxHP*(0.99)))
-renderer.drawScene(screen,scene)
+ui.drawScene(screen,scene)
 pygame.display.flip()
 
 battle_active = True
 winner = 0
+active_flag = None
+state = "Idle"
+mouseclick = None
+flag_name = None
+flag_slot = 0
 while (battle_active):
+    #this is when pygame events get processed so the game doesn't crash
+    for event in pygame.event.get():
+        if (event.type == pygame.MOUSEBUTTONUP):
+            if (event.button == 1):
+                mouseclick = event.pos
+
     #check for raised event flags and sort flags
-    #rules: from first resolved to last resolved: choose move, attacks
-    #       multiple flags of the same type are resolved in random order
-    choose_attack_list = []
-    execute_attack_list = []
-    flaglist = [choose_attack_list,execute_attack_list]
-    for slot, beast in enumerate(scene.beasts[1:],start=1):
-        for flag in beast.flags:
-            if (flag[1]):
-                if (flag[0] == "choose_attack"):
-                    choose_attack_list.append(slot)
-                elif (flag[0] == "execute_attack"):
-                    execute_attack_list.append(slot)
+    raisedFlags = fetchFlags(scene)
 
-    #Shuffle flags with same priority
-    for sublist in flaglist:
-        shuffle(sublist)
+    #if no flags are being handled right now, get the next flag
+    if (active_flag == None):
+        active_flag = raisedFlags.pop(0)
+        flag_name = active_flag[0]
+        flag_slot = active_flag[1]
+        if (flag_name == "choose_attack"):
+            state = "Choose attack"
+        elif (flag_name == "execute_attack"):
+            state = "Execute attack"
+        else:
+            state = "Idle"
 
-    #resolve events
-    for flag_id, sublist in enumerate(flaglist,start=0):
-        if (flag_id == 0):
-            for slot in sublist:
-                eventhandlers.moveselect(scene,slot,screen)
-        if (flag_id == 1):
-            for slot in sublist:
-                eventhandlers.performattack(scene,slot)
+    #draw ui according to state
+    if (state == "Idle"):
+        ui.drawScene(screen,scene)
+        pygame.display.flip()
+    elif (state == "Choose attack"):
+        ui.drawScene(screen,scene)
+        moveButtons = ui.drawMoveselect(screen,scene.beasts[flag_slot])
+        pygame.display.flip()
 
-    #progress game one tick
-    scene.tick()
+        if (mouseclick):
+            for atk_id, button in enumerate(moveButtons):
+                if(button.collidepoint(mouseclick)):
+                    selected_attack = scene.beasts[flag_slot].attacks[atk_id]
+                    scene.beasts[flag_slot].selected_attack[0] = selected_attack
+                    print(str(scene.beasts[flag_slot].name) + " selected " + scene.beasts[flag_slot].selected_attack[0].name)
+                    state = "Choose target"
+                    
+    elif (state == "Choose target"):
+        ui.drawScene(screen,scene)
+        pygame.display.flip()
+    elif (state == "Execute attack"):
+        ui.drawScene(screen,scene)
+        pygame.display.flip()
+    else:
+        pass
+
+    #if flag is resolved, set active flag to None
+    #active_flag = None
+
+    #if no events need to be processed, progress game one tick
+    if (not raisedFlags):
+        scene.tick()
     
     #check if only one teams beasts are remaining (that teams wins, and the battle ends)
     if (not (scene.beasts[1].isalive or scene.beasts[2].isalive)):
@@ -90,6 +119,8 @@ while (battle_active):
     elif (not (scene.beasts[3].isalive or scene.beasts[4].isalive)):
         battle_active = False
         winner = "A"
+
+    mouseclick = None
 
 
 scene.printScene()

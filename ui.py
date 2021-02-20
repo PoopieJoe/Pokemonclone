@@ -19,21 +19,23 @@ HPBACKGROUNDCOLOR = pygame.Color(180,180,180)
 HPFOREGROUNDCOLOR = pygame.Color(180,0,0)
 MOVESELECTBACKGROUNDCOLOR = pygame.Color(200,200,200)
 MOVESELECTFOREGROUNDCOLOR = pygame.Color(240,240,240)
+BUTTONHOVERCOLOR = pygame.Color(230,230,255)
+BUTTONPRESSCOLOR = pygame.Color(200,200,225)
+
 TESTCOLOR = pygame.Color(255,0,255)
 
-def renderTextAtPos(surface,text,pos,alignment="topLeft",font=None,color=pygame.Color(255,255,255),backgroundcolor=BACKGROUNDCOLOR):
-    if (font==None):
-        font = DEFAULTFONT
-
+def renderTextAtPos(surface,text,pos,alignment="topLeft",font=DEFAULTFONT,color=pygame.Color("white"),backgroundcolor=BACKGROUNDCOLOR):
     textSurface = font.render(text,1,color)
     if (alignment == "topLeft"):
         textpos=pos
-    if (alignment == "topCentre"):
+    elif (alignment == "topCentre"):
         textpos = (pos[0] - textSurface.get_width()/2, pos[1])
-    if (alignment == "centreLeft"):
+    elif (alignment == "centreLeft"):
         textpos = (pos[0], pos[1] - textSurface.get_height()/2)
-    if (alignment == "centreRight"):
+    elif (alignment == "centreRight"):
         textpos = (pos[0] - textSurface.get_width(),pos[1] - textSurface.get_height()/2)
+    elif (alignment == "centre"):
+        textpos = (pos[0] - textSurface.get_width()/2 , pos[1] - textSurface.get_height()/2)
 
     backFill = pygame.surface.Surface((textSurface.get_width(),textSurface.get_height()))
     backFill.fill(backgroundcolor)
@@ -41,32 +43,16 @@ def renderTextAtPos(surface,text,pos,alignment="topLeft",font=None,color=pygame.
     surface.blit(textSurface,textpos)
     return Rect(textpos,(textSurface.get_width(),textSurface.get_height()))
 
-def drawScene(surface,scene):
-    surface.fill(BACKGROUNDCOLOR)
-    renderTextAtPos(surface,"Battle title",(surface.get_width()/2,0),"topCentre")
-
-    slotreltextpos = [  
-        (0,0),
-        (0.6,0.45),
-        (0.6,0.55),
-        (0.05,0.2),
-        (0.05,0.3)
-    ]
-
-    for slot, beast in enumerate(scene.beasts[1:],start=1):
-        if beast.isalive:
-            healthfrac = beast.HP/beast.maxHP
-            slottext = beast.name + " " + str(beast.HP) + "/" + str(beast.maxHP) + " HP (" + str(max(round(healthfrac*100),1)) + "%)"
-            textpos = multtuple(slotreltextpos[slot],screenDims)
-
-            HPbaroffset = (0,int(NAMEFONTSIZE)/2)
-            Hpbarwidth = int(screenDims[0]*(0.33))
-            Hpbarheight = int(screenDims[1]*(0.02))
-            HPbarposition = addtuple(textpos,HPbaroffset)
-
-            pygame.draw.rect(surface,HPBACKGROUNDCOLOR,(HPbarposition,(Hpbarwidth,Hpbarheight)))
-            pygame.draw.rect(surface,HPFOREGROUNDCOLOR,(HPbarposition,(Hpbarwidth*healthfrac,Hpbarheight)))
-            renderTextAtPos(surface,slottext,textpos,"centreLeft",font=NAMEFONT)
+def drawButton(surface,text,rect,font=DEFAULTFONT,textcolor=pygame.Color("white"),backgroundcolor=BACKGROUNDCOLOR,hovercolor=BUTTONHOVERCOLOR,presscolor=BUTTONPRESSCOLOR,border_radius = 7):
+    buttoncolor = backgroundcolor
+    if (rect.collidepoint(pygame.mouse.get_pos())):
+        if (pygame.mouse.get_pressed(3)[0]):
+            buttoncolor = presscolor
+        else:
+            buttoncolor = hovercolor
+    
+    pygame.draw.rect(surface, buttoncolor, rect ,border_radius=border_radius)
+    renderTextAtPos(surface,text,rect.center,alignment="centre",color = textcolor,font = font , backgroundcolor=buttoncolor)
     return
 
 def drawMoveselect(surface,beast):
@@ -102,11 +88,8 @@ def drawMoveselect(surface,beast):
     
     for box_id, atk in enumerate(beast.attacks):
         #draws attack background
-        pygame.draw.rect(surface, MOVESELECTFOREGROUNDCOLOR, col1_boxes[box_id],border_radius=7)
         attackfont = pygame.font.SysFont(None,int(boxheight/3))
-        textoffset = (col1_boxes[box_id].w*(0.05),col1_boxes[box_id].h*(0.1))
-        renderTextAtPos(surface,atk.name,addtuple(col1_boxes[box_id].topleft,textoffset),color = pygame.Color(0,0,0),font = attackfont,backgroundcolor=MOVESELECTFOREGROUNDCOLOR)
-
+        drawButton(surface,atk.name,col1_boxes[box_id],font=attackfont,textcolor=pygame.Color("black"),backgroundcolor=MOVESELECTFOREGROUNDCOLOR,hovercolor=BUTTONHOVERCOLOR)
 
 
     #column2
@@ -116,6 +99,34 @@ def drawMoveselect(surface,beast):
 
     
 
+    return col1_boxes
+
+def drawScene(surface,scene):
+    surface.fill(BACKGROUNDCOLOR)
+    renderTextAtPos(surface,"Battle title",(surface.get_width()/2,0),"topCentre")
+
+    slotreltextpos = [  
+        (0,0),
+        (0.6,0.45),
+        (0.6,0.55),
+        (0.05,0.2),
+        (0.05,0.3)
+    ]
+
+    for slot, beast in enumerate(scene.beasts[1:],start=1):
+        if beast.isalive:
+            healthfrac = beast.HP/beast.maxHP
+            slottext = beast.name + " " + str(beast.HP) + "/" + str(beast.maxHP) + " HP (" + str(max(round(healthfrac*100),1)) + "%)"
+            textpos = multtuple(slotreltextpos[slot],screenDims)
+
+            HPbaroffset = (0,int(NAMEFONTSIZE)/2)
+            Hpbarwidth = int(screenDims[0]*(0.33))
+            Hpbarheight = int(screenDims[1]*(0.02))
+            HPbarposition = addtuple(textpos,HPbaroffset)
+
+            pygame.draw.rect(surface,HPBACKGROUNDCOLOR,(HPbarposition,(Hpbarwidth,Hpbarheight)))
+            pygame.draw.rect(surface,HPFOREGROUNDCOLOR,(HPbarposition,(Hpbarwidth*healthfrac,Hpbarheight)))
+            renderTextAtPos(surface,slottext,textpos,"centreLeft",font=NAMEFONT)
     return
 
 def addtuple(xs,ys):

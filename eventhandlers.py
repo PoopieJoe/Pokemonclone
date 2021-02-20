@@ -2,7 +2,7 @@ from math import floor,ceil
 from classes import Beast, Attack
 from random import random
 import pygame
-import renderer
+import ui
 
 Elements = ["none","physical","heat","cold","shock"]
 attackroll_randmod = 0.1 #attacks deal randomly between 90% and 110% dmg
@@ -12,8 +12,8 @@ def moveselect(scene,slot,surface):
     scene.printScene()
     beast = scene.beasts[slot]
 
-    renderer.drawScene(surface,scene)
-    renderer.drawMoveselect(surface,beast)
+    ui.drawScene(surface,scene)
+    ui.drawMoveselect(surface,beast)
     pygame.display.flip()
 
     selected_move = Attack()
