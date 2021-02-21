@@ -37,6 +37,13 @@ class Beast:
         #Flags
         self.flags = [["execute_attack",False],["choose_attack",False]]
 
+    def selectattack(self,atk_id):
+        self.selected_attack[0] = self.attacks[atk_id]
+        print(str(self.name) + " selected " + self.selected_attack[0].name)
+    
+    def selecttarget(self,slot):
+        self.selected_attack[1] = slot
+
     def death(self):
         self.HP = 0
         self.SPE = 0

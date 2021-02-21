@@ -57,12 +57,19 @@ state = "Idle"
 mouseclick = None
 flag_name = None
 flag_slot = 0
+menuButtons = []
 while (battle_active):
     #this is when pygame events get processed so the game doesn't crash
     for event in pygame.event.get():
-        if (event.type == pygame.MOUSEBUTTONUP):
-            if (event.button == 1):
-                mouseclick = event.pos
+        #handle inputs, put statemachine here
+        if (state == "Choose attack"):
+            if (event.type == pygame.MOUSEBUTTONUP):
+                if (event.button == 1):
+                    for but_id, button in enumerate(menuButtons):
+                        if (button.collidemouse()):
+                            if (but_id <= len(scene.beasts[flag_slot].attacks)):
+                                scene.beasts[flag_slot].selectattack(but_id)
+                                state = "Choose target"
 
     #check for raised event flags and sort flags
     raisedFlags = fetchFlags(scene)
@@ -79,23 +86,15 @@ while (battle_active):
         else:
             state = "Idle"
 
-    #draw ui according to state
+    #update ui according to state
     if (state == "Idle"):
+        menuButtons = []
         ui.drawScene(screen,scene)
         pygame.display.flip()
     elif (state == "Choose attack"):
         ui.drawScene(screen,scene)
-        moveButtons = ui.drawMoveselect(screen,scene.beasts[flag_slot])
-        pygame.display.flip()
-
-        if (mouseclick):
-            for atk_id, button in enumerate(moveButtons):
-                if(button.collidepoint(mouseclick)):
-                    selected_attack = scene.beasts[flag_slot].attacks[atk_id]
-                    scene.beasts[flag_slot].selected_attack[0] = selected_attack
-                    print(str(scene.beasts[flag_slot].name) + " selected " + scene.beasts[flag_slot].selected_attack[0].name)
-                    state = "Choose target"
-                    
+        menuButtons = ui.drawMoveselect(screen,scene.beasts[flag_slot])
+        pygame.display.flip()                    
     elif (state == "Choose target"):
         ui.drawScene(screen,scene)
         pygame.display.flip()

@@ -24,6 +24,39 @@ BUTTONPRESSCOLOR = pygame.Color(200,200,225)
 
 TESTCOLOR = pygame.Color(255,0,255)
 
+class Button:
+    def __init__(self,name,surface,text,rect,action=None,font=DEFAULTFONT,textcolor=pygame.Color("white"),backgroundcolor=BACKGROUNDCOLOR,hovercolor=BUTTONHOVERCOLOR,presscolor=BUTTONPRESSCOLOR,border_radius = 7):
+        self.surface = surface
+        self.text = text
+        self.rect = rect
+        self.font = font
+        self.textcolor = textcolor
+        self.backgroundcolor = backgroundcolor
+        self.hovercolor = hovercolor
+        self.presscolor = presscolor
+        self.border_radius = border_radius
+        self.name = name
+        return
+
+    def draw(self):
+        buttoncolor = self.backgroundcolor
+        if (self.collidemouse()):
+            if (pygame.mouse.get_pressed(3)[0]):
+                buttoncolor = self.presscolor
+            else:
+                buttoncolor = self.hovercolor
+        
+        pygame.draw.rect(self.surface, buttoncolor, self.rect ,border_radius=self.border_radius)
+        renderTextAtPos(self.surface,self.text,self.rect.center,alignment="centre",color = self.textcolor,font = self.font , backgroundcolor=buttoncolor)
+        return
+
+    def collidemouse(self):
+        if self.rect.collidepoint(pygame.mouse.get_pos()):
+            return True
+        else:
+            return False
+    
+
 def renderTextAtPos(surface,text,pos,alignment="topLeft",font=DEFAULTFONT,color=pygame.Color("white"),backgroundcolor=BACKGROUNDCOLOR):
     textSurface = font.render(text,1,color)
     if (alignment == "topLeft"):
@@ -42,18 +75,6 @@ def renderTextAtPos(surface,text,pos,alignment="topLeft",font=DEFAULTFONT,color=
     surface.blit(backFill,textpos)
     surface.blit(textSurface,textpos)
     return Rect(textpos,(textSurface.get_width(),textSurface.get_height()))
-
-def drawButton(surface,text,rect,font=DEFAULTFONT,textcolor=pygame.Color("white"),backgroundcolor=BACKGROUNDCOLOR,hovercolor=BUTTONHOVERCOLOR,presscolor=BUTTONPRESSCOLOR,border_radius = 7):
-    buttoncolor = backgroundcolor
-    if (rect.collidepoint(pygame.mouse.get_pos())):
-        if (pygame.mouse.get_pressed(3)[0]):
-            buttoncolor = presscolor
-        else:
-            buttoncolor = hovercolor
-    
-    pygame.draw.rect(surface, buttoncolor, rect ,border_radius=border_radius)
-    renderTextAtPos(surface,text,rect.center,alignment="centre",color = textcolor,font = font , backgroundcolor=buttoncolor)
-    return
 
 def drawMoveselect(surface,beast):
     majorBox = Rect(screenDims[0]*(0.02),screenDims[1]*(0.65),screenDims[0]*(0.96),screenDims[1]*(0.33))
@@ -86,10 +107,11 @@ def drawMoveselect(surface,beast):
             newbox = Rect( columns[0].left , columns[0].top+box*(boxheight+interbox_margin) , columns[0].width , boxheight )
             col1_boxes.append(newbox)
     
+    buttonlist = []
     for box_id, atk in enumerate(beast.attacks):
         #draws attack background
         attackfont = pygame.font.SysFont(None,int(boxheight/3))
-        drawButton(surface,atk.name,col1_boxes[box_id],font=attackfont,textcolor=pygame.Color("black"),backgroundcolor=MOVESELECTFOREGROUNDCOLOR,hovercolor=BUTTONHOVERCOLOR)
+        buttonlist.append(Button("atk",surface,atk.name,col1_boxes[box_id],font=attackfont,textcolor=pygame.Color("black"),backgroundcolor=MOVESELECTFOREGROUNDCOLOR,hovercolor=BUTTONHOVERCOLOR))
 
 
     #column2
@@ -98,8 +120,10 @@ def drawMoveselect(surface,beast):
     #pygame.draw.rect(surface,TESTCOLOR,minorBox)
 
     
+    for button in buttonlist:
+        button.draw()
 
-    return col1_boxes
+    return buttonlist
 
 def drawScene(surface,scene):
     surface.fill(BACKGROUNDCOLOR)
