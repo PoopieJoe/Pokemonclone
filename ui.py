@@ -23,7 +23,6 @@ BUTTONHOVERCOLOR = pygame.Color(230,230,255)
 BUTTONPRESSCOLOR = pygame.Color(200,200,225)
 
 TESTCOLOR = pygame.Color(255,0,255)
-TESTCOLOR2 = pygame.Color(255,255,0)
 
 class Rect_f:
     def __init__(self,left,top,width,height):
