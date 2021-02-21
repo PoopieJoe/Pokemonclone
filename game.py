@@ -56,7 +56,7 @@ active_flag = None
 state = "Idle"
 mouseclick = None
 flag_name = None
-flag_slot = 0
+active_beast = None
 menuButtons = []
 while (battle_active):
     #this is when pygame events get processed so the game doesn't crash
@@ -67,8 +67,8 @@ while (battle_active):
                 if (event.button == 1):
                     for but_id, button in enumerate(menuButtons):
                         if (button.collidemouse()):
-                            if (but_id <= len(scene.beasts[flag_slot].attacks)):
-                                scene.beasts[flag_slot].selectattack(but_id)
+                            if (but_id <= len(active_beast.attacks)):
+                                active_beast.selectattack(but_id)
                                 state = "Choose target"
 
     #check for raised event flags and sort flags
@@ -78,7 +78,7 @@ while (battle_active):
     if (active_flag == None):
         active_flag = raisedFlags.pop(0)
         flag_name = active_flag[0]
-        flag_slot = active_flag[1]
+        active_beast = scene.beasts[active_flag[1]]
         if (flag_name == "choose_attack"):
             state = "Choose attack"
         elif (flag_name == "execute_attack"):
@@ -93,10 +93,11 @@ while (battle_active):
         pygame.display.flip()
     elif (state == "Choose attack"):
         ui.drawScene(screen,scene)
-        menuButtons = ui.drawMoveselect(screen,scene.beasts[flag_slot])
+        menuButtons = ui.drawMoveselect(screen,active_beast)
         pygame.display.flip()                    
     elif (state == "Choose target"):
         ui.drawScene(screen,scene)
+        ui.drawTargetSelect(screen,scene,active_beast)
         pygame.display.flip()
     elif (state == "Execute attack"):
         ui.drawScene(screen,scene)
