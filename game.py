@@ -16,9 +16,17 @@ screen = pygame.display.set_mode(ui.screenDims)
 
 #Build database and import beasts - move this somewhere else
 Attack1 = Attack(name="Slam",power=1.00,element="physical",accuracy=0.90)
-Attack2 = Attack(name="Ray of Fire",power=0.80,element="heat",accuracy=1.00)
+Attack2 = Attack(name="Ray of fire",power=0.80,element="heat",accuracy=1.00)
+Attack3 = Attack(name="Frosty freezy freeze",power=0.80,element="heat",accuracy=1.00)
+Attack4 = Attack(name="Fake out",power=0.80,element="heat",accuracy=1.00)
+Attack5 = Attack(name="Taunt",power=0.80,element="heat",accuracy=1.00)
+Attack6 = Attack(name="Enrage",power=0.80,element="heat",accuracy=1.00)
+Attack7 = Attack(name="Tail swipe",power=0.80,element="heat",accuracy=1.00)
+Attack8 = Attack(name="Never gonna give you up",power=0.80,element="heat",accuracy=1.00)
+Attack9 = Attack(name="Violent diarrhoea",power=0.80,element="heat",accuracy=1.00)
+Attack10 = Attack(name="Lick wounds",power=0.80,element="heat",accuracy=1.00)
 
-Equipment1 = Equipment(name="Metal chestplate",attacks=[Attack1,Attack2],statbonuses=[("maxHP",+50),("DEF",+20),("shockRES",-0.30)])
+Equipment1 = Equipment(name="Metal chestplate",attacks=[Attack1,Attack2,Attack3,Attack4,Attack5,Attack6,Attack7,Attack8,Attack9,Attack10],statbonuses=[("maxHP",+50),("DEF",+20),("shockRES",-0.30)])
 
 Beast1 = Beast("Greg", maxHP = 110, ATK = 100, DEF = 100, heatRES = 0.30, coldRES = -0.20, shockRES = 0, SPE = 100)
 Beast1.equipItem(Equipment1)
