@@ -5,7 +5,7 @@ from random import shuffle
 
 class Scene:
     def __init__(self):
-        self.beasts = [Beast(),Beast(),Beast(),Beast(),Beast()]
+        self.beasts = [None,Beast(),Beast(),Beast(),Beast()]
         self.turnTracker = [0,0,0,0,0]
         self.turnTrackerLength = 20000
         self.flags = [[]]
@@ -17,7 +17,7 @@ class Scene:
         self.beasts[slot] = Beast()
     
     def setupBattle(self):
-        for beast in self.beasts:
+        for beast in self.beasts[1:]:
             beast.clearALLflags()
             if (beast.name == Beast().name):
                 beast.isalive = False
@@ -53,7 +53,7 @@ class Scene:
         for slot, beast in enumerate(self.beasts[1:],start=1):
             if (beast.isalive):
                 #check if tt exceeds threshold
-                if (beast.selected_attack[0].name != Attack().name): #has any move selected (moving to attack)
+                if (beast.selected_attack[0] != None): #has any move selected (moving to attack)
                     if (self.turnTracker[slot] >= self.turnTrackerLength/2):
                         self.beasts[slot].setflag(0)
                 else: #no move selected (moving from attack)

@@ -65,14 +65,15 @@ def moveselect(scene,slot,surface):
         print("Slot 3: " + scene.beasts[3].name.ljust(16," ") + ", Slot 4: " + scene.beasts[4].name.ljust(16," "))
         selected_slot = int(input("Select target slot: ").strip()) """
 
-def performattack(scene,slot):
-    attackingBeast = scene.beasts[slot]
+def performattack(scene,attackingBeast):
     defendingBeast = scene.beasts[attackingBeast.selected_attack[1]]
-
-    attackingBeast.clearflag(0)
     attack = attackingBeast.selected_attack[0]
 
-    print("\n> " + attackingBeast.name + " used " + attack.name + " on " + defendingBeast.name + "!")
+    if (defendingBeast == None):
+        print("\n> No target, the attack failed!")
+        return
+    else:
+        print("\n> " + attackingBeast.name + " used " + attack.name + " on " + defendingBeast.name + "!")
 
     #determine hit
     if ( random() >= (attack.accuracy) ):
@@ -84,7 +85,7 @@ def performattack(scene,slot):
 
     #get modifiers
     modifierList = []
-    randmod = random()*2*attackroll_randmod + 1 - attackroll_randmod #random roll
+    randmod = 1 + attackroll_randmod*(random()*2 - 1) #random roll
     modifierList.append(randmod)
 
     if ( random() < critchance ):
@@ -128,5 +129,5 @@ def performattack(scene,slot):
     else:
         #Secondary effects go here
         pass
-    attackingBeast.selected_attack = [Attack(),0]
+    attackingBeast.selected_attack = [None,0]
     return

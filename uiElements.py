@@ -19,6 +19,7 @@ HPBACKGROUNDCOLOR = pygame.Color(180,180,180)
 HPFOREGROUNDCOLOR = pygame.Color(180,0,0)
 MOVESELECTBACKGROUNDCOLOR = pygame.Color(200,200,200)
 MOVESELECTFOREGROUNDCOLOR = pygame.Color(240,240,240)
+MOVESELECTGREY = pygame.Color(150,150,150)
 BUTTONHOVERCOLOR = pygame.Color(200,200,255)
 BUTTONPRESSCOLOR = pygame.Color(160,160,225)
 
@@ -38,7 +39,6 @@ class Margin:
         self.left = left
         self.right = right
         self.form = form
-        return
 
 class Box:
     def __init__(self,relrect,parent,color = pygame.Color("white"),border_radius = 0, margin = Margin(0,0,0,0), children = [None]):
@@ -52,11 +52,9 @@ class Box:
         self.children = children
         self.margin = margin
         self.absrect = self.calcabsrect()
-        return
 
     def draw(self,surface):
         pygame.draw.rect(surface,self.color,self.absrect, border_radius = self.border_radius)
-        return
 
     def calcabsrect(self):
         parent = self.parent
@@ -72,11 +70,9 @@ class Box:
     def setrelrect(self,relrect):
         self.relrect = relrect
         self.absrect = self.calcabsrect()
-        return
 
     def addchild(self,child):
         self.children.append(child)
-        return
     
     def removechild(self,child):
         #this function sounds so ominous
@@ -84,17 +80,25 @@ class Box:
             if (x == child):
                 x.parent = None
                 self.children.pop(i)
-        return
 
     def setparent(self,parent):
         self.parent = parent
         self.parent.addchild(self)
         self.absrect = self.calcabsrect()
-        return
-
 
 class Button:
-    def __init__(self,name,text,box,font=DEFAULTFONT,textcolor=pygame.Color("white"),backgroundcolor=BACKGROUNDCOLOR,hovercolor=BUTTONHOVERCOLOR,presscolor=BUTTONPRESSCOLOR,border_radius = 7):
+    def __init__(
+            self,
+            name,
+            text,
+            box,
+            font=DEFAULTFONT,
+            textcolor=pygame.Color("white"),
+            backgroundcolor=BACKGROUNDCOLOR,
+            hovercolor=BUTTONHOVERCOLOR,
+            presscolor=BUTTONPRESSCOLOR,
+            border_radius = 7
+        ):
         self.text = text
         self.box = box
         self.font = font
@@ -104,7 +108,6 @@ class Button:
         self.presscolor = presscolor
         self.border_radius = border_radius
         self.name = name
-        return
 
     def draw(self,surface):
         buttoncolor = self.backgroundcolor
@@ -113,47 +116,54 @@ class Button:
                 buttoncolor = self.presscolor
             else:
                 buttoncolor = self.hovercolor
-        
         pygame.draw.rect(surface, buttoncolor, self.box.absrect ,border_radius=self.border_radius)
         renderTextAtPos(surface,self.text,self.box.absrect.center,alignment="centre",color = self.textcolor,font = self.font , backgroundcolor=buttoncolor)
-        return
-
+    
     def collidemouse(self):
         if self.box.absrect.collidepoint(pygame.mouse.get_pos()):
             return True
         return False
+    
+    def setparent(self,parent):
+        self.box.setparent(parent)
 
 class TextBox:
     def __init__(   
             self,
             box,
             lines,
+            margin=Margin(0,0,0,0),
             font=DEFAULTFONT,
             textcolor=pygame.Color("white"),
             backgroundcolor=BACKGROUNDCOLOR,
-            border_radius = 7
+            border_radius = 7,
+            textalignment = "topLeft"
         ):
         self.box = box
-        if hasattr(lines, '__iter__'): 
-            self.lines = []
-            for line in lines:
-                self.lines.append(str(line))
-        else:
-            self.lines = [str(lines)]
+        self.lines = []
+        for line in lines:
+            self.lines.append(str(line))
         self.font = font
+        self.textalignment = textalignment
         self.textcolor = textcolor
         self.backgroundcolor = backgroundcolor
         self.border_radius = border_radius
-        return
+        self.margin = margin
     
     def draw(self,surface):
         pygame.draw.rect(surface, self.backgroundcolor, self.box.absrect ,border_radius=self.border_radius)
         
         for linenum,line in enumerate(self.lines):
-            textpos = (self.box.absrect.left,linenum*self.font.get_height())
-            temp = self.font.render(line,True,self.textcolor)
-            surface.blit(temp,(self.box.absrect.left,self.box.absrect.top+linenum*self.font.get_height()))
-        return
+            if (self.textalignment == "topLeft"):
+                textpos = ( self.box.absrect.left+self.margin.left*self.box.absrect.width , self.box.absrect.top+linenum*self.font.get_height()+self.margin.top*self.box.absrect.height )
+            elif (self.textalignment == "centre"):
+                textpos = ( (self.box.absrect.left+self.box.absrect.right)/2 , (self.box.absrect.top+self.box.absrect.bottom)/2-(self.font.get_height()*len(self.lines))/2+(linenum+1)*self.font.get_height()/2 )
+            else:
+                textpos = ( self.box.absrect.left+self.margin.left*self.box.absrect.width , self.box.absrect.top+linenum*self.font.get_height()+self.margin.top*self.box.absrect.height )
+            renderTextAtPos(surface,line,textpos,alignment=self.textalignment,font=self.font,color=self.textcolor,backgroundcolor=self.backgroundcolor)
+    
+    def setparent(self,parent):
+        self.box.setparent(parent)
 
 BASEBOX = Box(
     relrect = Rect_f(0,0,1,1),

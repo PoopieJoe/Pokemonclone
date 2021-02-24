@@ -9,7 +9,7 @@ from classes import Beast, Equipment, Attack
 from scenemanager import Scene, fetchFlags
 import eventhandlers
 import ui
-from pygame.locals import *
+#from pygame.locals import *
 
 pygame.init()
 screen = pygame.display.set_mode(ui.screenDims)
@@ -51,12 +51,14 @@ scene.setupBattle()
 ui.drawScene(screen,scene)
 pygame.display.flip()
 
-scene.beasts[1].HP = int(round(scene.beasts[1].maxHP*(0.67)))
-scene.beasts[2].HP = int(round(scene.beasts[2].maxHP*(0.07)))
-scene.beasts[3].HP = int(round(scene.beasts[3].maxHP*(0.43)))
-scene.beasts[4].HP = int(round(scene.beasts[4].maxHP*(0.99)))
-ui.drawScene(screen,scene)
-pygame.display.flip()
+#scene.beasts[1].HP = int(round(scene.beasts[1].maxHP*(0.67)))
+#scene.beasts[2].HP = int(round(scene.beasts[2].maxHP*(0.07)))
+#scene.beasts[3].HP = int(round(scene.beasts[3].maxHP*(0.43)))
+#scene.beasts[4].HP = int(round(scene.beasts[4].maxHP*(0.99)))
+#for beast in scene.beasts[1:]:
+#    beast.addstatuseffect("Poison")
+#ui.drawScene(screen,scene)
+#pygame.display.flip()
 
 battle_active = True
 winner = 0
@@ -75,15 +77,23 @@ while (battle_active):
                 if (event.button == 1):
                     for but_id, button in enumerate(menuButtons):
                         if (button.collidemouse()):
-                            if (but_id <= len(active_beast.attacks)):
-                                active_beast.selectattack(but_id)
-                                state = "Choose target"
+                            active_beast.selectattack(but_id)
+                            state = "Choose target"
+        elif (state == "Choose target"):
+            if (event.type == pygame.MOUSEBUTTONUP):
+                if (event.button == 1):
+                    for but_id, button in enumerate(menuButtons):
+                        if (button.collidemouse()):
+                            active_beast.selecttarget(but_id+1)
+                            active_beast.clearflag(1)
+                            state = "Idle"
+                            active_flag = None
 
     #check for raised event flags and sort flags
     raisedFlags = fetchFlags(scene)
 
     #if no flags are being handled right now, get the next flag
-    if (active_flag == None):
+    if ((active_flag == None) and (len(raisedFlags) > 0)):
         active_flag = raisedFlags.pop(0)
         flag_name = active_flag[0]
         active_beast = scene.beasts[active_flag[1]]
@@ -105,10 +115,14 @@ while (battle_active):
         pygame.display.flip()                    
     elif (state == "Choose target"):
         ui.drawScene(screen,scene)
-        ui.drawTargetSelect(screen,scene,active_beast)
+        menuButtons = ui.drawTargetSelect(screen,scene,active_beast)
         pygame.display.flip()
     elif (state == "Execute attack"):
         ui.drawScene(screen,scene)
+        eventhandlers.performattack(scene,active_beast)
+        active_beast.clearflag(0)
+        state = "Idle"
+        active_flag = None
         pygame.display.flip()
     else:
         pass
@@ -117,7 +131,7 @@ while (battle_active):
     #active_flag = None
 
     #if no events need to be processed, progress game one tick
-    if (not raisedFlags):
+    if (len(raisedFlags) == 0):
         scene.tick()
     
     #check if only one teams beasts are remaining (that teams wins, and the battle ends)

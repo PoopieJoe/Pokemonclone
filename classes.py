@@ -26,9 +26,10 @@ class Beast:
 
         #status
         self.isalive = False
+        self.statuseffects = []
 
         self.attacks = []
-        self.selected_attack = [Attack(),0]
+        self.selected_attack = [None,0]
 
         #Equipment
         self.equipmentslots = []
@@ -43,6 +44,10 @@ class Beast:
     
     def selecttarget(self,slot):
         self.selected_attack[1] = slot
+        print(str(self.name) + " selected slot " + str(self.selected_attack[1]))
+
+    def addstatuseffect(self,name):
+        self.statuseffects.append(name)
 
     def death(self):
         self.HP = 0
