@@ -28,16 +28,16 @@ Attack10 = Attack(name="Lick wounds",power=0.80,element="heat",accuracy=1.00)
 
 Equipment1 = Equipment(name="Metal chestplate",attacks=[Attack1,Attack2,Attack3,Attack4,Attack5,Attack6,Attack7,Attack8,Attack9,Attack10],statbonuses=[("maxHP",+50),("DEF",+20),("shockRES",-0.30)])
 
-Beast1 = Beast("Greg", maxHP = 110, ATK = 100, DEF = 100, heatRES = 0.30, coldRES = -0.20, shockRES = 0, SPE = 100)
+Beast1 = Beast("Greg", maxHP = 110, ATK = 80, DEF = 200, heatRES = 0.30, coldRES = -0.20, shockRES = 0, SPE = 80)
 Beast1.equipItem(Equipment1)
 
-Beast2 = Beast("Bob", maxHP = 34, ATK = 100, DEF = 100, heatRES = 0.30, coldRES = -0.20, shockRES = 0, SPE = 100)
+Beast2 = Beast("Bob", maxHP = 34, ATK = 100, DEF = 100, heatRES = 0.30, coldRES = -0.20, shockRES = 0, SPE = 123)
 Beast2.equipItem(Equipment1)
 
-Beast3 = Beast("Micheala", maxHP = 92, ATK = 112, DEF = 100, heatRES = 0, coldRES = 0, shockRES = 0, SPE = 105)
+Beast3 = Beast("Micheala", maxHP = 92, ATK = 112, DEF = 100, heatRES = 0, coldRES = 0, shockRES = 0, SPE = 116)
 Beast3.equipItem(Equipment1)
 
-Beast4 = Beast("Larissa", maxHP = 186, ATK = 112, DEF = 100, heatRES = 0, coldRES = 0, shockRES = 0, SPE = 105)
+Beast4 = Beast("Larissa", maxHP = 186, ATK = 64, DEF = 100, heatRES = 0, coldRES = 0, shockRES = 0, SPE = 105)
 Beast4.equipItem(Equipment1)
 #end of database
 
@@ -73,21 +73,21 @@ while (battle_active):
     for event in pygame.event.get():
         #handle inputs, put statemachine here
         if (state == "Choose attack"):
-            if (event.type == pygame.MOUSEBUTTONUP):
-                if (event.button == 1):
+            if (event.type == pygame.MOUSEBUTTONUP) and (event.button == 1):
                     for but_id, button in enumerate(menuButtons):
                         if (button.collidemouse()):
-                            active_beast.selectattack(but_id)
-                            state = "Choose target"
+                            if (button.id >= 0 and button.id <= 12):
+                                active_beast.selectattack(button.id)
+                                state = "Choose target"
         elif (state == "Choose target"):
-            if (event.type == pygame.MOUSEBUTTONUP):
-                if (event.button == 1):
+            if (event.type == pygame.MOUSEBUTTONUP) and (event.button == 1):
                     for but_id, button in enumerate(menuButtons):
                         if (button.collidemouse()):
-                            active_beast.selecttarget(but_id+1)
-                            active_beast.clearflag(1)
-                            state = "Idle"
-                            active_flag = None
+                            if (button.id >= 1 and button.id <= 4):
+                                active_beast.selecttarget(scene,button.id)
+                                active_beast.clearflag(1)
+                                state = "Idle"
+                                active_flag = None
 
     #check for raised event flags and sort flags
     raisedFlags = fetchFlags(scene)

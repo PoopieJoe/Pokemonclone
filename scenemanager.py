@@ -57,8 +57,9 @@ class Scene:
                     if (self.turnTracker[slot] >= self.turnTrackerLength/2):
                         self.beasts[slot].setflag(0)
                 else: #no move selected (moving from attack)
-                    if (self.turnTracker[slot] >= self.turnTrackerLength):
+                    if (self.turnTracker[slot] >= self.turnTrackerLength): #exceeded turn tracker length
                         self.beasts[slot].setflag(1)
+                        self.turnTracker[slot] = 0
 
 def fetchFlags(scene):
     #check for raised event flags and sort flags

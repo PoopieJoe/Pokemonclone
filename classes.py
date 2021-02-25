@@ -42,9 +42,9 @@ class Beast:
         self.selected_attack[0] = self.attacks[atk_id]
         print(str(self.name) + " selected " + self.selected_attack[0].name)
     
-    def selecttarget(self,slot):
+    def selecttarget(self,scene,slot):
         self.selected_attack[1] = slot
-        print(str(self.name) + " selected slot " + str(self.selected_attack[1]))
+        print(str(self.name) + " selected " + str(scene.beasts[slot].name))
 
     def addstatuseffect(self,name):
         self.statuseffects.append(name)

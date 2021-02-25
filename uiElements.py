@@ -8,9 +8,9 @@ pygame.init()
 
 screenDims = (1280,720)
 
-DEFAULTFONTSIZE = int(screenDims[1]/(360/50))
+DEFAULTFONTSIZE = int(screenDims[1]/7.2)
 DEFAULTFONT = pygame.font.SysFont(None,DEFAULTFONTSIZE)
-NAMEFONTSIZE = int(screenDims[1]/(360/20))
+NAMEFONTSIZE = int(screenDims[1]*1/25)
 NAMEFONT = pygame.font.SysFont(None,NAMEFONTSIZE)
 
 BACKGROUNDCOLOR = pygame.Color(80,158,40)
@@ -22,6 +22,8 @@ MOVESELECTFOREGROUNDCOLOR = pygame.Color(240,240,240)
 MOVESELECTGREY = pygame.Color(150,150,150)
 BUTTONHOVERCOLOR = pygame.Color(200,200,255)
 BUTTONPRESSCOLOR = pygame.Color(160,160,225)
+TRACKERBARCOLOR = pygame.Color(255,255,80)
+TRACKERMARKERCOLOR = pygame.Color("black")
 
 TESTCOLOR = pygame.Color(255,0,255)
 
@@ -89,7 +91,7 @@ class Box:
 class Button:
     def __init__(
             self,
-            name,
+            buttype,
             text,
             box,
             font=DEFAULTFONT,
@@ -97,7 +99,8 @@ class Button:
             backgroundcolor=BACKGROUNDCOLOR,
             hovercolor=BUTTONHOVERCOLOR,
             presscolor=BUTTONPRESSCOLOR,
-            border_radius = 7
+            border_radius = 7,
+            id = 0
         ):
         self.text = text
         self.box = box
@@ -107,7 +110,8 @@ class Button:
         self.hovercolor = hovercolor
         self.presscolor = presscolor
         self.border_radius = border_radius
-        self.name = name
+        self.type = buttype
+        self.id = id
 
     def draw(self,surface):
         buttoncolor = self.backgroundcolor
@@ -194,6 +198,8 @@ def renderTextAtPos(surface,text,pos,alignment="topLeft",font=DEFAULTFONT,color=
         textpos = (pos[0], pos[1] - textSurface.get_height()/2)
     elif (alignment == "centreRight"):
         textpos = (pos[0] - textSurface.get_width(),pos[1] - textSurface.get_height()/2)
+    elif (alignment == "topRight"):
+        textpos = (pos[0] - textSurface.get_width(),pos[1])
     elif (alignment == "centre"):
         textpos = (pos[0] - textSurface.get_width()/2 , pos[1] - textSurface.get_height()/2)
 
