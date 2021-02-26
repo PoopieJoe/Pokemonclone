@@ -9,11 +9,13 @@ from classes import Beast, Equipment, Attack
 from scenemanager import Scene, fetchFlags
 import eventhandlers
 import ui
+import importdb
 #from pygame.locals import *
 
 pygame.init()
 screen = pygame.display.set_mode(ui.screenDims)
 
+#Attacks = importdb.importAttacks()
 #Build database and import beasts - move this somewhere else
 Attack1 = Attack(name="Slam",power=1.00,element="physical",accuracy=0.90)
 Attack2 = Attack(name="Ray of fire",power=0.80,element="heat",accuracy=1.00)

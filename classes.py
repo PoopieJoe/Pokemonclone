@@ -93,8 +93,14 @@ class Equipment:
         self.statbonuses = statbonuses
 
 class Attack:
-    def __init__(self, name = "none", power = 0, element = "none", accuracy = 0):
+    def __init__(self, atkid, name, physPower, heatPower, coldPower, shockPower, accuracy, critRate, flags, effects):
+        self.id = atkid
         self.name = name
-        self.power = power
-        self.element = element
+        self.physPower = physPower
+        self.heatPower = heatPower
+        self.coldPower = coldPower
+        self.shockPower = shockPower
         self.accuracy = accuracy
+        self.critRate = critRate
+        self.flags = flags
+        self.effects = effects

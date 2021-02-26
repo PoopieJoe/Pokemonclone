@@ -1,0 +1,4 @@
+ID,Name,Part,Attacks,max HP,ATK add,ATK mult,DEF add,Def mult,heatRES add,heatRES mult,coldRES add,coldRES mult,shockRES add,shockRES mult,SPE add,SPE mult,Flags,Effects
+0,Metal chestplate,Chest,"0,2",50,,,20,,,,,,-0.3,,,,Heavy,
+1,Icy mask,Head,3,0,,,,,,,0.2,,,,,,,
+2,Tail blade,Tail,1,20,,1.2,-20,,,,,,,,,1.1,,

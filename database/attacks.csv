@@ -1,0 +1,5 @@
+ID,Name,Physical power,Heat power,Cold power,Shock power,Accuracy,Crit rate,Flags,Effects
+0,Heavy slam,1.2,0,0,0,0.8,0.05,Contact,
+1,Tail swipe,0.6,0,0,0,1,0.05,Contact,Slow_1
+2,Blazing flurry,0.2,0.2,0,0,0.5,0.05,Contact,"Multihit_5,Burn(0.2)"
+3,Frigid gaze,0,0,0.1,0,0.9,0.05,Team_target,

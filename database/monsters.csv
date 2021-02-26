@@ -1,0 +1,3 @@
+ID,Species,Anatomy,ATK,DEF,heatRES,coldRES,shockRES,SPE,Ability,Flags
+0,Lurker,Humanoid,80,126,0.3,-0.2,,80,,
+1,Viper,Snakelike,107,83,,,,128,,
