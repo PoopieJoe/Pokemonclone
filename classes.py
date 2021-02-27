@@ -86,14 +86,81 @@ class Beast:
             if (attack not in self.attacks):
                 self.attacks.append(attack)
 
-class Equipment:
-    def __init__(self, name = "none", attacks = [], statbonuses = []):
+class Anatomy:
+    def __init__(
+        self,
+        anatomyid,
+        name,
+        parts,
+    ):
+        self.id = anatomyid
         self.name = name
+        self.parts = parts
+
+class Equipment:
+    def __init__(
+        self, 
+        equipmentid,
+        name, 
+        part,
+        attacks, 
+        addmaxHP,
+        maxHPmult,
+        addphysATK,
+        physATKmult,
+        addphysDEF,
+        physDEFmult,
+        addmagATK,
+        magATKmult,
+        addheatRES,
+        heatRESmult,
+        addcoldRES,
+        coldRESmult,
+        addshockRES,
+        shockRESmult,
+        addSPE,
+        SPEmult,
+        flags,
+        effects
+    ):
+        #ID,Name,Part,Attacks,max HP,ATK add,ATK mult,DEF add,Def mult,heatRES add,heatRES mult,coldRES add,coldRES mult,shockRES add,shockRES mult,SPE add,SPE mult,Flags,Effects
+        self.id = equipmentid
+        self.name = name
+        self.part = part
         self.attacks = attacks
-        self.statbonuses = statbonuses
+        self.addmaxHP = addmaxHP
+        self.maxHPmult = maxHPmult
+        self.addphysATK = addphysATK
+        self.physATKmult = physATKmult
+        self.addphysDEF = addphysDEF
+        self.physDEFmult = physDEFmult
+        self.addmagATK = addmagATK
+        self.magATKmult = magATKmult
+        self.addheatRES = addheatRES
+        self.heatRESmult = heatRESmult
+        self.addcoldRES = addcoldRES
+        self.coldRESmult = coldRESmult
+        self.addshockRES = addshockRES
+        self.shockRESmult = shockRESmult
+        self.addSPE = addSPE
+        self.SPEmult = SPEmult
+        self.flags = flags
+        self.effects = effects
 
 class Attack:
-    def __init__(self, atkid, name, physPower, heatPower, coldPower, shockPower, accuracy, critRate, flags, effects):
+    def __init__(
+        self, 
+        atkid, 
+        name, 
+        physPower, 
+        heatPower, 
+        coldPower, 
+        shockPower, 
+        accuracy, 
+        critRate, 
+        flags, 
+        effects
+    ):
         self.id = atkid
         self.name = name
         self.physPower = physPower
