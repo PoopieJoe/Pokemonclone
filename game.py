@@ -29,22 +29,25 @@ screen = pygame.display.set_mode(ui.screenDims)
 #Attack10 = Attack(name="Lick wounds",power=0.80,element="heat",accuracy=1.00)
 
 #Equipment1 = Equipment(name="Metal chestplate",attacks=[attacks[0],attacks[2]],statbonuses=[("maxHP",+50),("DEF",+20),("shockRES",-0.30)])
+#Beast1 = Beast("Greg", maxHP = 110, ATK = 80, DEF = 200, heatRES = 0.30, coldRES = -0.20, shockRES = 0, SPE = 80)
+#Beast1.equipItem(equipment[0])
 
-attacks = importdb.importAttacks("database/attacks.csv")
-equipment = importdb.importEquipment("database/equipment.csv")
-anatomies = importdb.importAnatomies("database/anatomies.csv")
+#Beast2 = Beast("Bob", maxHP = 34, ATK = 100, DEF = 100, heatRES = 0.30, coldRES = -0.20, shockRES = 0, SPE = 123)
+#Beast2.equipItem(equipment[0])
 
-Beast1 = Beast("Greg", maxHP = 110, ATK = 80, DEF = 200, heatRES = 0.30, coldRES = -0.20, shockRES = 0, SPE = 80)
-Beast1.equipItem(equipment[0])
+#Beast3 = Beast("Micheala", maxHP = 92, ATK = 112, DEF = 100, heatRES = 0, coldRES = 0, shockRES = 0, SPE = 116)
+#Beast3.equipItem(equipment[0])
 
-Beast2 = Beast("Bob", maxHP = 34, ATK = 100, DEF = 100, heatRES = 0.30, coldRES = -0.20, shockRES = 0, SPE = 123)
-Beast2.equipItem(equipment[0])
+#Beast4 = Beast("Larissa", maxHP = 186, ATK = 64, DEF = 100, heatRES = 0, coldRES = 0, shockRES = 0, SPE = 105)
 
-Beast3 = Beast("Micheala", maxHP = 92, ATK = 112, DEF = 100, heatRES = 0, coldRES = 0, shockRES = 0, SPE = 116)
-Beast3.equipItem(equipment[0])
+ATTACKS = importdb.importAttacks("database/attacks.csv")
+EQUIPMENT = importdb.importEquipment("database/equipment.csv")
+ANATOMIES = importdb.importAnatomies("database/anatomies.csv")
+MONSTERS = importdb.importSpecies("database/species.csv")
 
-Beast4 = Beast("Larissa", maxHP = 186, ATK = 64, DEF = 100, heatRES = 0, coldRES = 0, shockRES = 0, SPE = 105)
-Beast4.equipItem(equipment[0])
+Beast1 = Beast(MONSTERS[0],"Greg")
+
+#Beast4.equipItem(equipment[0])
 #end of database
 
 scene = Scene()
@@ -80,20 +83,20 @@ while (battle_active):
         #handle inputs, put statemachine here
         if (state == "Choose attack"):
             if (event.type == pygame.MOUSEBUTTONUP) and (event.button == 1):
-                    for but_id, button in enumerate(menuButtons):
-                        if (button.collidemouse()):
-                            if (button.id >= 0 and button.id <= 12):
-                                active_beast.selectattack(button.id)
-                                state = "Choose target"
+                for but_id, button in enumerate(menuButtons):
+                    if (button.collidemouse()):
+                        if (button.id >= 0 and button.id <= 12):
+                            active_beast.selectattack(button.id)
+                            state = "Choose target"
         elif (state == "Choose target"):
             if (event.type == pygame.MOUSEBUTTONUP) and (event.button == 1):
-                    for but_id, button in enumerate(menuButtons):
-                        if (button.collidemouse()):
-                            if (button.id >= 1 and button.id <= 4):
-                                active_beast.selecttarget(scene,button.id)
-                                active_beast.clearflag(1)
-                                state = "Idle"
-                                active_flag = None
+                for but_id, button in enumerate(menuButtons):
+                    if (button.collidemouse()):
+                        if (button.id >= 1 and button.id <= 4):
+                            active_beast.selecttarget(scene,button.id)
+                            active_beast.clearflag(1)
+                            state = "Idle"
+                            active_flag = None
 
     #check for raised event flags and sort flags
     raisedFlags = fetchFlags(scene)

@@ -1,0 +1,3 @@
+ID,Name,Anatomy,maxHP,physATK,physDEF,magATK,heatRES,coldRES,shockRES,SPE,Ability,Flags
+0,Lurker,0,148,80,126,80,0.3,-0.2,0,80,,
+1,Viper,1,73,107,83,50,0,0,0,128,,

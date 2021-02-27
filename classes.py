@@ -1,28 +1,26 @@
+import importdb
+
 class Beast:
     "Describes an ingame beast, complete with stats and equipment"
-    def __init__(self, name = "none", species = "none", maxHP = 1, ATK = 0, DEF = 1, heatRES = 0, coldRES = 0, shockRES = 0, SPE = 0):
+    def __init__(self, species, nickname = None, equipment = []):
         #details
         self.species = species
-        self.name = name
-
-        #basestats --> move these to a species list
-        self.baseMaxHP = maxHP
-        self.baseATK = ATK
-        self.baseDEF = DEF
-        self.baseHeatRES = heatRES
-        self.baseColdRES = coldRES
-        self.baseShockRES  = shockRES
-        self.baseSPE = SPE
+        self.parts = 
+        if (nickname == None):
+            self.nickname = species.name
+        else:
+            self.nickname = nickname
 
         #stats
-        self.maxHP = self.baseMaxHP
-        self.HP = self.maxHP
-        self.ATK = self.baseATK
-        self.DEF = self.baseDEF
-        self.heatRES = self.baseHeatRES
-        self.coldRES = self.baseColdRES
-        self.shockRES = self.baseShockRES
-        self.SPE = self.baseSPE
+        self.maxHP = self.species.maxHP
+        self.HP = self.species.maxHP
+        self.ATK = self.species.physATK
+        self.DEF = self.species.physDEF
+        self.magATK = self.species.magATK
+        self.heatRES = self.species.heatRES
+        self.coldRES = self.species.coldRES
+        self.shockRES = self.species.shockRES
+        self.SPE = self.species.SPE
 
         #status
         self.isalive = False
@@ -32,19 +30,28 @@ class Beast:
         self.selected_attack = [None,0]
 
         #Equipment
-        self.equipmentslots = []
         self.equipment = []
+        tmp = [[partname,None] for partname in self.species.anatomy.parts.copy()]
+        equipped_pieces = 0
+        for piece in equipment:
+            for part in tmp:
+                if ((part[0] == piece.part) and (part[1] == None)):
+                    self.equipItem(piece)
+                    equipped_pieces = equipped_pieces + 1
+        if (equipped_pieces < equipment.len):
+            raise Exception("One or more pieces of equipment could not be equipped")
+
 
         #Flags
         self.flags = [["execute_attack",False],["choose_attack",False]]
 
     def selectattack(self,atk_id):
         self.selected_attack[0] = self.attacks[atk_id]
-        print(str(self.name) + " selected " + self.selected_attack[0].name)
+        print(str(self.nickname) + " selected " + self.selected_attack[0].name)
     
     def selecttarget(self,scene,slot):
         self.selected_attack[1] = slot
-        print(str(self.name) + " selected " + str(scene.beasts[slot].name))
+        print(str(self.nickname) + " selected " + str(scene.beasts[slot].name))
 
     def addstatuseffect(self,name):
         self.statuseffects.append(name)
@@ -66,21 +73,22 @@ class Beast:
 
     def equipItem(self,equipment):
         self.equipment.append(equipment)
-        for bonus in equipment.statbonuses:
-            if (bonus[0] == "maxHP"):
-                self.maxHP += bonus[1]
-            elif (bonus[0] == "ATK"):
-                self.ATK += bonus[1]
-            elif (bonus[0] == "SPE"):
-                self.SPE += bonus[1]
-            elif (bonus[0] == "DEF"):
-                self.DEF += bonus[1]
-            elif (bonus[0] == "heatRES"):
-                self.heatRES += bonus[1]
-            elif (bonus[0] == "coldRES"):
-                self.coldRES += bonus[1]
-            elif (bonus[0] == "shockRES"):
-                self.shockRES += bonus[1]
+        #TODO remake this
+        #for bonus in equipment.statbonuses:
+        #    if (bonus[0] == "maxHP"):
+        #        self.maxHP += bonus[1]
+        #    elif (bonus[0] == "ATK"):
+        #        self.ATK += bonus[1]
+        #    elif (bonus[0] == "SPE"):
+        #        self.SPE += bonus[1]
+        #    elif (bonus[0] == "DEF"):
+        #        self.DEF += bonus[1]
+        #    elif (bonus[0] == "heatRES"):
+        #        self.heatRES += bonus[1]
+        #    elif (bonus[0] == "coldRES"):
+        #        self.coldRES += bonus[1]
+        #    elif (bonus[0] == "shockRES"):
+        #        self.shockRES += bonus[1]
         
         for attack in equipment.attacks:
             if (attack not in self.attacks):
@@ -171,3 +179,34 @@ class Attack:
         self.critRate = critRate
         self.flags = flags
         self.effects = effects
+
+class Species:
+    def __init__(
+        self, 
+        monid, 
+        name, 
+        anatomy,
+        maxHP,
+        physATK, 
+        physDEF, 
+        magATK,
+        heatRES, 
+        coldRES, 
+        shockRES, 
+        SPE, 
+        ability, 
+        flags
+    ):
+        self.id = monid
+        self.name = name
+        self.anatomy = anatomy
+        self.maxHP = maxHP
+        self.physATK = physATK
+        self.physDEF = physDEF
+        self.magATK = magATK
+        self.heatRES = heatRES
+        self.coldRES = coldRES
+        self.shockRES = shockRES
+        self.SPE = SPE
+        self.ability = ability
+        self.flags = flags

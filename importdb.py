@@ -69,3 +69,28 @@ def importAnatomies(filepath):
             anatomies.append(newanatomy)
 
     return anatomies
+
+def importSpecies(filepath):
+    species = []
+    with open(filepath,"rt",encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+
+        for row in reader:
+            newspecies = classes.Species(
+                monid=int(row["ID"]), 
+                name=row["Name"], 
+                anatomy=int(row["Anatomy"]),
+                maxHP=int(row["maxHP"]),
+                physATK=int(row["physATK"]), 
+                physDEF=int(row["physDEF"]), 
+                magATK=int(row["magATK"]),
+                heatRES=float(row["heatRES"]), 
+                coldRES=float(row["coldRES"]), 
+                shockRES=float(row["shockRES"]), 
+                SPE=int(row["SPE"]), 
+                ability=row["Ability"], 
+                flags=[flag for flag in row["Flags"].split(",") if flag != ""],
+                )
+            species.append(newspecies)
+
+    return species
