@@ -27,13 +27,13 @@ def drawTargetSelect(surface,scene,beast):
             col_num = 1
 
         if (target.isalive):
-            element = Button("beast",target.name,Box(Rect_f(0,0,0,0),None),font=buttonfont,textcolor=pygame.Color("black"),backgroundcolor=MOVESELECTFOREGROUNDCOLOR,hovercolor=BUTTONHOVERCOLOR,id=slot)
+            element = Button("beast",target.nickname,Box(Rect_f(0,0,0,0),None),font=buttonfont,textcolor=pygame.Color("black"),backgroundcolor=MOVESELECTFOREGROUNDCOLOR,hovercolor=BUTTONHOVERCOLOR,id=slot)
         else:
-            element = TextBox(Box(Rect_f(0,0,0,0),None),lines = [str(target.name)],font=buttonfont,textcolor=pygame.Color("black"),backgroundcolor=MOVESELECTGREY,textalignment="centre")
+            element = TextBox(Box(Rect_f(0,0,0,0),None),lines = [str(target.nickname)],font=buttonfont,textcolor=pygame.Color("black"),backgroundcolor=MOVESELECTGREY,textalignment="centre")
         menuelements[col_num].append(element)
     
     #final column contains the status, and no buttons
-    statustext = [beast.name,"","Status:"]
+    statustext = [beast.nickname,"","Status:"]
     if (len(beast.statuseffects)):
         for status in beast.statuseffects:
             statustext.append(str(status))
@@ -70,8 +70,6 @@ def drawTargetSelect(surface,scene,beast):
                 buttonlist.append(button)
     return buttonlist
 
-    return
-
 def drawMoveselect(surface,beast):
     MAJORBOX.draw(surface)
 
@@ -86,7 +84,7 @@ def drawMoveselect(surface,beast):
             col_num = col_num + 1
         menuelements[col_num].append(Button("attack",atk.name,Box(Rect_f(0,0,0,0),None),font=buttonfont,textcolor=pygame.Color("black"),backgroundcolor=MOVESELECTFOREGROUNDCOLOR,hovercolor=BUTTONHOVERCOLOR,id=atk_id))
     #final column contains the status, and no buttons
-    statustext = [beast.name,"","Status:"]
+    statustext = [beast.nickname,"","Status:"]
     if (len(beast.statuseffects)):
         for status in beast.statuseffects:
             statustext.append(str(status))
@@ -160,7 +158,7 @@ def drawScene(surface,scene):
             else: #left column has name to the right
                 namepos = (barbox.absrect.right+nameoffset*barbox.parent.absrect.width,barbox.absrect.top+barbox.absrect.height/2)
                 namealignment = "centreLeft"
-            renderTextAtPos(surface,beast.name,namepos,alignment=namealignment,font = trackerFont)
+            renderTextAtPos(surface,beast.nickname,namepos,alignment=namealignment,font = trackerFont)
                 
 
             #print marker
@@ -184,7 +182,7 @@ def drawScene(surface,scene):
     for slot, beast in enumerate(scene.beasts[1:],start=1):
         if beast.isalive:
             healthfrac = beast.HP/beast.maxHP
-            slottext = beast.name + " " + str(beast.HP) + "/" + str(beast.maxHP) + " HP (" + str(max(round(healthfrac*100),1)) + "%)"
+            slottext = beast.nickname + " " + str(beast.HP) + "/" + str(beast.maxHP) + " HP (" + str(max(round(healthfrac*100),1)) + "%)"
             textpos = multtuple(slotreltextpos[slot],screenDims)
 
             HPbaroffset = (0,int(NAMEFONTSIZE)/2)

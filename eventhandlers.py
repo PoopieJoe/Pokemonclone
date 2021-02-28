@@ -4,9 +4,10 @@ from random import random
 import pygame
 import ui
 
-Elements = ["none","physical","heat","cold","shock"]
+ELEMENTS = ["physical","heat","cold","shock"]
 attackroll_randmod = 0.1 #attacks deal randomly between 90% and 110% dmg
 critchance = 0.05 #5% critchance
+critmulti = 1.5 #critical hit dmg multiplier
 
 def moveselect(scene,slot,surface):
     scene.printScene()
@@ -16,7 +17,7 @@ def moveselect(scene,slot,surface):
     ui.drawMoveselect(surface,beast)
     pygame.display.flip()
 
-    selected_move = Attack()
+    selected_move = None
     selected_slot = 0
     move_selected = False
     while(not move_selected):
@@ -68,66 +69,82 @@ def moveselect(scene,slot,surface):
 def performattack(scene,attackingBeast):
     defendingBeast = scene.beasts[attackingBeast.selected_attack[1]]
     attack = attackingBeast.selected_attack[0]
+    attackingBeast.selected_attack = [None,0]
 
     if (defendingBeast == None):
         print("\n> No target, the attack failed!")
         return
     else:
-        print("\n> " + attackingBeast.name + " used " + attack.name + " on " + defendingBeast.name + "!")
+        print("\n> " + attackingBeast.nickname + " used " + attack.name + " on " + defendingBeast.nickname + "!")
 
     #determine hit
     if ( random() >= (attack.accuracy) ):
         print("> The attack missed!")
-        attackingBeast.selected_attack = [Attack(),0]
         return
 
     #if hit, calculate dmg
 
+    #get unmodified damage
+    raw_physdmg = attack.power[0]*attackingBeast.physATK
+    raw_magdmg = [attackingBeast.magATK*element for element in attack.power[1:]]
+    raw_dmg = [raw_physdmg,raw_magdmg[0],raw_magdmg[1],raw_magdmg[2]]
+
     #get modifiers
-    modifierList = []
+    elementalmodifiers = [
+        {"added": [], "added total": 0, "multi": [], "multi total" : 1},
+        {"added": [], "added total": 0, "multi": [], "multi total" : 1},
+        {"added": [], "added total": 0, "multi": [], "multi total" : 1},
+        {"added": [], "added total": 0, "multi": [], "multi total" : 1}
+    ]
+    globalmulti = {"multi": [], "multi total": 1}
+
     randmod = 1 + attackroll_randmod*(random()*2 - 1) #random roll
-    modifierList.append(randmod)
+    globalmulti["multi"].append(randmod)
 
     if ( random() < critchance ):
         crit = True
-        critmod = 1 + 0.5
+        globalmulti["multi"].append(critmulti)
     else:
         crit = False
-        critmod = 1
-    modifierList.append(critmod)
 
-    #calc total modifier
-    totalModifier = 1
-    for modifier in modifierList:
-        totalModifier *= modifier
+    #calc total modifiers
+    for element in range(len(ELEMENTS)):
+        for addmod in elementalmodifiers[element]["added"]:
+            elementalmodifiers[element]["added total"] += addmod
+        for multimod in elementalmodifiers[element]["multi"]:
+            elementalmodifiers[element]["multi total"] *= multimod
+    for multimod in globalmulti["multi"]:
+        globalmulti["multi total"] *= multimod
+
+    #get outgoing dmg per element
+    out_dmg = []
+    for element in range(len(ELEMENTS)):
+        d = (raw_dmg[element]+elementalmodifiers[element]["added total"])*elementalmodifiers[element]["multi total"]
+        out_dmg.append(d) 
 
     #use appropriate resistance
-    if (attack.element == "physical"):
-        dmg = round(attackingBeast.ATK * attack.power * 100 / defendingBeast.DEF * totalModifier)
-    else:
-        if (attack.element == "heat"):
-            resistance = defendingBeast.heatRES
-        elif (attack.element == "cold"):
-            resistance = defendingBeast.coldRES
-        elif (attack.element == "shock"):
-            resistance = defendingBeast.shockRES
-        dmg = round(attackingBeast.ATK * attack.power * (1-resistance) * totalModifier)
-    dmg = min( dmg, defendingBeast.HP )
-    #resolve attack
-    defendingBeast.HP -= dmg
+    dmg = []
+    for element in range(len(ELEMENTS)):
+        d = int(out_dmg[element] * (1 - defendingBeast.RES[element]))
+        dmg.append(d)
 
-    healthpercentage = ceil(dmg/defendingBeast.maxHP*100)
-    print("> " + defendingBeast.name + " took " + str(dmg) + " (" + str(healthpercentage) + "%) damage! ", end="")
+    total_dmg = sum(dmg)
+
+    total_dmg = min( total_dmg, defendingBeast.HP )
+    #resolve attack
+    defendingBeast.HP -= total_dmg
+
+    healthpercentage = ceil(total_dmg/defendingBeast.maxHP*100)
+    print("> " + defendingBeast.nickname + " took " + str(total_dmg) + " (" + str(healthpercentage) + "%) damage! ", end="")
     if (crit):
         print("Critical hit! ")
     else:
         print("")
 
     if (defendingBeast.HP <= 0): #if the beast dies, attack ends immediately, so no secondary effects occur (only effects that take place after the attack)
-        print("> " + defendingBeast.name + " died!")
+        print("> " + defendingBeast.nickname + " died!")
         defendingBeast.death()
     else:
         #Secondary effects go here
         pass
-    attackingBeast.selected_attack = [None,0]
     return

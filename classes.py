@@ -1,11 +1,10 @@
-import importdb
+import csv
 
 class Beast:
     "Describes an ingame beast, complete with stats and equipment"
-    def __init__(self, species, nickname = None, equipment = []):
+    def __init__(self, species, nickname = None, loadout = []):
         #details
         self.species = species
-        self.parts = 
         if (nickname == None):
             self.nickname = species.name
         else:
@@ -14,12 +13,10 @@ class Beast:
         #stats
         self.maxHP = self.species.maxHP
         self.HP = self.species.maxHP
-        self.ATK = self.species.physATK
-        self.DEF = self.species.physDEF
+        self.physATK = self.species.physATK
+        self.physDEF = self.species.physDEF
         self.magATK = self.species.magATK
-        self.heatRES = self.species.heatRES
-        self.coldRES = self.species.coldRES
-        self.shockRES = self.species.shockRES
+        self.RES = [1-(100/self.physDEF),self.species.heatRES,self.species.coldRES,self.species.shockRES]
         self.SPE = self.species.SPE
 
         #status
@@ -30,17 +27,20 @@ class Beast:
         self.selected_attack = [None,0]
 
         #Equipment
-        self.equipment = []
-        tmp = [[partname,None] for partname in self.species.anatomy.parts.copy()]
-        equipped_pieces = 0
-        for piece in equipment:
-            for part in tmp:
-                if ((part[0] == piece.part) and (part[1] == None)):
-                    self.equipItem(piece)
-                    equipped_pieces = equipped_pieces + 1
-        if (equipped_pieces < equipment.len):
-            raise Exception("One or more pieces of equipment could not be equipped")
+        if (loadout == []): #an empty loadout
+            for limb in getAnatomy(self.species.anatomy).parts:
+                loadout.append(None)
 
+        if (len(loadout) != len(getAnatomy(self.species.anatomy).parts)):
+            raise Exception("number of loadout items does not match the number of limbs")
+            
+        self.equipment = []
+        for n,piece in enumerate(loadout):
+            if (piece != None):
+                if (piece.part == getAnatomy(self.species.anatomy).parts[n]):
+                    self.equipItem(piece)
+                else:
+                    raise Exception("Item " + piece.part + " does not match the limb part " + getAnatomy(self.species.anatomy).parts[n])
 
         #Flags
         self.flags = [["execute_attack",False],["choose_attack",False]]
@@ -51,7 +51,7 @@ class Beast:
     
     def selecttarget(self,scene,slot):
         self.selected_attack[1] = slot
-        print(str(self.nickname) + " selected " + str(scene.beasts[slot].name))
+        print(str(self.nickname) + " selected " + str(scene.beasts[slot].nickname))
 
     def addstatuseffect(self,name):
         self.statuseffects.append(name)
@@ -92,7 +92,7 @@ class Beast:
         
         for attack in equipment.attacks:
             if (attack not in self.attacks):
-                self.attacks.append(attack)
+                self.attacks.append(getAttack(attack))
 
 class Anatomy:
     def __init__(
@@ -171,10 +171,7 @@ class Attack:
     ):
         self.id = atkid
         self.name = name
-        self.physPower = physPower
-        self.heatPower = heatPower
-        self.coldPower = coldPower
-        self.shockPower = shockPower
+        self.power = [physPower,heatPower,coldPower,shockPower]
         self.accuracy = accuracy
         self.critRate = critRate
         self.flags = flags
@@ -210,3 +207,146 @@ class Species:
         self.SPE = SPE
         self.ability = ability
         self.flags = flags
+
+def getAttack(ID):
+    """Returns the attack object by ID or by full name string"""
+    if (isinstance(ID,int)):
+        return ATTACKS[ID]
+    elif (isinstance(ID,str)):
+        for attack in ATTACKS:
+            if (attack.name == ID):
+                return attack
+    else:
+        raise Exception("Attack " + ID + " does not exist")
+
+def getEquipment(ID):
+    """Returns the equipment object by ID or by full name string"""
+    if (isinstance(ID,int)):
+        return EQUIPMENT[ID]
+    elif (isinstance(ID,str)):
+        for equipment in EQUIPMENT:
+            if (equipment.name == ID):
+                return equipment
+    else:
+        raise Exception("Equipment " + ID + " does not exist")
+
+def getAnatomy(ID):
+    """Returns the anatomy object by ID or by full name string"""
+    if (isinstance(ID,int)):
+        return ANATOMIES[ID]
+    elif (isinstance(ID,str)):
+        for anatomy in ANATOMIES:
+            if (anatomy.name == ID):
+                return anatomy
+    else:
+        raise Exception("Anatomy " + ID + " does not exist")
+
+def getSpecies(ID):
+    """Returns the species object by ID or by full name string"""
+    if (isinstance(ID,int)):
+        return SPECIES[ID]
+    elif (isinstance(ID,str)):
+        for species in SPECIES:
+            if (species.name == ID):
+                return species
+    else:
+        raise Exception("Species " + ID + " does not exist")
+
+def importAttacks(filepath):
+    attacks = []
+    with open(filepath,"rt",encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+
+        for row in reader:
+            newattack = Attack(
+                atkid=int(row["ID"]),
+                name=row["Name"],
+                physPower=float(row["Physical power"]),
+                heatPower=float(row["Heat power"]),
+                coldPower=float(row["Cold power"]),
+                shockPower=float(row["Shock power"]),
+                accuracy=float(row["Accuracy"]),
+                critRate=float(row["Crit rate"]),
+                flags=[flag for flag in row["Flags"].split(",") if flag != ""],
+                effects=[effect for effect in row["Effects"].split(",") if effect != ""]
+                )
+            attacks.append(newattack)
+    return attacks
+
+def importEquipment(filepath):
+    equipment = []
+    with open(filepath,"rt",encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        
+        for row in reader:
+            newequipment = Equipment(
+                equipmentid=int(row["ID"]),
+                name=row["Name"], 
+                part=row["Part"],
+                attacks=[int(attack) for attack in row["Attacks"].split(",") if attack != ""], 
+                addmaxHP=int(row["added maxHP"]),
+                maxHPmult=float(row["maxHP multiplier"]),
+                addphysATK=int(row["added ATK"]),
+                physATKmult=float(row["ATK multiplier"]),
+                addphysDEF=int(row["added DEF"]),
+                physDEFmult=float(row["DEF multiplier"]),
+                addmagATK=int(row["added magATK"]),
+                magATKmult=float(row["magATK multiplier"]),
+                addheatRES=float(row["added heatRES"]),
+                heatRESmult=float(row["heatRES multiplier"]),
+                addcoldRES=float(row["added coldRES"]),
+                coldRESmult=float(row["coldRES multiplier"]),
+                addshockRES=float(row["added shockRES"]),
+                shockRESmult=float(row["shockRES multiplier"]),
+                addSPE=int(row["added SPE"]),
+                SPEmult=float(row["SPE multiplier"]),
+                flags=[flag for flag in row["Flags"].split(",") if flag != ""],
+                effects=[effect for effect in row["Effects"].split(",") if effect != ""]
+                )
+            equipment.append(newequipment)
+    return equipment
+
+def importAnatomies(filepath):
+    anatomies = []
+    with open(filepath,"rt",encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+
+        for row in reader:
+            newanatomy = Anatomy(
+                anatomyid=int(row["ID"]),
+                name=row["Name"],
+                parts=[part for part in row["Parts"].split(",") if part != ""]
+                )
+            anatomies.append(newanatomy)
+
+    return anatomies
+
+def importSpecies(filepath):
+    species = []
+    with open(filepath,"rt",encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+
+        for row in reader:
+            newspecies = Species(
+                monid=int(row["ID"]), 
+                name=row["Name"], 
+                anatomy=int(row["Anatomy"]),
+                maxHP=int(row["maxHP"]),
+                physATK=int(row["physATK"]), 
+                physDEF=int(row["physDEF"]), 
+                magATK=int(row["magATK"]),
+                heatRES=float(row["heatRES"]), 
+                coldRES=float(row["coldRES"]), 
+                shockRES=float(row["shockRES"]), 
+                SPE=int(row["SPE"]), 
+                ability=row["Ability"], 
+                flags=[flag for flag in row["Flags"].split(",") if flag != ""],
+                )
+            species.append(newspecies)
+
+    return species
+
+ATTACKS = importAttacks("database/attacks.csv")
+EQUIPMENT = importEquipment("database/equipment.csv")
+ANATOMIES = importAnatomies("database/anatomies.csv")
+SPECIES = importSpecies("database/species.csv")

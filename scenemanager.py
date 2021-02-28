@@ -5,7 +5,7 @@ from random import shuffle
 
 class Scene:
     def __init__(self):
-        self.beasts = [None,Beast(),Beast(),Beast(),Beast()]
+        self.beasts = [None,None,None,None,None]
         self.turnTracker = [0,0,0,0,0]
         self.turnTrackerLength = 20000
         self.flags = [[]]
@@ -14,14 +14,12 @@ class Scene:
         self.beasts[slot] = beast
     
     def removeBeast(self, beast, slot):
-        self.beasts[slot] = Beast()
+        self.beasts[slot] = None
     
     def setupBattle(self):
         for beast in self.beasts[1:]:
-            beast.clearALLflags()
-            if (beast.name == Beast().name):
-                beast.isalive = False
-            else:
+            if (beast != None):
+                beast.clearALLflags()
                 beast.isalive = True
                 beast.HP = beast.maxHP
                 beast.setflag(1)
@@ -33,15 +31,15 @@ class Scene:
         if (self.beasts[1].isalive or self.beasts[2].isalive):
             print("Team A: ")
             if (self.beasts[1].isalive):
-                print("  Slot 1: " + self.beasts[1].name.ljust(16," ") + str(self.beasts[1].HP).ljust(3," ") + "/" + str(self.beasts[1].maxHP).ljust(3," ") + " HP (" + str(round(self.beasts[1].HP/self.beasts[1].maxHP*100)).ljust(3," ") + "%)")
+                print("  Slot 1: " + self.beasts[1].nickname.ljust(16," ") + str(self.beasts[1].HP).ljust(3," ") + "/" + str(self.beasts[1].maxHP).ljust(3," ") + " HP (" + str(round(self.beasts[1].HP/self.beasts[1].maxHP*100)).ljust(3," ") + "%)")
             if (self.beasts[2].isalive):
-                print("  Slot 2: " + self.beasts[2].name.ljust(16," ") + str(self.beasts[2].HP).ljust(3," ") + "/" + str(self.beasts[2].maxHP).ljust(3," ") + " HP (" + str(round(self.beasts[2].HP/self.beasts[2].maxHP*100)).ljust(3," ") + "%)")
+                print("  Slot 2: " + self.beasts[2].nickname.ljust(16," ") + str(self.beasts[2].HP).ljust(3," ") + "/" + str(self.beasts[2].maxHP).ljust(3," ") + " HP (" + str(round(self.beasts[2].HP/self.beasts[2].maxHP*100)).ljust(3," ") + "%)")
         if (self.beasts[3].isalive or self.beasts[4].isalive):
             print("Team B: ")
             if (self.beasts[3].isalive):
-                print("  Slot 3: " + self.beasts[3].name.ljust(16," ") + str(self.beasts[3].HP).ljust(3," ") + "/" + str(self.beasts[3].maxHP).ljust(3," ") + " HP (" + str(round(self.beasts[3].HP/self.beasts[3].maxHP*100)).ljust(3," ") + "%)")
+                print("  Slot 3: " + self.beasts[3].nickname.ljust(16," ") + str(self.beasts[3].HP).ljust(3," ") + "/" + str(self.beasts[3].maxHP).ljust(3," ") + " HP (" + str(round(self.beasts[3].HP/self.beasts[3].maxHP*100)).ljust(3," ") + "%)")
             if (self.beasts[4].isalive):
-                print("  Slot 4: " + self.beasts[4].name.ljust(16," ") + str(self.beasts[4].HP).ljust(3," ") + "/" + str(self.beasts[4].maxHP).ljust(3," ") + " HP (" + str(round(self.beasts[4].HP/self.beasts[4].maxHP*100)).ljust(3," ") + "%)")
+                print("  Slot 4: " + self.beasts[4].nickname.ljust(16," ") + str(self.beasts[4].HP).ljust(3," ") + "/" + str(self.beasts[4].maxHP).ljust(3," ") + " HP (" + str(round(self.beasts[4].HP/self.beasts[4].maxHP*100)).ljust(3," ") + "%)")
         print("###########################################")
 
     def tick(self):

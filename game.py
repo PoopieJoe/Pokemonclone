@@ -5,11 +5,10 @@ here's ur damn docstring
 import sys
 from random import shuffle
 import pygame
-from classes import Beast, Equipment, Attack
+from classes import *
 from scenemanager import Scene, fetchFlags
 import eventhandlers
 import ui
-import importdb
 #from pygame.locals import *
 
 pygame.init()
@@ -17,38 +16,10 @@ screen = pygame.display.set_mode(ui.screenDims)
 
 
 #Build database and import beasts - move this somewhere else
-#Attack1 = Attack(name="Slam",power=1.00,element="physical",accuracy=0.90)
-#Attack2 = Attack(name="Ray of fire",power=0.80,element="heat",accuracy=1.00)
-#Attack3 = Attack(name="Frosty freezy freeze",power=0.80,element="heat",accuracy=1.00)
-#Attack4 = Attack(name="Fake out",power=0.80,element="heat",accuracy=1.00)
-#Attack5 = Attack(name="Taunt",power=0.80,element="heat",accuracy=1.00)
-#Attack6 = Attack(name="Enrage",power=0.80,element="heat",accuracy=1.00)
-#Attack7 = Attack(name="Tail swipe",power=0.80,element="heat",accuracy=1.00)
-#Attack8 = Attack(name="Never gonna give you up",power=0.80,element="heat",accuracy=1.00)
-#Attack9 = Attack(name="Violent diarrhoea",power=0.80,element="heat",accuracy=1.00)
-#Attack10 = Attack(name="Lick wounds",power=0.80,element="heat",accuracy=1.00)
-
-#Equipment1 = Equipment(name="Metal chestplate",attacks=[attacks[0],attacks[2]],statbonuses=[("maxHP",+50),("DEF",+20),("shockRES",-0.30)])
-#Beast1 = Beast("Greg", maxHP = 110, ATK = 80, DEF = 200, heatRES = 0.30, coldRES = -0.20, shockRES = 0, SPE = 80)
-#Beast1.equipItem(equipment[0])
-
-#Beast2 = Beast("Bob", maxHP = 34, ATK = 100, DEF = 100, heatRES = 0.30, coldRES = -0.20, shockRES = 0, SPE = 123)
-#Beast2.equipItem(equipment[0])
-
-#Beast3 = Beast("Micheala", maxHP = 92, ATK = 112, DEF = 100, heatRES = 0, coldRES = 0, shockRES = 0, SPE = 116)
-#Beast3.equipItem(equipment[0])
-
-#Beast4 = Beast("Larissa", maxHP = 186, ATK = 64, DEF = 100, heatRES = 0, coldRES = 0, shockRES = 0, SPE = 105)
-
-ATTACKS = importdb.importAttacks("database/attacks.csv")
-EQUIPMENT = importdb.importEquipment("database/equipment.csv")
-ANATOMIES = importdb.importAnatomies("database/anatomies.csv")
-MONSTERS = importdb.importSpecies("database/species.csv")
-
-Beast1 = Beast(MONSTERS[0],"Greg")
-
-#Beast4.equipItem(equipment[0])
-#end of database
+Beast1 = Beast(getSpecies("Lurker"),nickname="Greg",loadout=[None,getEquipment("Metal chestplate"),None,None,None])
+Beast2 = Beast(getSpecies("Lurker"),nickname="Bob",loadout=[None,getEquipment("Metal chestplate"),None,None,None])
+Beast3 = Beast(getSpecies("Viper"),nickname="Micheala",loadout=[None,getEquipment("Metal chestplate"),None])
+Beast4 = Beast(getSpecies("Viper"),nickname="Claire",loadout=[None,getEquipment("Metal chestplate"),None])
 
 scene = Scene()
 scene.addBeast(beast = Beast1,slot = 1)
