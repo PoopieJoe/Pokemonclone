@@ -14,9 +14,9 @@ class Beast:
         self.maxHP = self.species.maxHP
         self.HP = self.species.maxHP
         self.physATK = self.species.physATK
-        self.physDEF = self.species.physDEF
+        self.armor = self.species.armor
         self.magATK = self.species.magATK
-        self.RES = [1-(100/self.physDEF),self.species.heatRES,self.species.coldRES,self.species.shockRES]
+        self.RES = [1-(100/self.armor),self.species.heatRES,self.species.coldRES,self.species.shockRES]
         self.SPE = self.species.SPE
 
         #status
@@ -60,6 +60,9 @@ class Beast:
         self.HP = 0
         self.SPE = 0
         self.isalive = False
+
+    def getflag(self,flag):
+        return self.flags[flag][1]
 
     def setflag(self,flag):
         self.flags[flag][1] = True
@@ -116,8 +119,8 @@ class Equipment:
         maxHPmult,
         addphysATK,
         physATKmult,
-        addphysDEF,
-        physDEFmult,
+        addarmor,
+        armormult,
         addmagATK,
         magATKmult,
         addheatRES,
@@ -140,8 +143,8 @@ class Equipment:
         self.maxHPmult = maxHPmult
         self.addphysATK = addphysATK
         self.physATKmult = physATKmult
-        self.addphysDEF = addphysDEF
-        self.physDEFmult = physDEFmult
+        self.addarmor = addarmor
+        self.armormult = armormult
         self.addmagATK = addmagATK
         self.magATKmult = magATKmult
         self.addheatRES = addheatRES
@@ -185,7 +188,7 @@ class Species:
         anatomy,
         maxHP,
         physATK, 
-        physDEF, 
+        armor, 
         magATK,
         heatRES, 
         coldRES, 
@@ -199,7 +202,7 @@ class Species:
         self.anatomy = anatomy
         self.maxHP = maxHP
         self.physATK = physATK
-        self.physDEF = physDEF
+        self.armor = armor
         self.magATK = magATK
         self.heatRES = heatRES
         self.coldRES = coldRES
@@ -288,8 +291,8 @@ def importEquipment(filepath):
                 maxHPmult=float(row["maxHP multiplier"]),
                 addphysATK=int(row["added ATK"]),
                 physATKmult=float(row["ATK multiplier"]),
-                addphysDEF=int(row["added DEF"]),
-                physDEFmult=float(row["DEF multiplier"]),
+                addarmor=int(row["added armor"]),
+                armormult=float(row["armor multiplier"]),
                 addmagATK=int(row["added magATK"]),
                 magATKmult=float(row["magATK multiplier"]),
                 addheatRES=float(row["added heatRES"]),
@@ -333,7 +336,7 @@ def importSpecies(filepath):
                 anatomy=int(row["Anatomy"]),
                 maxHP=int(row["maxHP"]),
                 physATK=int(row["physATK"]), 
-                physDEF=int(row["physDEF"]), 
+                armor=int(row["armor"]), 
                 magATK=int(row["magATK"]),
                 heatRES=float(row["heatRES"]), 
                 coldRES=float(row["coldRES"]), 

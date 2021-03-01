@@ -122,6 +122,67 @@ def drawMoveselect(surface,beast):
                 buttonlist.append(button)
     return buttonlist
 
+def drawExecuteAttack(surface,scene,attack):
+    MAJORBOX.draw(surface)
+    menuelements = [[]]
+    titletext = [attack["attacker"].nickname + " used " + attack["attack"].name + " on " + attack["defender"].nickname + "!"]
+    title = TextBox(
+        box=Box(Rect_f(0,0,1,0.2),parent=MAJORBOX),
+        lines=titletext,
+        textcolor=pygame.Color("black"),
+        backgroundcolor=pygame.Color("white"),
+        border_radius=14,
+        textalignment="centre",
+        font=pygame.font.SysFont("None",30)
+        )
+    menuelements[0].append(title)
+
+    boxoffset = 0.01
+    detailstext = []
+    if (attack["success"]):
+        if (attack["hit"]):
+            if (attack["crit"]):
+                detailstext.append("Critical hit!")
+            detailstext.append(attack["defender"].nickname + " took " + str(attack["damage total"]) + " (" + str(round(attack["damage total"]/attack["defender"].maxHP*100)) + "%) dmg!")
+        else:
+            detailstext.append("The attack missed!")
+    else:
+        detailstext.append("The attack failed!")
+
+    details = TextBox(
+        box=Box(Rect_f(0,0.2+boxoffset,1,0.6-boxoffset),parent=MAJORBOX),
+        lines = detailstext,
+        margin=Margin(0.05,0.1,0.05,0.05),
+        textcolor=pygame.Color("black"),
+        backgroundcolor=pygame.Color("white"),
+        border_radius=14,
+        font=pygame.font.SysFont("None",30),
+        textalignment="topLeft"
+        )
+    menuelements[0].append(details)
+
+    continuebutton = Button(
+        buttype="continue",
+        text="continue",
+        box=Box(Rect_f(0,0.8+boxoffset,1,0.15-boxoffset),parent=MAJORBOX),
+        textcolor=pygame.Color("black"),
+        backgroundcolor=pygame.Color("white"),
+        border_radius=7,
+        font=pygame.font.SysFont("None",30)
+        )
+    menuelements[0].append(continuebutton)
+
+    for column in menuelements:
+        for element in column:
+            element.draw(surface)
+
+    buttonlist = []
+    for column in menuelements:
+        for button in column:
+            if isinstance(button,Button):
+                buttonlist.append(button)
+    return buttonlist
+
 def drawScene(surface,scene):
     surface.fill(BACKGROUNDCOLOR)
 

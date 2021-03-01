@@ -202,6 +202,8 @@ def renderTextAtPos(surface,text,pos,alignment="topLeft",font=DEFAULTFONT,color=
         textpos = (pos[0] - textSurface.get_width(),pos[1])
     elif (alignment == "centre"):
         textpos = (pos[0] - textSurface.get_width()/2 , pos[1] - textSurface.get_height()/2)
+    else:
+        raise Exception("invalid alignment given")
 
     backFill = pygame.surface.Surface((textSurface.get_width(),textSurface.get_height()))
     backFill.fill(backgroundcolor)

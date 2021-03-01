@@ -66,27 +66,40 @@ def moveselect(scene,slot,surface):
         print("Slot 3: " + scene.beasts[3].name.ljust(16," ") + ", Slot 4: " + scene.beasts[4].name.ljust(16," "))
         selected_slot = int(input("Select target slot: ").strip()) """
 
-def performattack(scene,attackingBeast):
-    defendingBeast = scene.beasts[attackingBeast.selected_attack[1]]
-    attack = attackingBeast.selected_attack[0]
+def performattack(scene,attackingBeast):    
+    attackresult = {
+        "attacker": attackingBeast,
+        "defender": scene.beasts[attackingBeast.selected_attack[1]],
+        "attack": attackingBeast.selected_attack[0],
+        "success": False,
+        "hit": False,
+        "crit": False,
+        "damage total": 0,
+        "damage by element": [0,0,0,0],
+        "secondary effects applied": []
+    }
+
     attackingBeast.selected_attack = [None,0]
 
-    if (defendingBeast == None):
+    if (attackresult["defender"].isalive == False):
         print("\n> No target, the attack failed!")
-        return
+        return attackresult
     else:
-        print("\n> " + attackingBeast.nickname + " used " + attack.name + " on " + defendingBeast.nickname + "!")
+        print("\n> " + attackingBeast.nickname + " used " + attackresult["attack"].name + " on " + attackresult["defender"].nickname + "!")
+        attackresult["success"] = True
 
     #determine hit
-    if ( random() >= (attack.accuracy) ):
+    if ( random() >= (attackresult["attack"].accuracy) ):
         print("> The attack missed!")
-        return
+        return attackresult
+    else:
+        attackresult["hit"] = True
 
     #if hit, calculate dmg
 
     #get unmodified damage
-    raw_physdmg = attack.power[0]*attackingBeast.physATK
-    raw_magdmg = [attackingBeast.magATK*element for element in attack.power[1:]]
+    raw_physdmg = attackresult["attack"].power[0]*attackresult["attacker"].physATK
+    raw_magdmg = [attackresult["attacker"].magATK*element for element in attackresult["attack"].power[1:]]
     raw_dmg = [raw_physdmg,raw_magdmg[0],raw_magdmg[1],raw_magdmg[2]]
 
     #get modifiers
@@ -102,10 +115,10 @@ def performattack(scene,attackingBeast):
     globalmulti["multi"].append(randmod)
 
     if ( random() < critchance ):
-        crit = True
+        attackresult["crit"] = True
         globalmulti["multi"].append(critmulti)
     else:
-        crit = False
+        attackresult["crit"] = False
 
     #calc total modifiers
     for element in range(len(ELEMENTS)):
@@ -123,28 +136,28 @@ def performattack(scene,attackingBeast):
         out_dmg.append(d) 
 
     #use appropriate resistance
-    dmg = []
     for element in range(len(ELEMENTS)):
-        d = int(out_dmg[element] * (1 - defendingBeast.RES[element]))
-        dmg.append(d)
+        d = int(out_dmg[element] * (1 - attackresult["defender"].RES[element]))
+        attackresult["damage by element"].append(d)
 
-    total_dmg = sum(dmg)
+    #total damage is hidden if target dies
+    attackresult["damage total"] = sum(attackresult["damage by element"])
+    attackresult["damage total"] = min( attackresult["damage total"], attackresult["defender"].HP )
 
-    total_dmg = min( total_dmg, defendingBeast.HP )
     #resolve attack
-    defendingBeast.HP -= total_dmg
+    attackresult["defender"].HP -= attackresult["damage total"]
 
-    healthpercentage = ceil(total_dmg/defendingBeast.maxHP*100)
-    print("> " + defendingBeast.nickname + " took " + str(total_dmg) + " (" + str(healthpercentage) + "%) damage! ", end="")
-    if (crit):
+    healthpercentage = ceil(attackresult["damage total"]/attackresult["defender"].maxHP*100)
+    print("> " + attackresult["defender"].nickname + " took " + str(attackresult["damage total"]) + " (" + str(healthpercentage) + "%) damage! ", end="")
+    if (attackresult["crit"]):
         print("Critical hit! ")
     else:
         print("")
 
-    if (defendingBeast.HP <= 0): #if the beast dies, attack ends immediately, so no secondary effects occur (only effects that take place after the attack)
-        print("> " + defendingBeast.nickname + " died!")
-        defendingBeast.death()
+    if (attackresult["defender"].HP <= 0): #if the beast dies, attack ends immediately, so no secondary effects occur (only effects that take place after the attack)
+        attackresult["defender"].death()
     else:
         #Secondary effects go here
         pass
-    return
+ 
+    return attackresult

@@ -43,6 +43,12 @@ class Scene:
         print("###########################################")
 
     def tick(self):
+        #check if anyone died
+        for slot, beast in enumerate(self.beasts[1:],start=1):
+            if (beast.HP <= 0 and beast.isalive):
+                beast.death()
+                print("> " + beast.nickname + " died!")
+
         #increment turn tracker
         for slot, beast in enumerate(self.beasts[1:],start=1):
             self.turnTracker[slot] = self.turnTracker[slot] + beast.SPE

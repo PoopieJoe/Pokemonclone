@@ -52,15 +52,14 @@ while (battle_active):
     #this is when pygame events get processed so the game doesn't crash
     for event in pygame.event.get():
         #handle inputs, put statemachine here
-        if (state == "Choose attack"):
-            if (event.type == pygame.MOUSEBUTTONUP) and (event.button == 1):
+        if (event.type == pygame.MOUSEBUTTONUP) and (event.button == 1):
+            if (state == "Choose attack"):
                 for but_id, button in enumerate(menuButtons):
                     if (button.collidemouse()):
                         if (button.id >= 0 and button.id <= 12):
                             active_beast.selectattack(button.id)
                             state = "Choose target"
-        elif (state == "Choose target"):
-            if (event.type == pygame.MOUSEBUTTONUP) and (event.button == 1):
+            elif (state == "Choose target"):
                 for but_id, button in enumerate(menuButtons):
                     if (button.collidemouse()):
                         if (button.id >= 1 and button.id <= 4):
@@ -68,6 +67,14 @@ while (battle_active):
                             active_beast.clearflag(1)
                             state = "Idle"
                             active_flag = None
+            elif (state == "Execute attack"):
+                for but_id, button in enumerate(menuButtons):
+                    if (button.collidemouse()):
+                        if (button.type == "continue"):
+                            state = "Idle"
+                            active_flag = None
+
+
 
     #check for raised event flags and sort flags
     raisedFlags = fetchFlags(scene)
@@ -98,20 +105,18 @@ while (battle_active):
         menuButtons = ui.drawTargetSelect(screen,scene,active_beast)
         pygame.display.flip()
     elif (state == "Execute attack"):
-        ui.drawScene(screen,scene)
-        eventhandlers.performattack(scene,active_beast)
+        if (active_beast.getflag(0)):
+            attackresult = eventhandlers.performattack(scene,active_beast)
         active_beast.clearflag(0)
-        state = "Idle"
-        active_flag = None
+
+        ui.drawScene(screen,scene)
+        menuButtons = ui.drawExecuteAttack(screen,scene,attackresult)
         pygame.display.flip()
     else:
         pass
 
-    #if flag is resolved, set active flag to None
-    #active_flag = None
-
     #if no events need to be processed, progress game one tick
-    if (len(raisedFlags) == 0):
+    if (len(raisedFlags) == 0 and state == "Idle"):
         scene.tick()
     
     #check if only one teams beasts are remaining (that teams wins, and the battle ends)
