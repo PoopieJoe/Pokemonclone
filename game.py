@@ -124,6 +124,7 @@ while (battle_active):
         ui.drawScene(screen,scene)
         menuButtons = ui.drawExecuteAttack(screen,scene,attackresult)
         pygame.display.flip()
+        
     else:
         pass
 
