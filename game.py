@@ -40,14 +40,15 @@ pygame.display.flip()
 #ui.drawScene(screen,scene)
 #pygame.display.flip()
 
+raisedFlags = []
 battle_active = True
 winner = 0
 active_flag = None
 state = "Idle"
-mouseclick = None
 flag_name = None
 active_beast = None
 menuButtons = []
+attackresult = []
 while (battle_active):
     #this is when pygame events get processed so the game doesn't crash
     for event in pygame.event.get():
@@ -77,7 +78,8 @@ while (battle_active):
 
 
     #check for raised event flags and sort flags
-    raisedFlags = fetchFlags(scene)
+    if ((active_flag == None) and (len(raisedFlags) == 0)):
+        raisedFlags = fetchFlags(scene)
 
     #if no flags are being handled right now, get the next flag
     if ((active_flag == None) and (len(raisedFlags) > 0)):
@@ -106,9 +108,19 @@ while (battle_active):
         pygame.display.flip()
     elif (state == "Execute attack"):
         if (active_beast.getflag(0)):
-            attackresult = eventhandlers.performattack(scene,active_beast)
-        active_beast.clearflag(0)
-
+            attackresult.append( eventhandlers.performattack(scene,active_beast) )
+            if (attackresult[0]["chain"]["type"] == "num_left"):
+                #chains multiple identical attacks
+                chainsleft = attackresult[0]["chain"]["value"]
+                while (chainsleft > 0):
+                    attackresult.append( eventhandlers.performattack(scene,active_beast,chained = True) )
+                    chainsleft = chainsleft - 1
+            elif (attackresult[0]["chain"]["type"] == "by_id"):
+                print("yea no this doesnt work yet")
+                pass
+            active_beast.clearflag(0)
+            active_beast.selected_attack = [None,0]
+            
         ui.drawScene(screen,scene)
         menuButtons = ui.drawExecuteAttack(screen,scene,attackresult)
         pygame.display.flip()
@@ -126,9 +138,6 @@ while (battle_active):
     elif (not (scene.beasts[3].isalive or scene.beasts[4].isalive)):
         battle_active = False
         winner = "A"
-
-    mouseclick = None
-
 
 scene.printScene()
 print("Team " + winner + " wins!")

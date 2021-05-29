@@ -1,6 +1,7 @@
 from math import floor,ceil
 from classes import Beast, Attack
 from random import random
+from fnmatch import fnmatch
 import pygame
 import ui
 
@@ -66,7 +67,8 @@ def moveselect(scene,slot,surface):
         print("Slot 3: " + scene.beasts[3].name.ljust(16," ") + ", Slot 4: " + scene.beasts[4].name.ljust(16," "))
         selected_slot = int(input("Select target slot: ").strip()) """
 
-def performattack(scene,attackingBeast):    
+def performattack(scene,attackingBeast,chained = False):
+
     attackresult = {
         "attacker": attackingBeast,
         "defender": scene.beasts[attackingBeast.selected_attack[1]],
@@ -76,17 +78,28 @@ def performattack(scene,attackingBeast):
         "crit": False,
         "damage total": 0,
         "damage by element": [0,0,0,0],
-        "secondary effects applied": []
+        "secondary effects applied": [],
+        "chain": {"type": "none", "value": 0}
     }
 
-    attackingBeast.selected_attack = [None,0]
-
+    if (chained): #chained attacks don't need to be printed again
+        print("\n> " + attackingBeast.nickname + " used " + attackresult["attack"].name + " on " + attackresult["defender"].nickname + "!")
+    
     if (attackresult["defender"].isalive == False):
-        print("\n> No target, the attack failed!")
+        if (chained == None): #chained attacks just stop printing if they're dead
+            print("> No target, the attack failed!")
         return attackresult
     else:
-        print("\n> " + attackingBeast.nickname + " used " + attackresult["attack"].name + " on " + attackresult["defender"].nickname + "!")
         attackresult["success"] = True
+
+    #stuff that happens before the attack executes
+    for effect in attackresult["attack"].effects:
+        if ( fnmatch(effect, "Multihit_*") ):
+            if (chained): #if we're already chaining just decrement counter
+                attackresult["chain"]["value"] = chained - 1
+            else:
+                numhits = int(effect[len(effect)-1])
+                attackresult["chain"] = {"type": "num_left", "value": numhits - 1}
 
     #determine hit
     if ( random() >= (attackresult["attack"].accuracy) ):
@@ -158,6 +171,17 @@ def performattack(scene,attackingBeast):
         attackresult["defender"].death()
     else:
         #Secondary effects go here
-        pass
+        for effect in attackresult["attack"].effects:
+            if ( fnmatch(effect, "Burn(*)") ):
+                #fetch burn chance from string
+                openparenpos = 4
+                closeparenpos = len(effect)-1
+                chance = float(effect[openparenpos+1:closeparenpos])
+                if ( (random() < chance) and ("Burn" not in attackresult["defender"].statuseffects)):
+                    #apply burn
+                    attackresult["defender"].addstatuseffect("Burn")
+                    attackresult["secondary effects applied"].append("Burn")
+                    print("> "+ attackresult["defender"].nickname + " was burned!")
+                
  
     return attackresult

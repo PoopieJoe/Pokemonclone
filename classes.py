@@ -1,4 +1,5 @@
 import csv
+from pathlib import Path
 
 class Beast:
     "Describes an ingame beast, complete with stats and equipment"
@@ -47,11 +48,14 @@ class Beast:
 
     def selectattack(self,atk_id):
         self.selected_attack[0] = self.attacks[atk_id]
-        print(str(self.nickname) + " selected " + self.selected_attack[0].name)
+        print(str(self.nickname) + " selected " + self.selected_attack[0].name + " as their attack!")
     
     def selecttarget(self,scene,slot):
         self.selected_attack[1] = slot
-        print(str(self.nickname) + " selected " + str(scene.beasts[slot].nickname))
+        print(str(self.nickname) + " selected " + str(scene.beasts[slot].nickname) + " as the target!")
+    
+    def setchainattack(self,atk_id):
+        self.selected_attack[0] = ATTACKS[atk_id]
 
     def addstatuseffect(self,name):
         self.statuseffects.append(name)
@@ -349,7 +353,8 @@ def importSpecies(filepath):
 
     return species
 
-ATTACKS = importAttacks("database/attacks.csv")
-EQUIPMENT = importEquipment("database/equipment.csv")
-ANATOMIES = importAnatomies("database/anatomies.csv")
-SPECIES = importSpecies("database/species.csv")
+dbpath = "D:/Documents/Projects/Visual Studio Code/Pokemonclone/database/"
+ATTACKS = importAttacks(Path(dbpath+"attacks.csv"))
+EQUIPMENT = importEquipment(Path(dbpath+"equipment.csv"))
+ANATOMIES = importAnatomies(Path(dbpath+"anatomies.csv"))
+SPECIES = importSpecies(Path(dbpath+"species.csv"))

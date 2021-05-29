@@ -122,10 +122,12 @@ def drawMoveselect(surface,beast):
                 buttonlist.append(button)
     return buttonlist
 
-def drawExecuteAttack(surface,scene,attack):
+def drawExecuteAttack(surface,scene,attacks):
+    main_attack = attacks[0] #first attack is the name of the move that was used
+
     MAJORBOX.draw(surface)
     menuelements = [[]]
-    titletext = [attack["attacker"].nickname + " used " + attack["attack"].name + " on " + attack["defender"].nickname + "!"]
+    titletext = [main_attack["attacker"].nickname + " used " + main_attack["attack"].name + " on " + main_attack["defender"].nickname + "!"]
     title = TextBox(
         box=Box(Rect_f(0,0,1,0.2),parent=MAJORBOX),
         lines=titletext,
@@ -139,15 +141,20 @@ def drawExecuteAttack(surface,scene,attack):
 
     boxoffset = 0.01
     detailstext = []
-    if (attack["success"]):
-        if (attack["hit"]):
-            if (attack["crit"]):
-                detailstext.append("Critical hit!")
-            detailstext.append(attack["defender"].nickname + " took " + str(attack["damage total"]) + " (" + str(round(attack["damage total"]/attack["defender"].maxHP*100)) + "%) dmg!")
+    for n,attack in enumerate(attacks):
+        if (attack["success"]):
+            if (attack["hit"]):
+                if (attack["crit"]):
+                    detailstext.append("Critical hit!")
+                detailstext.append(attack["defender"].nickname + " took " + str(attack["damage total"]) + " (" + str(round(attack["damage total"]/attack["defender"].maxHP*100)) + "%) dmg!")
+#                if attack["secondary effects applied"]:
+#                    for status in attack["secondary effects applied"]:
+#                        detailstext.append("Status applied: " + status + "!")
+            else:
+                detailstext.append("The attack missed!")
         else:
-            detailstext.append("The attack missed!")
-    else:
-        detailstext.append("The attack failed!")
+            if n == 0: #chain attacks dont need this spam
+                detailstext.append("The attack failed!")
 
     details = TextBox(
         box=Box(Rect_f(0,0.2+boxoffset,1,0.6-boxoffset),parent=MAJORBOX),
