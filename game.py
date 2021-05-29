@@ -5,6 +5,7 @@ here's ur damn docstring
 import sys
 from random import shuffle
 import pygame
+from time import sleep
 from classes import *
 from scenemanager import Scene, fetchFlags
 import eventhandlers
@@ -94,6 +95,22 @@ while (battle_active):
         else:
             state = "Idle"
 
+    #change gamestate according to state
+    if (state == "Execute attack"):
+        if (active_beast.getflag(0)):
+            attackresult.append( eventhandlers.performattack(scene,active_beast) )
+            if (attackresult[0]["chain"]["type"] == "num_left"):
+                #chains multiple identical attacks
+                chainsleft = attackresult[0]["chain"]["value"]
+                while (chainsleft > 0):
+                    attackresult.append( eventhandlers.performattack(scene,active_beast,chained = True) )
+                    chainsleft = chainsleft - 1
+            elif (attackresult[0]["chain"]["type"] == "by_id"):
+                print("yea no this doesnt work yet")
+                pass
+            active_beast.clearflag(0)
+            active_beast.selected_attack = [None,0]
+
     #update ui according to state
     if (state == "Idle"):
         menuButtons = []
@@ -108,29 +125,16 @@ while (battle_active):
         menuButtons = ui.drawTargetSelect(screen,scene,active_beast)
         pygame.display.flip()
     elif (state == "Execute attack"):
-        if (active_beast.getflag(0)):
-            attackresult.append( eventhandlers.performattack(scene,active_beast) )
-            if (attackresult[0]["chain"]["type"] == "num_left"):
-                #chains multiple identical attacks
-                chainsleft = attackresult[0]["chain"]["value"]
-                while (chainsleft > 0):
-                    attackresult.append( eventhandlers.performattack(scene,active_beast,chained = True) )
-                    chainsleft = chainsleft - 1
-            elif (attackresult[0]["chain"]["type"] == "by_id"):
-                print("yea no this doesnt work yet")
-                pass
-            active_beast.clearflag(0)
-            active_beast.selected_attack = [None,0]
-            
-        ui.drawScene(screen,scene)
-        menuButtons = ui.drawExecuteAttack(screen,scene,attackresult)
-        pygame.display.flip()
-        
+        if (attackresult):
+            ui.drawScene(screen,scene)
+            menuButtons = ui.drawExecuteAttack(screen,scene,attackresult)
+            pygame.display.flip()
     else:
         pass
 
     #if no events need to be processed, progress game one tick
     if (len(raisedFlags) == 0 and state == "Idle"):
+        sleep(1/30) #worlds shittiestly programmed framerate
         scene.tick()
     
     #check if only one teams beasts are remaining (that teams wins, and the battle ends)

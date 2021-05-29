@@ -2,6 +2,8 @@ from classes import Beast, Attack
 from math import floor,ceil
 from itertools import chain
 from random import shuffle
+from fnmatch import fnmatch
+from globalconstants import *
 
 class Scene:
     def __init__(self):
@@ -43,15 +45,24 @@ class Scene:
         print("###########################################")
 
     def tick(self):
-        #check if anyone died
+        #check relevant status flags
         for slot, beast in enumerate(self.beasts[1:],start=1):
-            if (beast.HP <= 0 and beast.isalive):
-                beast.death()
-                print("> " + beast.nickname + " died!")
+            for effect in beast.statuseffects:
+                if ( fnmatch(effect["name"], "Burn") ):
+                    effect["counter"] = effect["counter"] - 1
+                    if (effect["counter"] == 0):
+                        beast.HP = beast.HP - effect["dmgpertick"]
+                        effect["counter"] = effect["ticksperdmg"]
 
         #increment turn tracker
         for slot, beast in enumerate(self.beasts[1:],start=1):
             self.turnTracker[slot] = self.turnTracker[slot] + beast.SPE
+
+        #check if anyone died last tick
+        for slot, beast in enumerate(self.beasts[1:],start=1):
+            if (beast.HP <= 0 and beast.isalive):
+                beast.death()
+                print("> " + beast.nickname + " died!")
 
         #set flags
         for slot, beast in enumerate(self.beasts[1:],start=1):

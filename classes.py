@@ -57,8 +57,8 @@ class Beast:
     def setchainattack(self,atk_id):
         self.selected_attack[0] = ATTACKS[atk_id]
 
-    def addstatuseffect(self,name):
-        self.statuseffects.append(name)
+    def addstatuseffect(self,effect):
+        self.statuseffects.append(effect)
 
     def death(self):
         self.HP = 0

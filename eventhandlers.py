@@ -4,32 +4,7 @@ from random import random
 from fnmatch import fnmatch
 import pygame
 import ui
-
-ELEMENTS = ["physical","heat","cold","shock"]
-attackroll_randmod = 0.1 #attacks deal randomly between 90% and 110% dmg
-critchance = 0.05 #5% critchance
-critmulti = 1.5 #critical hit dmg multiplier
-
-def moveselect(scene,slot,surface):
-    scene.printScene()
-    beast = scene.beasts[slot]
-
-    ui.drawScene(surface,scene)
-    ui.drawMoveselect(surface,beast)
-    pygame.display.flip()
-
-    selected_move = None
-    selected_slot = 0
-    move_selected = False
-    while(not move_selected):
-        pass
-
-
-    print("> " + beast.name + " (Slot " + str(slot) + ") will use " + selected_move.name + " on " + scene.beasts[selected_slot].name + " (Slot " + str(selected_slot) + ")!")
-    beast.selected_attack = [selected_move,selected_slot]
-    scene.turnTracker[slot] = 0
-    beast.clearflag(1)
-    return
+from globalconstants import *
 
 """ #show status
     print("\n> " + beast.name.ljust(16," ") + str(beast.HP).ljust(3," ") + "/" + str(beast.maxHP).ljust(3," ") + " HP (" + str(floor(beast.HP/beast.maxHP*100)).ljust(3," ") + "%)")
@@ -177,9 +152,12 @@ def performattack(scene,attackingBeast,chained = False):
                 openparenpos = 4
                 closeparenpos = len(effect)-1
                 chance = float(effect[openparenpos+1:closeparenpos])
-                if ( (random() < chance) and ("Burn" not in attackresult["defender"].statuseffects)):
+                if ( (random() < chance) and not [True for effect in attackresult["defender"].statuseffects if effect["name"] == "Burn"]):
                     #apply burn
-                    attackresult["defender"].addstatuseffect("Burn")
+                    dmgpertick = attackresult["defender"].maxHP*BURNDMG*attackresult["defender"].SPE/scene.turnTrackerLength
+                    ticksperdmg = max(1,floor(1/dmgpertick))
+                    dmgpertick = max(1,dmgpertick)
+                    attackresult["defender"].addstatuseffect({"name":"Burn","ticksperdmg":ticksperdmg,"dmgpertick":dmgpertick,"counter":ticksperdmg})
                     attackresult["secondary effects applied"].append("Burn")
                     print("> "+ attackresult["defender"].nickname + " was burned!")
                 
