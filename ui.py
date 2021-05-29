@@ -147,9 +147,9 @@ def drawExecuteAttack(surface,scene,attacks):
                 if (attack["crit"]):
                     detailstext.append("Critical hit!")
                 detailstext.append(attack["defender"].nickname + " took " + str(attack["damage total"]) + " (" + str(round(attack["damage total"]/attack["defender"].maxHP*100)) + "%) dmg!")
-#                if attack["secondary effects applied"]:
-#                    for status in attack["secondary effects applied"]:
-#                        detailstext.append("Status applied: " + status + "!")
+                if attack["secondary effects applied"]:
+                    for status in attack["secondary effects applied"]:
+                        detailstext.append("Status applied: " + status + "!")
             else:
                 detailstext.append("The attack missed!")
         else:

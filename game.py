@@ -89,6 +89,7 @@ while (battle_active):
         if (flag_name == "choose_attack"):
             state = "Choose attack"
         elif (flag_name == "execute_attack"):
+            attackresult = []
             state = "Execute attack"
         else:
             state = "Idle"
