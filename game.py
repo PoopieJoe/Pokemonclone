@@ -104,8 +104,6 @@ while (battle_active):
             active_beast.selected_attack = [None,0]
 
     #update ui according to state
-
-    
     if (state == "Idle"):
         menuButtons = []
         ui.drawScene(screen,scene)
