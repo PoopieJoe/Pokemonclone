@@ -6,11 +6,10 @@ import pygame
 import ui
 from globalconstants import *
 
-def performattack(scene,attackingBeast,chained = False):
-
+def performattack(attackingBeast,defendingBeast,chained = False):
     attackresult = {
         "attacker": attackingBeast,
-        "defender": scene.beasts[attackingBeast.selected_attack[1]],
+        "defender": defendingBeast,
         "attack": attackingBeast.selected_attack[0],
         "success": False,
         "hit": False,
@@ -124,7 +123,7 @@ def performattack(scene,attackingBeast,chained = False):
                 chance = float(effect[openparenpos+1:closeparenpos])
                 if ( (random() < chance) and not [True for eff in attackresult["defender"].statuseffects if eff["name"] == BURNNAME]):
                     #apply burn
-                    dmgpertick = attackresult["defender"].maxHP*BURNDMG*attackresult["defender"].SPE/scene.turnTrackerLength
+                    dmgpertick = attackresult["defender"].maxHP*BURNDMG*attackresult["defender"].SPE/TURNTRACKER_LENGTH
                     ticksperdmg = max(1,floor(1/dmgpertick))
                     dmgpertick = max(1,dmgpertick)
                     attackresult["defender"].addstatuseffect({"name":BURNNAME,"ticksperdmg":ticksperdmg,"dmgpertick":dmgpertick,"counter":ticksperdmg})
@@ -138,7 +137,7 @@ def performattack(scene,attackingBeast,chained = False):
                 closeparenpos = effect.find(')')
                 duration = int(effect[underscorepos+1:openparenpos]) #duration in turns
                 chance = float(effect[openparenpos+1:closeparenpos])
-                if ( (random() < chance) and not [True for eff in attackresult["defender"].statuseffects if (eff["name"] == SLOWNAME and eff["trackleft"] < duration*scene.turnTrackerLength)]):
-                    attackresult["defender"].addstatuseffect({"name":SLOWNAME,"duration":duration*scene.turnTrackerLength,"trackleft":duration*scene.turnTrackerLength})
+                if ( (random() < chance) and not [True for eff in attackresult["defender"].statuseffects if (eff["name"] == SLOWNAME and eff["trackleft"] < duration*TURNTRACKER_LENGTH)]):
+                    attackresult["defender"].addstatuseffect({"name":SLOWNAME,"duration":duration*TURNTRACKER_LENGTH,"trackleft":duration*TURNTRACKER_LENGTH})
  
     return attackresult

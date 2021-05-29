@@ -9,7 +9,7 @@ class Scene:
     def __init__(self):
         self.beasts = [None,None,None,None,None]
         self.turnTracker = [0,0,0,0,0]
-        self.turnTrackerLength = 20000
+        self.turnTrackerLength = TURNTRACKER_LENGTH
         self.flags = [[]]
 
     def addBeast(self, beast, slot):

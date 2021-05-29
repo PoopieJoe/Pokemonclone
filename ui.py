@@ -8,6 +8,7 @@ from uiElements import *
 
 pygame.init()
 
+# ui constants, these can stay here
 column_buttonlimit = 6
 interbox_margin_y = 0.04
 interbox_margin_x = 0.01
@@ -15,7 +16,7 @@ buttonheight = (1-interbox_margin_y*(column_buttonlimit-1))/column_buttonlimit
 buttonfont = pygame.font.SysFont(None,int(200*buttonheight))
 statusfont = pygame.font.SysFont(None,int(250*buttonheight))
 
-def getStatusText(scene,beast):
+def getStatusText(beast):
     statustext = [beast.nickname,"","Status:"]
     #print HP total
     hptext = str(beast.HP) + "/" + str(beast.maxHP) + " HP (" + str(max(round(beast.HP/beast.maxHP*100),1)) + "%)"
@@ -26,7 +27,7 @@ def getStatusText(scene,beast):
             if (status["name"] == BURNNAME):
                 statustext.append(BURNNAME)
             elif (status["name"] == SLOWNAME):
-                statustext.append(SLOWNAME + " (" + str(ceil(status["trackleft"]/scene.turnTrackerLength)) + ")")
+                statustext.append(SLOWNAME + " (" + str(ceil(status["trackleft"]/TURNTRACKER_LENGTH)) + ")")
     else:
         statustext.append("Healthy")
     return statustext
@@ -50,7 +51,7 @@ def drawTargetSelect(surface,scene,beast):
         menuelements[col_num].append(element)
     
     #final column contains the status, and no buttons
-    statustext = getStatusText(scene,beast)
+    statustext = getStatusText(beast)
     statusbox = TextBox(Box(Rect_f(0,0,0,0),None),statustext,font=statusfont,textcolor=pygame.Color("black"),backgroundcolor=MOVESELECTFOREGROUNDCOLOR,margin=Margin(0.03,0.1,0.03,0.1))
     menuelements.append([statusbox])
 
@@ -97,7 +98,7 @@ def drawMoveselect(surface,scene,beast):
         menuelements[col_num].append(Button("attack",atk.name,Box(Rect_f(0,0,0,0),None),font=buttonfont,textcolor=pygame.Color("black"),backgroundcolor=MOVESELECTFOREGROUNDCOLOR,hovercolor=BUTTONHOVERCOLOR,id=atk_id))
     
     #final column contains the status, and no buttons
-    statustext = getStatusText(scene,beast)
+    statustext = getStatusText(beast)
     statusbox = TextBox(Box(Rect_f(0,0,0,0),None),statustext,font=statusfont,textcolor=pygame.Color("black"),backgroundcolor=MOVESELECTFOREGROUNDCOLOR,margin=Margin(0.03,0.1,0.03,0.1))
     menuelements.append([statusbox])
 

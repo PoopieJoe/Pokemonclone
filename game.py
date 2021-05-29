@@ -90,12 +90,12 @@ while (battle_active):
     if (state == "Execute attack"):
         if (active_beast.getflag(0)):
             #TODO: multitarget attacks handled here?
-            attackresult.append( eventhandlers.performattack(scene,active_beast) )
+            attackresult.append( eventhandlers.performattack(active_beast,scene.beasts[active_beast.selected_attack[1]]) )
             if (attackresult[0]["chain"]["type"] == "num_left"):
                 #chains multiple identical attack
                 chainsleft = attackresult[0]["chain"]["value"]
                 while (chainsleft > 0):
-                    attackresult.append( eventhandlers.performattack(scene,active_beast,chained = True) )
+                    attackresult.append( eventhandlers.performattack(active_beast,scene.beasts[active_beast.selected_attack[1]],chained = True) )
                     chainsleft = chainsleft - 1
             elif (attackresult[0]["chain"]["type"] == "by_id"):
                 print("yea no this doesnt work yet")
