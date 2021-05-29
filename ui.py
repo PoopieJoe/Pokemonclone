@@ -2,7 +2,8 @@ import pygame
 from pygame.locals import *
 import scenemanager
 import classes
-from math import floor
+from math import floor,ceil
+from globalconstants import *
 from uiElements import *
 
 pygame.init()
@@ -13,6 +14,22 @@ interbox_margin_x = 0.01
 buttonheight = (1-interbox_margin_y*(column_buttonlimit-1))/column_buttonlimit
 buttonfont = pygame.font.SysFont(None,int(200*buttonheight))
 statusfont = pygame.font.SysFont(None,int(250*buttonheight))
+
+def getStatusText(scene,beast):
+    statustext = [beast.nickname,"","Status:"]
+    #print HP total
+    hptext = str(beast.HP) + "/" + str(beast.maxHP) + " HP (" + str(max(round(beast.HP/beast.maxHP*100),1)) + "%)"
+    statustext.append(hptext)
+    if (len(beast.statuseffects)):
+        for status in beast.statuseffects:
+            #different statuses need other things printed
+            if (status["name"] == BURNNAME):
+                statustext.append(BURNNAME)
+            elif (status["name"] == SLOWNAME):
+                statustext.append(SLOWNAME + " (" + str(ceil(status["trackleft"]/scene.turnTrackerLength)) + ")")
+    else:
+        statustext.append("Healthy")
+    return statustext
 
 def drawTargetSelect(surface,scene,beast):
     MAJORBOX.draw(surface)
@@ -33,12 +50,7 @@ def drawTargetSelect(surface,scene,beast):
         menuelements[col_num].append(element)
     
     #final column contains the status, and no buttons
-    statustext = [beast.nickname,"","Status:"]
-    if (len(beast.statuseffects)):
-        for status in beast.statuseffects:
-            statustext.append(str(status))
-    else:
-        statustext.append("Healthy")
+    statustext = getStatusText(scene,beast)
     statusbox = TextBox(Box(Rect_f(0,0,0,0),None),statustext,font=statusfont,textcolor=pygame.Color("black"),backgroundcolor=MOVESELECTFOREGROUNDCOLOR,margin=Margin(0.03,0.1,0.03,0.1))
     menuelements.append([statusbox])
 
@@ -70,7 +82,7 @@ def drawTargetSelect(surface,scene,beast):
                 buttonlist.append(button)
     return buttonlist
 
-def drawMoveselect(surface,beast):
+def drawMoveselect(surface,scene,beast):
     MAJORBOX.draw(surface)
 
     #create list of all buttons in the menu, divided into which column they belong to
@@ -83,13 +95,9 @@ def drawMoveselect(surface,beast):
             menuelements.append([])
             col_num = col_num + 1
         menuelements[col_num].append(Button("attack",atk.name,Box(Rect_f(0,0,0,0),None),font=buttonfont,textcolor=pygame.Color("black"),backgroundcolor=MOVESELECTFOREGROUNDCOLOR,hovercolor=BUTTONHOVERCOLOR,id=atk_id))
+    
     #final column contains the status, and no buttons
-    statustext = [beast.nickname,"","Status:"]
-    if (len(beast.statuseffects)):
-        for status in beast.statuseffects:
-            statustext.append(str(status))
-    else:
-        statustext.append("Healthy")
+    statustext = getStatusText(scene,beast)
     statusbox = TextBox(Box(Rect_f(0,0,0,0),None),statustext,font=statusfont,textcolor=pygame.Color("black"),backgroundcolor=MOVESELECTFOREGROUNDCOLOR,margin=Margin(0.03,0.1,0.03,0.1))
     menuelements.append([statusbox])
 

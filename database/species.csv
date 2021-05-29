@@ -1,3 +1,5 @@
 ID,Name,Anatomy,maxHP,physATK,armor,magATK,heatRES,coldRES,shockRES,SPE,Ability,Flags
 0,Lurker,0,148,80,126,80,0.3,-0.2,0,80,,
 1,Viper,1,73,107,83,50,0,0,0,128,,
+2,Lizion,2,92,123,101,70,0.1,-0.1,0.2,113,,
+3,Halfling,0,70,40,80,110,0.4,0.4,0.4,97,,

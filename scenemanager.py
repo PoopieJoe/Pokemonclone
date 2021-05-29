@@ -47,12 +47,32 @@ class Scene:
     def tick(self):
         #check relevant status flags
         for slot, beast in enumerate(self.beasts[1:],start=1):
-            for effect in beast.statuseffects:
-                if ( fnmatch(effect["name"], "Burn") ):
-                    effect["counter"] = effect["counter"] - 1
-                    if (effect["counter"] == 0):
-                        beast.HP = beast.HP - effect["dmgpertick"]
-                        effect["counter"] = effect["ticksperdmg"]
+            if (beast.isalive):
+                status_ended = []
+                for n,status in enumerate(beast.statuseffects):
+                    if ( fnmatch(status["name"], BURNNAME) ):
+                        status["counter"] -= 1
+                        if (status["counter"] == 0):
+                            #take dmg
+                            beast.HP = beast.HP - status["dmgpertick"]
+
+                            #determine new damage and tick values for next dmg instance in case hp total or speed changes during burn effect
+                            dmgpertick = BURNDMG*beast.maxHP*beast.SPE/self.turnTrackerLength
+                            status["ticksperdmg"] = max(1,floor(1/dmgpertick))
+                            status["dmgpertick"] = max(1,dmgpertick)
+                            status["counter"] = status["ticksperdmg"]
+
+                    elif ( fnmatch(status["name"], SLOWNAME) ):
+                        if (status["duration"] == status["trackleft"]):
+                            beast.SPE *= SLOWMOD
+                        elif (status["trackleft"] <= 0):
+                            beast.SPE /= SLOWMOD
+                            status_ended.append(n) #queue this effect for removal
+                        status["trackleft"] -=  beast.SPE
+
+                #remove effects that have ended
+                for index in status_ended:
+                    beast.statuseffects.pop(index) #remove status
 
         #increment turn tracker
         for slot, beast in enumerate(self.beasts[1:],start=1):

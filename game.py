@@ -16,11 +16,11 @@ pygame.init()
 screen = pygame.display.set_mode(ui.screenDims)
 
 
-#Build database and import beasts - move this somewhere else
+#Build a beast
 Beast1 = Beast(getSpecies("Lurker"),nickname="Greg",loadout=[None,getEquipment("Metal chestplate"),None,None,None])
-Beast2 = Beast(getSpecies("Lurker"),nickname="Bob",loadout=[None,getEquipment("Metal chestplate"),None,None,None])
-Beast3 = Beast(getSpecies("Viper"),nickname="Micheala",loadout=[None,getEquipment("Metal chestplate"),None])
-Beast4 = Beast(getSpecies("Viper"),nickname="Claire",loadout=[None,getEquipment("Metal chestplate"),None])
+Beast2 = Beast(getSpecies("Viper"),nickname="Bob",loadout=[None,getEquipment("Metal chestplate"),getEquipment("Tail blade")])
+Beast3 = Beast(getSpecies("Lizion"),nickname="Micheala",loadout=[getEquipment("Icy mask"),None,None,None,getEquipment("Tail blade")])
+Beast4 = Beast(getSpecies("Halfling"),nickname="Claire",loadout=[None,getEquipment("Metal chestplate"),None,None,None])
 
 scene = Scene()
 scene.addBeast(beast = Beast1,slot = 1)
@@ -31,15 +31,6 @@ scene.addBeast(beast = Beast4,slot = 4)
 scene.setupBattle()
 ui.drawScene(screen,scene)
 pygame.display.flip()
-
-#scene.beasts[1].HP = int(round(scene.beasts[1].maxHP*(0.67)))
-#scene.beasts[2].HP = int(round(scene.beasts[2].maxHP*(0.07)))
-#scene.beasts[3].HP = int(round(scene.beasts[3].maxHP*(0.43)))
-#scene.beasts[4].HP = int(round(scene.beasts[4].maxHP*(0.99)))
-#for beast in scene.beasts[1:]:
-#    beast.addstatuseffect("Poison")
-#ui.drawScene(screen,scene)
-#pygame.display.flip()
 
 raisedFlags = []
 battle_active = True
@@ -98,9 +89,10 @@ while (battle_active):
     #change gamestate according to state
     if (state == "Execute attack"):
         if (active_beast.getflag(0)):
+            #TODO: multitarget attacks handled here?
             attackresult.append( eventhandlers.performattack(scene,active_beast) )
             if (attackresult[0]["chain"]["type"] == "num_left"):
-                #chains multiple identical attacks
+                #chains multiple identical attack
                 chainsleft = attackresult[0]["chain"]["value"]
                 while (chainsleft > 0):
                     attackresult.append( eventhandlers.performattack(scene,active_beast,chained = True) )
@@ -118,8 +110,8 @@ while (battle_active):
         pygame.display.flip()
     elif (state == "Choose attack"):
         ui.drawScene(screen,scene)
-        menuButtons = ui.drawMoveselect(screen,active_beast)
-        pygame.display.flip()                    
+        menuButtons = ui.drawMoveselect(screen,scene,active_beast)
+        pygame.display.flip()
     elif (state == "Choose target"):
         ui.drawScene(screen,scene)
         menuButtons = ui.drawTargetSelect(screen,scene,active_beast)
@@ -134,7 +126,7 @@ while (battle_active):
 
     #if no events need to be processed, progress game one tick
     if (len(raisedFlags) == 0 and state == "Idle"):
-        sleep(1/30) #worlds shittiestly programmed framerate
+        sleep(1/60) #worlds shittiestly programmed framerate
         scene.tick()
     
     #check if only one teams beasts are remaining (that teams wins, and the battle ends)

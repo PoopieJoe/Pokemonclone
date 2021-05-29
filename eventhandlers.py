@@ -6,42 +6,6 @@ import pygame
 import ui
 from globalconstants import *
 
-""" #show status
-    print("\n> " + beast.name.ljust(16," ") + str(beast.HP).ljust(3," ") + "/" + str(beast.maxHP).ljust(3," ") + " HP (" + str(floor(beast.HP/beast.maxHP*100)).ljust(3," ") + "%)")
-
-    #move select
-    movelist = []
-    for attack in beast.attacks:
-        movelist.append(attack.name)
-    print("> Moves: ", end="")
-    print(*movelist, sep=", ")
-
-    move_name = input("Select move: ").strip()
-    while (move_name not in [attack.name for attack in beast.attacks]):
-        print(move_name + " is an invalid move, choose one of the available moves")
-        print("> Moves: ", end="")
-        print(*movelist, sep=", ")
-        move_name = str(input("Select move: ")).strip()
-    selected_move = beast.attacks[[attack.name for attack in beast.attacks].index(move_name)]
-
-    #select target  
-    print("> Team A: ", end = "")
-    print("Slot 1: " + scene.beasts[1].name.ljust(16," ") + ", Slot 2: " + scene.beasts[2].name.ljust(16," "))
-    print("> Team B: ", end = "")
-    print("Slot 3: " + scene.beasts[3].name.ljust(16," ") + ", Slot 4: " + scene.beasts[4].name.ljust(16," "))
-
-    selected_slot = int(input("Select target slot: ").strip())
-    while (selected_slot < 1 or selected_slot > 4 or scene.beasts[selected_slot].name == Beast().name):
-        if (selected_slot < 1 or selected_slot > 4):
-            print(str(selected_slot) + " is an invalid slot, choose a number between 1 and 4")
-        elif (scene.beasts[selected_slot].name == Beast().name):
-            print(str(selected_slot) + " is an empty slot, choose a slot with a beast")
-        print("> Team A: ", end = "")
-        print("Slot 1: " + scene.beasts[1].name.ljust(16," ") + ", Slot 2: " + scene.beasts[2].name.ljust(16," "))
-        print("> Team B: ", end = "")
-        print("Slot 3: " + scene.beasts[3].name.ljust(16," ") + ", Slot 4: " + scene.beasts[4].name.ljust(16," "))
-        selected_slot = int(input("Select target slot: ").strip()) """
-
 def performattack(scene,attackingBeast,chained = False):
 
     attackresult = {
@@ -125,12 +89,18 @@ def performattack(scene,attackingBeast,chained = False):
 
     #use appropriate resistance
     for element in range(len(ELEMENTS)):
-        d = int(out_dmg[element] * (1 - attackresult["defender"].RES[element]))
+        d = floor(out_dmg[element] * (1 - attackresult["defender"].RES[element]))
         attackresult["damage by element"].append(d)
 
-    #total damage is hidden if target dies
-    attackresult["damage total"] = sum(attackresult["damage by element"])
-    attackresult["damage total"] = min( attackresult["damage total"], attackresult["defender"].HP )
+    #sum up damage
+    attackresult["damage total"] =  sum(attackresult["damage by element"])
+    if (attackresult["damage total"] > 0): #if any damage was dealt, min is 1
+        attackresult["damage total"] =  max(1,attackresult["damage total"])
+        attackresult["damage total"] = min( attackresult["damage total"], attackresult["defender"].HP ) #total damage is hidden if target dies
+    elif (attackresult["damage total"] < 0): #if any health was healed, min is 1
+        attackresult["damage total"] =  min(-1,attackresult["damage total"])
+    else:
+        pass #don't do anything if total is exactly 0
 
     #resolve attack
     attackresult["defender"].HP -= attackresult["damage total"]
@@ -147,19 +117,28 @@ def performattack(scene,attackingBeast,chained = False):
     else:
         #Secondary effects go here
         for effect in attackresult["attack"].effects:
-            if ( fnmatch(effect, "Burn(*)") ):
+            if ( fnmatch(effect, BURNNAME + "(*)") ):
                 #fetch burn chance from string
                 openparenpos = 4
                 closeparenpos = len(effect)-1
                 chance = float(effect[openparenpos+1:closeparenpos])
-                if ( (random() < chance) and not [True for effect in attackresult["defender"].statuseffects if effect["name"] == "Burn"]):
+                if ( (random() < chance) and not [True for eff in attackresult["defender"].statuseffects if eff["name"] == BURNNAME]):
                     #apply burn
                     dmgpertick = attackresult["defender"].maxHP*BURNDMG*attackresult["defender"].SPE/scene.turnTrackerLength
                     ticksperdmg = max(1,floor(1/dmgpertick))
                     dmgpertick = max(1,dmgpertick)
-                    attackresult["defender"].addstatuseffect({"name":"Burn","ticksperdmg":ticksperdmg,"dmgpertick":dmgpertick,"counter":ticksperdmg})
-                    attackresult["secondary effects applied"].append("Burn")
+                    attackresult["defender"].addstatuseffect({"name":BURNNAME,"ticksperdmg":ticksperdmg,"dmgpertick":dmgpertick,"counter":ticksperdmg})
+                    attackresult["secondary effects applied"].append(BURNNAME)
                     print("> "+ attackresult["defender"].nickname + " was burned!")
-                
+
+            elif ( fnmatch(effect, SLOWNAME + "_*(*)") ):
+                #fetch slow chance and intensity from string
+                underscorepos = effect.find('_')
+                openparenpos = effect.find('(')
+                closeparenpos = effect.find(')')
+                duration = int(effect[underscorepos+1:openparenpos]) #duration in turns
+                chance = float(effect[openparenpos+1:closeparenpos])
+                if ( (random() < chance) and not [True for eff in attackresult["defender"].statuseffects if (eff["name"] == SLOWNAME and eff["trackleft"] < duration*scene.turnTrackerLength)]):
+                    attackresult["defender"].addstatuseffect({"name":SLOWNAME,"duration":duration*scene.turnTrackerLength,"trackleft":duration*scene.turnTrackerLength})
  
     return attackresult

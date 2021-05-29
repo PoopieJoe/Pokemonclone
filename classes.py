@@ -273,7 +273,7 @@ def importAttacks(filepath):
                 coldPower=float(row["Cold power"]),
                 shockPower=float(row["Shock power"]),
                 accuracy=float(row["Accuracy"]),
-                critRate=float(row["Crit rate"]),
+                critRate=float(row["Crit rate mod"]),
                 flags=[flag for flag in row["Flags"].split(",") if flag != ""],
                 effects=[effect for effect in row["Effects"].split(",") if effect != ""]
                 )

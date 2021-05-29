@@ -1,3 +1,4 @@
 ID,Name,Parts
 0,Humanoid,"Head,Chest,Arm,Arm,Legs"
 1,Snakelike,"Head,Chest,Tail"
+2,Chimera,"Head,Head,Head,Legs,Tail"
