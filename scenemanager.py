@@ -76,7 +76,10 @@ class Scene:
 
         #increment turn tracker
         for slot, beast in enumerate(self.beasts[1:],start=1):
-            self.turnTracker[slot] = self.turnTracker[slot] + beast.SPE
+            if ((self.turnTracker[slot] < TURNTRACKER_LENGTH/2) and (self.turnTracker[slot] + beast.SPE > TURNTRACKER_LENGTH/2)):
+                self.turnTracker[slot] = TURNTRACKER_LENGTH/2
+            else:
+                self.turnTracker[slot] = self.turnTracker[slot] + beast.SPE
 
         #check if anyone died last tick
         for slot, beast in enumerate(self.beasts[1:],start=1):

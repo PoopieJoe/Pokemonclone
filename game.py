@@ -15,7 +15,6 @@ import ui
 pygame.init()
 screen = pygame.display.set_mode(ui.screenDims)
 
-
 #Build a beast
 Beast1 = Beast(getSpecies("Lurker"),nickname="Greg",loadout=[None,getEquipment("Metal chestplate"),None,None,None])
 Beast2 = Beast(getSpecies("Viper"),nickname="Bob",loadout=[None,getEquipment("Metal chestplate"),getEquipment("Tail blade")])
@@ -126,7 +125,7 @@ while (battle_active):
 
     #if no events need to be processed, progress game one tick
     if (len(raisedFlags) == 0 and state == "Idle"):
-        sleep(1/60) #worlds shittiestly programmed framerate
+        sleep(1/30) #worlds shittiestly programmed framerate
         scene.tick()
     
     #check if only one teams beasts are remaining (that teams wins, and the battle ends)

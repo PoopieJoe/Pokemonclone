@@ -1,31 +1,11 @@
 import pygame
 from pygame.locals import *
+from math import floor
 import scenemanager
 import classes
-from math import floor
+from globalconstants import *
 
 pygame.init()
-
-screenDims = (1280,720)
-
-DEFAULTFONTSIZE = int(screenDims[1]/7.2)
-DEFAULTFONT = pygame.font.SysFont(None,DEFAULTFONTSIZE)
-NAMEFONTSIZE = int(screenDims[1]*1/25)
-NAMEFONT = pygame.font.SysFont(None,NAMEFONTSIZE)
-
-BACKGROUNDCOLOR = pygame.Color(80,158,40)
-BACKGROUND = pygame.surface.Surface(screenDims).fill(BACKGROUNDCOLOR)
-HPBACKGROUNDCOLOR = pygame.Color(180,180,180)
-HPFOREGROUNDCOLOR = pygame.Color(180,0,0)
-MOVESELECTBACKGROUNDCOLOR = pygame.Color(200,200,200)
-MOVESELECTFOREGROUNDCOLOR = pygame.Color(240,240,240)
-MOVESELECTGREY = pygame.Color(150,150,150)
-BUTTONHOVERCOLOR = pygame.Color(200,200,255)
-BUTTONPRESSCOLOR = pygame.Color(160,160,225)
-TRACKERBARCOLOR = pygame.Color(255,255,80)
-TRACKERMARKERCOLOR = pygame.Color("black")
-
-TESTCOLOR = pygame.Color(255,0,255)
 
 class Rect_f:
     def __init__(self,left,top,width,height):

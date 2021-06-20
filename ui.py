@@ -8,26 +8,18 @@ from uiElements import *
 
 pygame.init()
 
-# ui constants, these can stay here
-column_buttonlimit = 6
-interbox_margin_y = 0.04
-interbox_margin_x = 0.01
-buttonheight = (1-interbox_margin_y*(column_buttonlimit-1))/column_buttonlimit
-buttonfont = pygame.font.SysFont(None,int(200*buttonheight))
-statusfont = pygame.font.SysFont(None,int(250*buttonheight))
-
 def getStatusText(beast):
     statustext = [beast.nickname,"","Status:"]
     #print HP total
     hptext = str(beast.HP) + "/" + str(beast.maxHP) + " HP (" + str(max(round(beast.HP/beast.maxHP*100),1)) + "%)"
     statustext.append(hptext)
-    if (len(beast.statuseffects)):
+    if (beast.statuseffects):
         for status in beast.statuseffects:
             #different statuses need other things printed
             if (status["name"] == BURNNAME):
                 statustext.append(BURNNAME)
             elif (status["name"] == SLOWNAME):
-                statustext.append(SLOWNAME + " (" + str(ceil(status["trackleft"]/TURNTRACKER_LENGTH)) + ")")
+                statustext.append(SLOWNAME + " (" + str(ceil(status["trackleft"]/TURNTRACKER_LENGTH)) + " turns left)")
     else:
         statustext.append("Healthy")
     return statustext
@@ -148,6 +140,7 @@ def drawExecuteAttack(surface,scene,attacks):
         )
     menuelements[0].append(title)
 
+    # main body text
     boxoffset = 0.01
     detailstext = []
     for n,attack in enumerate(attacks):
@@ -155,7 +148,13 @@ def drawExecuteAttack(surface,scene,attacks):
             if (attack["hit"]):
                 if (attack["crit"]):
                     detailstext.append("Critical hit!")
-                detailstext.append(attack["defender"].nickname + " took " + str(attack["damage total"]) + " (" + str(round(attack["damage total"]/attack["defender"].maxHP*100)) + "%) dmg!")
+                dmgperc = attack["damage total"]/attack["defender"].maxHP*100
+                if (dmgperc >= 1):
+                    detailstext.append(attack["defender"].nickname + " took " + str(attack["damage total"]) + " (" + str(round(dmgperc)) + "%) dmg!")
+                else:
+                    detailstext.append(attack["defender"].nickname + " took " + str(attack["damage total"]) + " (<1%) dmg!")
+                
+                
                 if attack["secondary effects applied"]:
                     for status in attack["secondary effects applied"]:
                         detailstext.append("Status applied: " + status + "!")
@@ -203,51 +202,57 @@ def drawScene(surface,scene):
     surface.fill(BACKGROUNDCOLOR)
 
     #turntracker
-    turntrackerbox = Box(Rect_f(0.1,0.03,0.8,0.07),parent=BASEBOX)
+    turntrackerbox = Box(Rect_f(0.1,0.03,0.8,0.08),parent=BASEBOX)
+    #turn tracker exists on 1 bar with 4 markers
+    #print bar
+    bar_x = 0.1
+    bar_y = 0.325
+    bar_w = 1-2*bar_x
+    bar_h = 1-2*bar_y
+    barbox = Box(Rect_f(bar_x,bar_y,bar_w,bar_h),parent = turntrackerbox,color=TRACKERBARCOLOR)
+    barbox.draw(surface)    
     for slot,beast in enumerate(scene.beasts[1:],start=1):
         if beast.isalive:
-            #set current bar position
-            bar_w = 0.4
-            bar_h = 0.18
-            lcol_x = 0
-            rcol_x = 1-bar_w
-            trow_y = 0
-            brow_y = 1-bar_h
-            if ( slot == 1 ): #topright
-                barrect = Rect_f(rcol_x,trow_y,bar_w,bar_h)
-            elif ( slot == 2 ): #bottomright
-                barrect = Rect_f(rcol_x,brow_y,bar_w,bar_h)
-            elif ( slot == 3 ): #topleft
-                barrect = Rect_f(lcol_x,trow_y,bar_w,bar_h)
-            elif ( slot == 4 ): #bottomleft
-                barrect = Rect_f(lcol_x,brow_y,bar_w,bar_h)
-            
-            #print bar
-            barbox = Box(barrect,parent = turntrackerbox,color=TRACKERBARCOLOR)
-            barbox.draw(surface)
-            
             #print name
             nameoffset = 0.005
-            trackerFont = pygame.font.SysFont(None,barbox.absrect.height*3)
-            if slot == 1 or slot == 2: #right column has name to the left
-                namepos = (barbox.absrect.left-nameoffset*barbox.parent.absrect.width,barbox.absrect.top+barbox.absrect.height/2)
+            trackerFont = pygame.font.SysFont(None,int(turntrackerbox.absrect.height*0.5))
+            if (slot == 1):
+                namepos = (barbox.absrect.left-nameoffset*barbox.parent.absrect.width,barbox.absrect.top+barbox.absrect.height*0)
                 namealignment = "centreRight"
-            else: #left column has name to the right
-                namepos = (barbox.absrect.right+nameoffset*barbox.parent.absrect.width,barbox.absrect.top+barbox.absrect.height/2)
+                slotcolor = SLOT1COLOR
+            elif (slot == 2):
+                namepos = (barbox.absrect.left-nameoffset*barbox.parent.absrect.width,barbox.absrect.top+barbox.absrect.height*1)
+                namealignment = "centreRight"
+                slotcolor = SLOT2COLOR
+            elif (slot == 3):
+                namepos = (barbox.absrect.right+nameoffset*barbox.parent.absrect.width,barbox.absrect.top+barbox.absrect.height*0)
                 namealignment = "centreLeft"
-            renderTextAtPos(surface,beast.nickname,namepos,alignment=namealignment,font = trackerFont)
-                
+                slotcolor = SLOT3COLOR
+            elif (slot == 4):
+                namepos = (barbox.absrect.right+nameoffset*barbox.parent.absrect.width,barbox.absrect.top+barbox.absrect.height*1)
+                namealignment = "centreLeft"
+                slotcolor = SLOT4COLOR
+
+            renderTextAtPos(surface,beast.nickname,namepos,alignment=namealignment,font = trackerFont,color = slotcolor)
 
             #print marker
-            if (scene.turnTracker[slot] < scene.turnTrackerLength/2):
-                markerposx = barbox.absrect.left + barbox.absrect.width*min(scene.turnTracker[slot]/scene.turnTrackerLength*2,1)
-                markerradius = barbox.absrect.height*1.5/2
-            else:
-                markerposx = barbox.absrect.right - barbox.absrect.width*min((scene.turnTracker[slot]-scene.turnTrackerLength/2)/scene.turnTrackerLength*2,1)
-                markerradius = barbox.absrect.height*1/2
-            markerpos = ( markerposx , barbox.absrect.centery )
-            pygame.draw.circle(surface,TRACKERMARKERCOLOR,markerpos,markerradius)
+            markerwidth = barbox.absrect.height*1/2
+            if (scene.turnTracker[slot] < scene.turnTrackerLength/2): #moving forward to attack
+                progresstoattack = scene.turnTracker[slot]/TURNTRACKER_LENGTH*2
+                markerposx = barbox.absrect.left + barbox.absrect.width*min(progresstoattack,1)
+                markerheight = barbox.absrect.height*2
+                markerposy = barbox.absrect.centery-markerheight/2 + 1 #idk why but its off by 1 pixel and its infuriating
+        
+            else: #moving back to move select
+                progresstomovesel = (scene.turnTracker[slot]-scene.turnTrackerLength/2)/scene.turnTrackerLength*2
+                markerposx = barbox.absrect.right - barbox.absrect.width*min(progresstomovesel,1) - markerwidth
+                markerheight = barbox.absrect.height
+                markerposy = barbox.absrect.centery-markerheight/2 + 1 #idk why but its off by 1 pixel and its infuriating
+            markerpos = ( markerposx , markerposy )
+            markerdims = ( markerwidth , markerheight )
+            pygame.draw.rect(surface,slotcolor,(markerpos,markerdims))
 
+    # Health/statusboxes
     slotreltextpos = [  
         (0,0),
         (0.6,0.42),
@@ -269,7 +274,15 @@ def drawScene(surface,scene):
 
             pygame.draw.rect(surface,HPBACKGROUNDCOLOR,(HPbarposition,(Hpbarwidth,Hpbarheight)))
             pygame.draw.rect(surface,HPFOREGROUNDCOLOR,(HPbarposition,(Hpbarwidth*healthfrac,Hpbarheight)))
-            renderTextAtPos(surface,slottext,textpos,"centreLeft",font=NAMEFONT)
+            if (slot == 1):
+                textcolor = SLOT1COLOR
+            elif (slot == 2):
+                textcolor = SLOT2COLOR
+            elif (slot == 3):
+                textcolor = SLOT3COLOR
+            elif (slot == 4):
+                textcolor = SLOT4COLOR
+            renderTextAtPos(surface,slottext,textpos,"centreLeft",font=NAMEFONT,color=textcolor)
     return
 
 def addtuple(xs,ys):
