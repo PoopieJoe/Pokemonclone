@@ -17,6 +17,8 @@ screen = pygame.display.set_mode(ui.screenDims)
 
 #Build a beast
 Beast1 = Beast(getSpecies("Lurker"),nickname="Greg",loadout=[None,getEquipment("Metal chestplate"),None,None,None])
+Beast1.maxHP = 10000
+Beast1.HP = Beast1.maxHP
 Beast2 = Beast(getSpecies("Viper"),nickname="Bob",loadout=[None,getEquipment("Metal chestplate"),getEquipment("Tail blade")])
 Beast3 = Beast(getSpecies("Lizion"),nickname="Micheala",loadout=[getEquipment("Icy mask"),None,None,None,getEquipment("Tail blade")])
 Beast4 = Beast(getSpecies("Halfling"),nickname="Claire",loadout=[None,getEquipment("Metal chestplate"),None,None,None])

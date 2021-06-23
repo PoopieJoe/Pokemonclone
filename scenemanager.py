@@ -56,10 +56,10 @@ class Scene:
                             #take dmg
                             beast.HP = beast.HP - status["dmgpertick"]
 
-                            #determine new damage and tick values for next dmg instance in case hp total or speed changes during burn effect
-                            dmgpertick = BURNDMG*beast.maxHP*beast.SPE/self.turnTrackerLength
-                            status["ticksperdmg"] = max(1,floor(1/dmgpertick))
-                            status["dmgpertick"] = max(1,dmgpertick)
+                            #determine new damage and tick values for next dmg instance in case hp total changes during burn effect
+                            burndmg = beast.calcBurnDMG()
+                            status["dmgpertick"] = burndmg[0]
+                            status["ticksperdmg"] = burndmg[1]
                             status["counter"] = status["ticksperdmg"]
 
                     elif ( fnmatch(status["name"], SLOWNAME) ):
@@ -74,18 +74,19 @@ class Scene:
                 for index in status_ended:
                     beast.statuseffects.pop(index) #remove status
 
-        #increment turn tracker
-        for slot, beast in enumerate(self.beasts[1:],start=1):
-            if ((self.turnTracker[slot] < TURNTRACKER_LENGTH/2) and (self.turnTracker[slot] + beast.SPE > TURNTRACKER_LENGTH/2)):
-                self.turnTracker[slot] = TURNTRACKER_LENGTH/2
-            else:
-                self.turnTracker[slot] = self.turnTracker[slot] + beast.SPE
-
         #check if anyone died last tick
         for slot, beast in enumerate(self.beasts[1:],start=1):
             if (beast.HP <= 0 and beast.isalive):
                 beast.death()
                 print("> " + beast.nickname + " died!")
+
+        #increment turn tracker
+        for slot, beast in enumerate(self.beasts[1:],start=1):
+            if (beast.isalive):
+                if ((self.turnTracker[slot] < TURNTRACKER_LENGTH/2) and (self.turnTracker[slot] + beast.SPE > TURNTRACKER_LENGTH/2)):
+                    self.turnTracker[slot] = TURNTRACKER_LENGTH/2
+                else:
+                    self.turnTracker[slot] = self.turnTracker[slot] + beast.SPE
 
         #set flags
         for slot, beast in enumerate(self.beasts[1:],start=1):

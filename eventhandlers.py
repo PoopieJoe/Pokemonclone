@@ -123,9 +123,10 @@ def performattack(attackingBeast,defendingBeast,chained = False):
                 chance = float(effect[openparenpos+1:closeparenpos])
                 if ( (random() < chance) and not [True for eff in attackresult["defender"].statuseffects if eff["name"] == BURNNAME]):
                     #apply burn
-                    dmgpertick = attackresult["defender"].maxHP*BURNDMG*attackresult["defender"].SPE/TURNTRACKER_LENGTH
-                    ticksperdmg = max(1,floor(1/dmgpertick))
-                    dmgpertick = max(1,dmgpertick)
+                    burndmg = attackresult["defender"].calcBurnDMG()
+                    dmgpertick = burndmg[0]
+                    ticksperdmg = burndmg[1]
+                    
                     attackresult["defender"].addstatuseffect({"name":BURNNAME,"ticksperdmg":ticksperdmg,"dmgpertick":dmgpertick,"counter":ticksperdmg})
                     attackresult["secondary effects applied"].append(BURNNAME)
                     print("> "+ attackresult["defender"].nickname + " was burned!")

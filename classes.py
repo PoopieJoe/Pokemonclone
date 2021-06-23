@@ -1,5 +1,7 @@
 import csv
 from pathlib import Path
+from math import floor
+from globalconstants import *
 
 class Beast:
     "Describes an ingame beast, complete with stats and equipment"
@@ -45,6 +47,10 @@ class Beast:
 
         #Flags
         self.flags = [["execute_attack",False],["choose_attack",False]]
+
+    def calcBurnDMG(self):
+        dmgpertick = BURNDMG*self.maxHP*100/TURNTRACKER_LENGTH
+        return (max(1,floor(dmgpertick)), max(1,floor(1/dmgpertick)))
 
     def selectattack(self,atk_id):
         self.selected_attack[0] = self.attacks[atk_id]
@@ -353,7 +359,7 @@ def importSpecies(filepath):
 
     return species
 
-dbpath = "D:/Documents/Projects/Visual Studio Code/Pokemonclone/database/"
+dbpath = "./database/"
 ATTACKS = importAttacks(Path(dbpath+"attacks.csv"))
 EQUIPMENT = importEquipment(Path(dbpath+"equipment.csv"))
 ANATOMIES = importAnatomies(Path(dbpath+"anatomies.csv"))
