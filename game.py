@@ -35,7 +35,6 @@ scene.setupBattle()
 ui.drawScene(screen,scene)
 pygame.display.flip()
 
-raisedFlags = []
 battle_active = True
 winner = 0
 menuButtons = []
