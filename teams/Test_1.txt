@@ -1,0 +1,15 @@
+Team name:  Bobbers
+
+Name:       Greg
+Species:    Lurker
+@Head:      Straw hat
+@Chest:     Metal chestplate
+@Arm:       Ignition arm
+@Arm:       Skull shield
+@Legs:      Running shoes
+
+Name:       Bob
+Species:    Viper
+@Head:      Icy mask
+@Chest:     Cloth wrap
+@Tail:      Tail blade

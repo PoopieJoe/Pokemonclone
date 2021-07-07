@@ -3,6 +3,8 @@ from pygame.locals import *
 pygame.init()
 #### Gameplay-related constants
 
+BEASTSPERTEAM = 2
+
 # Elements
 ELEMENTS = ["physical","heat","cold","shock"]
 
@@ -19,15 +21,10 @@ BURNNAME = "Burn"
 BURNDMG = 1/8 #dmg per turn
 
 SLOWNAME = "Slow"
-SLOWMOD = 0.8 #speed multiplier during slow
+SLOWMOD = 0.5 #speed multiplier during slow
 
-# UI constants
+# UI colors and fonts
 screenDims = (1280,720)
-
-DEFAULTFONTSIZE = int(screenDims[1]/7.2)
-DEFAULTFONT = pygame.font.SysFont(None,DEFAULTFONTSIZE)
-NAMEFONTSIZE = int(screenDims[1]*1/25)
-NAMEFONT = pygame.font.SysFont(None,NAMEFONTSIZE)
 
 BACKGROUNDCOLOR = pygame.Color(80,158,40)
 BACKGROUND = pygame.surface.Surface(screenDims).fill(BACKGROUNDCOLOR)
@@ -40,13 +37,6 @@ BUTTONHOVERCOLOR = pygame.Color(200,200,255)
 BUTTONPRESSCOLOR = pygame.Color(160,160,225)
 TRACKERBARCOLOR = pygame.Color(255,255,80)
 TESTCOLOR = pygame.Color(255,0,255)
-
-column_buttonlimit = 6
-interbox_margin_y = 0.04
-interbox_margin_x = 0.01
-buttonheight = (1-interbox_margin_y*(column_buttonlimit-1))/column_buttonlimit
-buttonfont = pygame.font.SysFont(None,int(200*buttonheight))
-statusfont = pygame.font.SysFont(None,int(250*buttonheight))
 
 # Colors to differentiate between slots
 SLOT1COLOR = Color(255,0,0)

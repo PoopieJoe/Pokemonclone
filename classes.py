@@ -7,7 +7,7 @@ class Beast:
     "Describes an ingame beast, complete with stats and equipment"
     def __init__(self, species, nickname = None, loadout = []):
         #details
-        self.species = species
+        self.species = getSpecies(species)
         if (nickname == None):
             self.nickname = species.name
         else:
@@ -40,6 +40,7 @@ class Beast:
         self.equipment = []
         for n,piece in enumerate(loadout):
             if (piece != None):
+                piece = getEquipment(piece)
                 if (piece.part == getAnatomy(self.species.anatomy).parts[n]):
                     self.equipItem(piece)
                 else:
@@ -53,12 +54,21 @@ class Beast:
         return (max(1,floor(dmgpertick)), max(1,floor(1/dmgpertick)))
 
     def selectattack(self,atk_id):
-        self.selected_attack[0] = self.attacks[atk_id]
-        print(str(self.nickname) + " selected " + self.selected_attack[0].name + " as their attack!")
+        print(str(self.nickname) + " selected " + self.attacks[atk_id].name + " as their attack!")
+        try:
+            self.selected_attack[0] = self.attacks[atk_id]
+            return True
+        except Exception:
+            return False
+        
     
     def selecttarget(self,scene,slot):
-        self.selected_attack[1] = slot
         print(str(self.nickname) + " selected " + str(scene.beasts[slot].nickname) + " as the target!")
+        try:
+            self.selected_attack[1] = slot
+            return True
+        except Exception:
+            return False
     
     def setchainattack(self,atk_id):
         self.selected_attack[0] = ATTACKS[atk_id]

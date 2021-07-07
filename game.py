@@ -16,13 +16,16 @@ pygame.init()
 screen = pygame.display.set_mode(ui.screenDims)
 
 #Build a beast
-Beast1 = Beast(getSpecies("Lurker"),nickname="Greg",loadout=[None,getEquipment("Metal chestplate"),None,None,None])
-Beast1.maxHP = 10000
-Beast1.HP = Beast1.maxHP
-Beast2 = Beast(getSpecies("Viper"),nickname="Bob",loadout=[None,getEquipment("Metal chestplate"),getEquipment("Tail blade")])
-Beast3 = Beast(getSpecies("Lizion"),nickname="Micheala",loadout=[getEquipment("Icy mask"),None,None,None,getEquipment("Tail blade")])
-Beast4 = Beast(getSpecies("Halfling"),nickname="Claire",loadout=[None,getEquipment("Metal chestplate"),None,None,None])
+Beast1 = Beast(species="Lurker",nickname="Greg",loadout=[None,"Metal chestplate",None,None,None])
+Beast2 = Beast(species="Viper",nickname="Bob",loadout=[None,"Metal chestplate","Tail blade"])
 
+Beast3 = Beast(species="Lizion",nickname="Micheala",loadout=["Icy mask",None,None,None,"Tail blade"])
+Beast4 = Beast(species="Halfling",nickname="Claire",loadout=[None,"Metal chestplate",None,None,None])
+
+team1name = Beast1.nickname + " & " + Beast2.nickname
+team2name = Beast3.nickname + " & " + Beast4.nickname
+
+#Build scene
 scene = Scene()
 scene.addBeast(beast = Beast1,slot = 1)
 scene.addBeast(beast = Beast2,slot = 2)
@@ -47,28 +50,21 @@ while (battle_active):
     for event in pygame.event.get():
         #handle inputs, put statemachine here
         if (event.type == pygame.MOUSEBUTTONUP) and (event.button == 1):
-            if (state == "Choose attack"):
-                for but_id, button in enumerate(menuButtons):
-                    if (button.collidemouse()):
-                        if (button.id >= 0 and button.id <= 12):
-                            active_beast.selectattack(button.id)
+            #TODO: handle button presses better
+            for button in menuButtons:
+                if button.collidemouse():
+                    success = button.action(*(button.actionargs))
+                    if success:
+                        if state == "Choose attack":
                             state = "Choose target"
-            elif (state == "Choose target"):
-                for but_id, button in enumerate(menuButtons):
-                    if (button.collidemouse()):
-                        if (button.id >= 1 and button.id <= 4):
-                            active_beast.selecttarget(scene,button.id)
+                        elif state == "Choose target":
                             active_beast.clearflag(1)
                             state = "Idle"
                             active_flag = None
-            elif (state == "Execute attack"):
-                for but_id, button in enumerate(menuButtons):
-                    if (button.collidemouse()):
-                        if (button.type == "continue"):
+                        elif state == "Execute attack":
+                            active_beast.clearflag(0)
                             state = "Idle"
                             active_flag = None
-
-
 
     #check for raised event flags and sort flags
     if ((active_flag == None) and (len(raisedFlags) == 0)):
@@ -133,10 +129,10 @@ while (battle_active):
     #check if only one teams beasts are remaining (that teams wins, and the battle ends)
     if (not (scene.beasts[1].isalive or scene.beasts[2].isalive)):
         battle_active = False
-        winner = "B"
+        winner = team2name
     elif (not (scene.beasts[3].isalive or scene.beasts[4].isalive)):
         battle_active = False
-        winner = "A"
+        winner = team1name
 
 scene.printScene()
 print("Team " + winner + " wins!")

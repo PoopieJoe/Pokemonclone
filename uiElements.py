@@ -7,6 +7,11 @@ from globalconstants import *
 
 pygame.init()
 
+DEFAULTFONTSIZE = int(screenDims[1]/7.2)
+DEFAULTFONT = pygame.font.SysFont(None,DEFAULTFONTSIZE)
+NAMEFONTSIZE = int(screenDims[1]*1/25)
+NAMEFONT = pygame.font.SysFont(None,NAMEFONTSIZE)
+
 class Rect_f:
     def __init__(self,left,top,width,height):
         self.top = top
@@ -24,15 +29,15 @@ class Margin:
 
 class Box:
     def __init__(self,relrect,parent,color = pygame.Color("white"),border_radius = 0, margin = Margin(0,0,0,0), children = [None]):
-        self.relrect = relrect
-        self.color = color
-        self.border_radius = border_radius
-        if parent == None:
+        self.relrect = relrect #type: Rect_f()
+        self.color = color #type: Color()
+        self.border_radius = border_radius #type: float
+        if parent == None: #type: Box()
             self.parent = None
         else:
             self.setparent(parent)
-        self.children = children
-        self.margin = margin
+        self.children = children #type: [Box()]
+        self.margin = margin #type: Margin() 
         self.absrect = self.calcabsrect()
 
     def draw(self,surface):
@@ -80,7 +85,8 @@ class Button:
             hovercolor=BUTTONHOVERCOLOR,
             presscolor=BUTTONPRESSCOLOR,
             border_radius = 7,
-            id = 0
+            action = None,
+            actionargs = []
         ):
         self.text = text
         self.box = box
@@ -91,7 +97,8 @@ class Button:
         self.presscolor = presscolor
         self.border_radius = border_radius
         self.type = buttype
-        self.id = id
+        self.action = action
+        self.actionargs = actionargs
 
     def draw(self,surface):
         buttoncolor = self.backgroundcolor
@@ -149,24 +156,25 @@ class TextBox:
     def setparent(self,parent):
         self.box.setparent(parent)
 
-BASEBOX = Box(
-    relrect = Rect_f(0,0,1,1),
-    parent = None
-)
-BASEBOX.absrect = Rect(0,0,screenDims[0],screenDims[1])
+class Tooltip:
+    def __init__(self, text, region = Box(Rect_f(0,0,0.5,0.5),None), ttwidth = 0.5, ttheight = 0.5, font=DEFAULTFONT, bgcolor = pygame.Color("white"), textcolor = pygame.Color("black")):
+        text = text
+        font = font
+        region = region
+        bgcolor = bgcolor
+        textcolor = textcolor
+        width = ttwidth
+        height = ttheight
 
-MAJORBOX = Box(
-    relrect = Rect_f(0.02,0.55,0.96,0.43),
-    color = HPBACKGROUNDCOLOR,
-    parent = BASEBOX,
-    border_radius = 14,
-    margin = Margin(0.005,0.005,0.03,0.03)
-)
+    def collidemouse(self):
+        if self.region.absrect.collidepoint(pygame.mouse.get_pos()):
+            return True
+        return False
 
-MINORBOX = Box(
-    relrect = Rect_f(0,0,1,1),
-    parent=MAJORBOX
-)
+    def draw(self, surface):
+        if self.collidemouse():
+            pygame.draw.rect(surface, self.bgcolor, self.box.absrect ,border_radius=self.box.border_radius)
+            renderTextAtPos(surface,self.text,self.box.absrect.topleft,alignment="topLeft",color = self.textcolor,font = self.font , backgroundcolor=self.bgcolor)
 
 def renderTextAtPos(surface,text,pos,alignment="topLeft",font=DEFAULTFONT,color=pygame.Color("white"),backgroundcolor=BACKGROUNDCOLOR):
     textSurface = font.render(text,1,color)
@@ -190,3 +198,22 @@ def renderTextAtPos(surface,text,pos,alignment="topLeft",font=DEFAULTFONT,color=
     surface.blit(backFill,textpos)
     surface.blit(textSurface,textpos)
     return Rect(textpos,(textSurface.get_width(),textSurface.get_height()))
+
+BASEBOX = Box(
+    relrect = Rect_f(0,0,1,1),
+    parent = None
+)
+BASEBOX.absrect = Rect(0,0,screenDims[0],screenDims[1])
+
+MAJORBOX = Box(
+    relrect = Rect_f(0.02,0.55,0.96,0.43),
+    color = HPBACKGROUNDCOLOR,
+    parent = BASEBOX,
+    border_radius = 14,
+    margin = Margin(0.005,0.005,0.03,0.03)
+)
+
+MINORBOX = Box(
+    relrect = Rect_f(0,0,1,1),
+    parent=MAJORBOX
+)

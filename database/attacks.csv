@@ -3,6 +3,5 @@ ID,Name,Physical power,Heat power,Cold power,Shock power,Accuracy,Crit rate mod,
 1,Tail swipe,0.6,0,0,0,1,1,Contact,Slow_1(1)
 2,Ignition,0,0.1,0,0,1,1,Contact,Burn(1)
 3,Frigid gaze,0,0,0.1,0,0.9,1,Team_target,
-4,Blazing flurry,0,0,0,0,1,1,Contact,Burn(1)
+4,Blazing flurry,0.1,0.3,0,0,0.4,1,Contact,"Multihit_5,Burn(0.2)"
 5,Ice lash,0,0,1,0,1,1,,
-6,Blazing flurry,0.1,0.3,0,0,0.4,1,Contact,"Multihit_5,Burn(0.2)"

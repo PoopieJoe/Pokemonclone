@@ -3,10 +3,20 @@ from pygame.locals import *
 import scenemanager
 import classes
 from math import floor,ceil
+from eventhandlers import backaction,continueaction
 from globalconstants import *
 from uiElements import *
 
 pygame.init()
+
+interbox_margin_y = 0.04
+interbox_margin_x = 0.01
+numcolumns = 4
+numbutspercol = 6
+buttonwidth = 1/numcolumns-interbox_margin_x
+buttonheight = 1/numbutspercol-interbox_margin_y
+buttonfont = pygame.font.SysFont(None,int(200*buttonheight))
+statusfont = pygame.font.SysFont(None,int(250*buttonheight))
 
 def getStatusText(beast):
     statustext = [beast.nickname,"","Status:"]
@@ -27,107 +37,108 @@ def getStatusText(beast):
 def drawTargetSelect(surface,scene,beast):
     MAJORBOX.draw(surface)
 
-    #create list of all buttons in the menu, divided into which column they belong to
-    menuelements = [[],[]]
+    buttons = []
 
-    #create button list for every column
     for slot,target in enumerate(scene.beasts[1:],start=1):
-        col_num = 0
-        if (slot > 2): #last two slots are other teams
-            col_num = 1
+        row_num = (slot - 1) % BEASTSPERTEAM
+        col_num = floor( (slot - 1) / BEASTSPERTEAM )
 
-        if (target.isalive):
-            element = Button("beast",target.nickname,Box(Rect_f(0,0,0,0),None),font=buttonfont,textcolor=pygame.Color("black"),backgroundcolor=MOVESELECTFOREGROUNDCOLOR,hovercolor=BUTTONHOVERCOLOR,id=slot)
-        else:
-            element = TextBox(Box(Rect_f(0,0,0,0),None),lines = [str(target.nickname)],font=buttonfont,textcolor=pygame.Color("black"),backgroundcolor=MOVESELECTGREY,textalignment="centre")
-        menuelements[col_num].append(element)
+        targetbutton_x = col_num * (buttonwidth + interbox_margin_x)
+        targetbutton_y = row_num * (buttonheight + interbox_margin_y)
+        targetbutton = Button(  "target",
+                                target.nickname,
+                                Box(Rect_f(targetbutton_x,targetbutton_y,buttonwidth,buttonheight),MINORBOX),
+                                font=buttonfont,
+                                textcolor=pygame.Color("black"),
+                                backgroundcolor=MOVESELECTFOREGROUNDCOLOR,
+                                hovercolor=BUTTONHOVERCOLOR,
+                                action=beast.selecttarget,
+                                actionargs=[scene,slot]
+                                )
+        targetbutton.draw(surface)
+        buttons.append(targetbutton)
     
-    #final column contains the status, and no buttons
+    backbutton_x = 2*(buttonwidth + interbox_margin_x)
+    backbutton_y = 0*(buttonheight + interbox_margin_y)
+    backbutton = Button(    "back",
+                            "Back",
+                            Box(Rect_f(backbutton_x,backbutton_y,buttonwidth,buttonheight),MINORBOX),
+                            font=buttonfont,
+                            textcolor=pygame.Color("black"),
+                            backgroundcolor=MOVESELECTFOREGROUNDCOLOR,
+                            hovercolor=BUTTONHOVERCOLOR,
+                            action=backaction
+                            )
+    backbutton.draw(surface)
+    buttons.append(backbutton)
+
+    statusbox_rectf = Rect_f(3*(buttonwidth + interbox_margin_x),0,buttonwidth,1)
     statustext = getStatusText(beast)
-    statusbox = TextBox(Box(Rect_f(0,0,0,0),None),statustext,font=statusfont,textcolor=pygame.Color("black"),backgroundcolor=MOVESELECTFOREGROUNDCOLOR,margin=Margin(0.03,0.1,0.03,0.1))
-    menuelements.append([statusbox])
+    statusbox = TextBox(    Box(statusbox_rectf,MINORBOX),
+                            statustext,
+                            font=statusfont,
+                            textcolor=pygame.Color("black"),
+                            backgroundcolor=MOVESELECTFOREGROUNDCOLOR,
+                            margin=Margin(0.03,0.1,0.03,0.1))
+    statusbox.draw(surface)
 
-    #create column boxes
-    columns = []
-    buttonwidth = (1-interbox_margin_x*(len(menuelements)-1))/len(menuelements)
-    for column in range(len(menuelements)):
-        columns.append(Box(Rect_f(column/len(menuelements),0,buttonwidth,1),parent=MINORBOX))
-        for element in range(len(menuelements[column])):
-            buttonrect = Rect_f( 0 , element*(buttonheight+interbox_margin_y) , 1 , buttonheight )
-            menuelements[column][element].box.setrelrect(buttonrect)
-            menuelements[column][element].box.setparent(columns[column])
-
-    #last column
-    for element_num,element in enumerate(menuelements[len(menuelements)-1]):
-        if (element_num == 0):
-            statusrect = Rect_f(0.05,0,0.9,0.5)
-            element.box.setrelrect(statusrect)
-            element.box.setparent(columns[len(menuelements)-1])
-
-    for column in menuelements:
-        for element in column:
-            element.draw(surface)
-
-    buttonlist = []
-    for column in menuelements:
-        for button in column:
-            if isinstance(button,Button):
-                buttonlist.append(button)
-    return buttonlist
+    return buttons
 
 def drawMoveselect(surface,scene,beast):
     MAJORBOX.draw(surface)
+    buttons = []
 
-    #create list of all buttons in the menu, divided into which column they belong to
-    menuelements = [[]]
-    col_num = 0
+    for atk_id,atk in enumerate(beast.attacks):
+        row_num = atk_id % numbutspercol
+        col_num = floor(atk_id / numbutspercol)
 
-    #create button list for every column
-    for atk_id, atk in enumerate(beast.attacks):
-        if (len(menuelements[col_num]) >= column_buttonlimit):
-            menuelements.append([])
-            col_num = col_num + 1
-        menuelements[col_num].append(Button("attack",atk.name,Box(Rect_f(0,0,0,0),None),font=buttonfont,textcolor=pygame.Color("black"),backgroundcolor=MOVESELECTFOREGROUNDCOLOR,hovercolor=BUTTONHOVERCOLOR,id=atk_id))
-    
-    #final column contains the status, and no buttons
+        atkbutton_x = col_num * (buttonwidth + interbox_margin_x)
+        atkbutton_y = row_num * (buttonheight + interbox_margin_y)
+        attackbutton = Button(  "attack",
+                                atk.name,
+                                Box(Rect_f(atkbutton_x,atkbutton_y,buttonwidth,buttonheight),MINORBOX),
+                                font=buttonfont,
+                                textcolor=pygame.Color("black"),
+                                backgroundcolor=MOVESELECTFOREGROUNDCOLOR,
+                                hovercolor=BUTTONHOVERCOLOR,
+                                action=beast.selectattack,
+                                actionargs=[atk_id]
+                                )
+        attackbutton.draw(surface)
+        buttons.append(attackbutton)
+
+    backbutton_x = 2*(buttonwidth + interbox_margin_x)
+    backbutton_y = 0*(buttonheight + interbox_margin_y)
+    backbutton = Button(    "back",
+                            "Back",
+                            Box(Rect_f(backbutton_x,backbutton_y,buttonwidth,buttonheight),MINORBOX),
+                            font=buttonfont,
+                            textcolor=pygame.Color("black"),
+                            backgroundcolor=MOVESELECTFOREGROUNDCOLOR,
+                            hovercolor=BUTTONHOVERCOLOR,
+                            action=backaction
+                            )
+    backbutton.draw(surface)
+    buttons.append(backbutton)
+
+    statusbox_rectf = Rect_f(3*(buttonwidth + interbox_margin_x),0,buttonwidth,1)
     statustext = getStatusText(beast)
-    statusbox = TextBox(Box(Rect_f(0,0,0,0),None),statustext,font=statusfont,textcolor=pygame.Color("black"),backgroundcolor=MOVESELECTFOREGROUNDCOLOR,margin=Margin(0.03,0.1,0.03,0.1))
-    menuelements.append([statusbox])
+    statusbox = TextBox(    Box(statusbox_rectf,MINORBOX),
+                            statustext,
+                            font=statusfont,
+                            textcolor=pygame.Color("black"),
+                            backgroundcolor=MOVESELECTFOREGROUNDCOLOR,
+                            margin=Margin(0.03,0.1,0.03,0.1))
+    statusbox.draw(surface)
 
-    #set the positions and sizes for all buttons execpt last column
-    columns = []
-    buttonwidth = (1-interbox_margin_x*(len(menuelements)-1))/len(menuelements)
-    for column in range(len(menuelements)):
-        columns.append(Box(Rect_f(column/len(menuelements),0,buttonwidth,1),parent=MINORBOX))
-        if (column < len(menuelements)):
-            for element in range(len(menuelements[column])):
-                buttonrect = Rect_f( 0 , element*(buttonheight+interbox_margin_y) , 1 , buttonheight )
-                menuelements[column][element].box.setrelrect(buttonrect)
-                menuelements[column][element].box.setparent(columns[column])
-    
-    #last column
-    for element_num,element in enumerate(menuelements[len(menuelements)-1]):
-        if (element_num == 0):
-            statusrect = Rect_f(0.05,0,0.9,0.5)
-            element.box.setrelrect(statusrect)
-            element.box.setparent(columns[len(menuelements)-1])
-    
-    for column in menuelements:
-        for element in column:
-            element.draw(surface)
-
-    buttonlist = []
-    for column in menuelements:
-        for button in column:
-            if isinstance(button,Button):
-                buttonlist.append(button)
-    return buttonlist
+    return buttons
 
 def drawExecuteAttack(surface,scene,attacks):
-    main_attack = attacks[0] #first attack is the name of the move that was used
-
     MAJORBOX.draw(surface)
-    menuelements = [[]]
+
+    buttons = []
+
+    main_attack = attacks[0] #first attack is the name of the move that was used
     titletext = [main_attack["attacker"].nickname + " used " + main_attack["attack"].name + " on " + main_attack["defender"].nickname + "!"]
     title = TextBox(
         box=Box(Rect_f(0,0,1,0.2),parent=MAJORBOX),
@@ -138,7 +149,7 @@ def drawExecuteAttack(surface,scene,attacks):
         textalignment="centre",
         font=pygame.font.SysFont("None",30)
         )
-    menuelements[0].append(title)
+    title.draw(surface)
 
     # main body text
     boxoffset = 0.01
@@ -174,29 +185,22 @@ def drawExecuteAttack(surface,scene,attacks):
         font=pygame.font.SysFont("None",30),
         textalignment="topLeft"
         )
-    menuelements[0].append(details)
+    details.draw(surface)
 
-    continuebutton = Button(
-        buttype="continue",
-        text="continue",
-        box=Box(Rect_f(0,0.8+boxoffset,1,0.15-boxoffset),parent=MAJORBOX),
-        textcolor=pygame.Color("black"),
-        backgroundcolor=pygame.Color("white"),
-        border_radius=7,
-        font=pygame.font.SysFont("None",30)
-        )
-    menuelements[0].append(continuebutton)
+    continuebutton_x = 0*(buttonwidth + interbox_margin_x)
+    continuebutton_y = 5*(buttonheight + interbox_margin_y)
+    continuebutton = Button(    buttype="continue",
+                                text="continue",
+                                box=Box(Rect_f(0,0.8+boxoffset,1,0.15-boxoffset),parent=MAJORBOX),
+                                textcolor=pygame.Color("black"),
+                                backgroundcolor=pygame.Color("white"),
+                                border_radius=7,
+                                font=pygame.font.SysFont("None",30),
+                                action=continueaction)
+    continuebutton.draw(surface)
+    buttons.append(continuebutton)
 
-    for column in menuelements:
-        for element in column:
-            element.draw(surface)
-
-    buttonlist = []
-    for column in menuelements:
-        for button in column:
-            if isinstance(button,Button):
-                buttonlist.append(button)
-    return buttonlist
+    return buttons
 
 def drawScene(surface,scene):
     surface.fill(BACKGROUNDCOLOR)

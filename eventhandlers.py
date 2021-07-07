@@ -3,7 +3,6 @@ from classes import Beast, Attack
 from random import random
 from fnmatch import fnmatch
 import pygame
-import ui
 from globalconstants import *
 
 def performattack(attackingBeast,defendingBeast,chained = False):
@@ -136,9 +135,22 @@ def performattack(attackingBeast,defendingBeast,chained = False):
                 underscorepos = effect.find('_')
                 openparenpos = effect.find('(')
                 closeparenpos = effect.find(')')
-                duration = int(effect[underscorepos+1:openparenpos]) #duration in turns
+                duration = int(effect[underscorepos+1:openparenpos]) #duration in 1/6th turns
                 chance = float(effect[openparenpos+1:closeparenpos])
                 if ( (random() < chance) and not [True for eff in attackresult["defender"].statuseffects if (eff["name"] == SLOWNAME and eff["trackleft"] < duration*TURNTRACKER_LENGTH)]):
-                    attackresult["defender"].addstatuseffect({"name":SLOWNAME,"duration":duration*TURNTRACKER_LENGTH,"trackleft":duration*TURNTRACKER_LENGTH})
+                    attackresult["defender"].addstatuseffect({"name":SLOWNAME,"duration":duration*TURNTRACKER_LENGTH/6,"trackleft":duration*TURNTRACKER_LENGTH/6})
  
     return attackresult
+
+#Button actions
+def backaction():
+    print("This is where the back function should do something but I don't know how yet")
+    return
+
+def continueaction():
+    try:
+        #this lterally does nothing why did I type this
+        return True
+    except Exception:
+        return False
+    
