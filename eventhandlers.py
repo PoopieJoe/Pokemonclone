@@ -142,11 +142,6 @@ def performattack(attackingBeast,defendingBeast,chained = False):
  
     return attackresult
 
-#Button actions
-def backaction():
-    print("This is where the back function should do something but I don't know how yet")
-    return
-
 def continueaction():
     try:
         #this lterally does nothing why did I type this

@@ -3,7 +3,7 @@ from pygame.locals import *
 import scenemanager
 import classes
 from math import floor,ceil
-from eventhandlers import backaction,continueaction
+from eventhandlers import continueaction
 from globalconstants import *
 from uiElements import *
 
@@ -58,8 +58,8 @@ def drawTargetSelect(surface,scene,beast):
         targetbutton.draw(surface)
         buttons.append(targetbutton)
     
-    backbutton_x = 2*(buttonwidth + interbox_margin_x)
-    backbutton_y = 0*(buttonheight + interbox_margin_y)
+    backbutton_x = 2 * (buttonwidth + interbox_margin_x)
+    backbutton_y = 0 * (buttonheight + interbox_margin_y)
     backbutton = Button(    "back",
                             "Back",
                             Box(Rect_f(backbutton_x,backbutton_y,buttonwidth,buttonheight),MINORBOX),
@@ -67,7 +67,8 @@ def drawTargetSelect(surface,scene,beast):
                             textcolor=pygame.Color("black"),
                             backgroundcolor=MOVESELECTFOREGROUNDCOLOR,
                             hovercolor=BUTTONHOVERCOLOR,
-                            action=backaction
+                            action=scene.setstate,
+                            actionargs=["Choose attack"]
                             )
     backbutton.draw(surface)
     buttons.append(backbutton)
@@ -106,20 +107,6 @@ def drawMoveselect(surface,scene,beast):
                                 )
         attackbutton.draw(surface)
         buttons.append(attackbutton)
-
-    backbutton_x = 2*(buttonwidth + interbox_margin_x)
-    backbutton_y = 0*(buttonheight + interbox_margin_y)
-    backbutton = Button(    "back",
-                            "Back",
-                            Box(Rect_f(backbutton_x,backbutton_y,buttonwidth,buttonheight),MINORBOX),
-                            font=buttonfont,
-                            textcolor=pygame.Color("black"),
-                            backgroundcolor=MOVESELECTFOREGROUNDCOLOR,
-                            hovercolor=BUTTONHOVERCOLOR,
-                            action=backaction
-                            )
-    backbutton.draw(surface)
-    buttons.append(backbutton)
 
     statusbox_rectf = Rect_f(3*(buttonwidth + interbox_margin_x),0,buttonwidth,1)
     statustext = getStatusText(beast)
