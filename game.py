@@ -14,7 +14,7 @@ import ui
 pygame.init()
 screen = pygame.display.set_mode(ui.screenDims)
 
-#Build a beast
+#Build a beast: TODO put import from text here
 Beast1 = Beast(species="Lurker",nickname="Greg",loadout=[None,"Metal chestplate",None,None,None])
 Beast2 = Beast(species="Viper",nickname="Bob",loadout=[None,"Metal chestplate","Tail blade"])
 
@@ -39,10 +39,9 @@ battle_active = True
 winner = 0
 menuButtons = []
 while (battle_active):
-    #this is when pygame events get processed so the game doesn't crash
     for event in pygame.event.get():
         #handle inputs, put statemachine here
-        if (event.type == pygame.MOUSEBUTTONUP) and (event.button == 1):
+        if (event.type == pygame.MOUSEBUTTONUP) and (event.button == 1): #left mousebutton up
             for button in menuButtons:
                 if button.collidemouse():
                     success = button.action(*(button.actionargs))
@@ -58,6 +57,8 @@ while (battle_active):
                             scene.active_beast.clearflag(0)
                             scene.state = "Idle"
                             scene.active_flag = None
+        else:
+            pass
 
     #check for raised event flags and sort flags
     if (scene.noflags()):
@@ -88,7 +89,6 @@ while (battle_active):
         menuButtons = []
         ui.drawScene(screen,scene)
     elif (scene.state == "Choose attack"):
-        ui.drawScene(screen,scene)
         menuButtons = ui.drawMoveselect(screen,scene,scene.active_beast)
     elif (scene.state == "Choose target"):
         ui.drawScene(screen,scene)

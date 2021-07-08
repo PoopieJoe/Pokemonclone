@@ -157,14 +157,15 @@ class TextBox:
         self.box.setparent(parent)
 
 class Tooltip:
-    def __init__(self, text, region = Box(Rect_f(0,0,0.5,0.5),None), ttwidth = 0.5, ttheight = 0.5, font=DEFAULTFONT, bgcolor = pygame.Color("white"), textcolor = pygame.Color("black")):
-        text = text
-        font = font
-        region = region
-        bgcolor = bgcolor
-        textcolor = textcolor
-        width = ttwidth
-        height = ttheight
+    def __init__(self, text, region = Box(Rect_f(0,0,0.5,0.5),None), ttwidth = 0.5, ttheight = 0.5, font=DEFAULTFONT, bgcolor = pygame.Color("white"), textcolor = pygame.Color("black"),textalignment="topLeft"):
+        self.text = text
+        self.font = font
+        self.region = region
+        self.bgcolor = bgcolor
+        self.textcolor = textcolor
+        self.width = ttwidth
+        self.height = ttheight
+        self.textalignment = textalignment
 
     def collidemouse(self):
         if self.region.absrect.collidepoint(pygame.mouse.get_pos()):
@@ -173,8 +174,18 @@ class Tooltip:
 
     def draw(self, surface):
         if self.collidemouse():
-            pygame.draw.rect(surface, self.bgcolor, self.box.absrect ,border_radius=self.box.border_radius)
-            renderTextAtPos(surface,self.text,self.box.absrect.topleft,alignment="topLeft",color = self.textcolor,font = self.font , backgroundcolor=self.bgcolor)
+            (absx,absy) = pygame.mouse.get_pos()
+            ttbox = Box(Rect_f(absx/screenDims[0],absy/screenDims[1],self.width,self.height),BASEBOX)
+            pygame.draw.rect(surface, self.bgcolor, ttbox.absrect)
+
+            for linenum,line in enumerate(self.text):
+                if (self.textalignment == "topLeft"):
+                    textpos = ( ttbox.absrect.left+ttbox.absrect.width , ttbox.absrect.top+linenum*self.font.get_height()+ttbox.absrect.height )
+                elif (self.textalignment == "centre"):
+                    textpos = ( (ttbox.absrect.left+ttbox.absrect.right)/2 , (ttbox.absrect.top+ttbox.absrect.bottom)/2-(self.font.get_height()*len(self.text))/2+(linenum+1)*self.font.get_height()/2 )
+                else:
+                    textpos = ( ttbox.absrect.left+ttbox.absrect.width , ttbox.absrect.top+linenum*self.font.get_height()+ttbox.absrect.height )
+                renderTextAtPos(surface,line,textpos,alignment=self.textalignment,font=self.font,color=self.textcolor,backgroundcolor=self.bgcolor)
 
 def renderTextAtPos(surface,text,pos,alignment="topLeft",font=DEFAULTFONT,color=pygame.Color("white"),backgroundcolor=BACKGROUNDCOLOR):
     textSurface = font.render(text,1,color)

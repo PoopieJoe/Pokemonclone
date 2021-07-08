@@ -6,6 +6,7 @@ from math import floor,ceil
 from eventhandlers import continueaction
 from globalconstants import *
 from uiElements import *
+from tuplemath import addtuple,multtuple
 
 pygame.init()
 
@@ -86,6 +87,7 @@ def drawTargetSelect(surface,scene,beast):
     return buttons
 
 def drawMoveselect(surface,scene,beast):
+    drawScene(surface,scene)
     MAJORBOX.draw(surface)
     buttons = []
 
@@ -118,9 +120,23 @@ def drawMoveselect(surface,scene,beast):
                             margin=Margin(0.03,0.1,0.03,0.1))
     statusbox.draw(surface)
 
+    #tooltips
+    healthbartttext = getStatusText(scene.beasts[1])
+
+    hpbarpos = (0.6,0.42)
+    Hpbarwidth = 0.33
+    Hpbarheight = 0.03
+
+    healthbar1tooltip = Tooltip(healthbartttext,
+                                region=Box(Rect_f(hpbarpos[0],hpbarpos[1],Hpbarwidth,Hpbarheight),BASEBOX),
+                                ttwidth=0.3,
+                                ttheight=0.3)
+    healthbar1tooltip.draw(surface)
+
     return buttons
 
 def drawExecuteAttack(surface,scene,attacks):
+    drawScene(surface,scene)
     MAJORBOX.draw(surface)
 
     buttons = []
@@ -189,9 +205,7 @@ def drawExecuteAttack(surface,scene,attacks):
 
     return buttons
 
-def drawScene(surface,scene):
-    surface.fill(BACKGROUNDCOLOR)
-
+def drawTurnTracker(surface,scene):
     #turntracker
     turntrackerbox = Box(Rect_f(0.1,0.03,0.8,0.08),parent=BASEBOX)
     #turn tracker exists on 1 bar with 4 markers
@@ -242,8 +256,9 @@ def drawScene(surface,scene):
             markerpos = ( markerposx , markerposy )
             markerdims = ( markerwidth , markerheight )
             pygame.draw.rect(surface,slotcolor,(markerpos,markerdims))
+    return
 
-    # Health/statusboxes
+def drawHealthbars(surface,scene):
     slotreltextpos = [  
         (0,0),
         (0.6,0.42),
@@ -252,19 +267,22 @@ def drawScene(surface,scene):
         (0.05,0.22)
     ]
 
+    Hpbarwidth = int(surface.get_width()*(0.33))
+    Hpbarheight = int(surface.get_height()*(0.01))
+
     for slot, beast in enumerate(scene.beasts[1:],start=1):
         if beast.isalive:
+            #HP bar
             healthfrac = beast.HP/beast.maxHP
             slottext = beast.nickname + " " + str(beast.HP) + "/" + str(beast.maxHP) + " HP (" + str(max(round(healthfrac*100),1)) + "%)"
             textpos = multtuple(slotreltextpos[slot],screenDims)
-
             HPbaroffset = (0,int(NAMEFONTSIZE)/2)
-            Hpbarwidth = int(surface.get_width()*(0.33))
-            Hpbarheight = int(surface.get_height()*(0.01))
             HPbarposition = addtuple(textpos,HPbaroffset)
 
             pygame.draw.rect(surface,HPBACKGROUNDCOLOR,(HPbarposition,(Hpbarwidth,Hpbarheight)))
             pygame.draw.rect(surface,HPFOREGROUNDCOLOR,(HPbarposition,(Hpbarwidth*healthfrac,Hpbarheight)))
+
+            #name text
             if (slot == 1):
                 textcolor = SLOT1COLOR
             elif (slot == 2):
@@ -276,8 +294,9 @@ def drawScene(surface,scene):
             renderTextAtPos(surface,slottext,textpos,"centreLeft",font=NAMEFONT,color=textcolor)
     return
 
-def addtuple(xs,ys):
-     return tuple(x + y for x, y in zip(xs, ys))
-    
-def multtuple(xs,ys):
-    return tuple(x * y for x, y in zip(xs, ys))
+def drawScene(surface,scene):
+    surface.fill(BACKGROUNDCOLOR)
+
+    drawTurnTracker(surface,scene)
+    drawHealthbars(surface,scene)
+    return
