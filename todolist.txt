@@ -2,6 +2,7 @@ Priority:
 - improve ui:
     - buff icons
     - tooltips for attacks, targets and buffs/status
+- Remake equipment modifier application
 - Import teams from text
 - Handle attack targeting & multitargeting
 - Fill database (~20 species, ~30 equipment pieces, ~50 attacks)
