@@ -60,7 +60,6 @@ class Beast:
             return True
         except Exception:
             return False
-        
     
     def selecttarget(self,scene,slot):
         print(str(self.nickname) + " selected " + str(scene.beasts[slot].nickname) + " as the target!")

@@ -26,6 +26,7 @@ SLOWMOD = 0.5 #speed multiplier during slow
 # UI colors and fonts
 screenDims = (1280,720)
 
+ALPHACOLOR = pygame.Color(0,1,255)
 BACKGROUNDCOLOR = pygame.Color(80,158,40)
 BACKGROUND = pygame.surface.Surface(screenDims).fill(BACKGROUNDCOLOR)
 HPBACKGROUNDCOLOR = pygame.Color(180,180,180)

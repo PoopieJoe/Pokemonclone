@@ -2,6 +2,7 @@ Priority:
 - improve ui:
     - buff icons
     - tooltips for attacks, targets and buffs/status
+    - Change layer structure to put tooltips on top
 - Remake equipment modifier application
 - Import teams from text
 - Handle attack targeting & multitargeting

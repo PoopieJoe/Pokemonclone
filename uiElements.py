@@ -157,8 +157,9 @@ class TextBox:
         self.box.setparent(parent)
 
 class Tooltip:
-    def __init__(self, text, region = Box(Rect_f(0,0,0.5,0.5),None), ttwidth = 0.5, ttheight = 0.5, font=DEFAULTFONT, bgcolor = pygame.Color("white"), textcolor = pygame.Color("black"),textalignment="topLeft"):
-        self.text = text
+    def __init__(self, gettext, gettextargs = [], region = Box(Rect_f(0,0,0.5,0.5),None), ttwidth = 0.5, ttheight = 0.5, font=NAMEFONT, bgcolor = pygame.Color("white"), textcolor = pygame.Color("black"),textalignment="topLeft"):
+        self.gettext = gettext
+        self.gettextargs = gettextargs
         self.font = font
         self.region = region
         self.bgcolor = bgcolor
@@ -174,18 +175,85 @@ class Tooltip:
 
     def draw(self, surface):
         if self.collidemouse():
+            #update tooltip text
+            self.text = self.gettext(*(self.gettextargs))
+            lenlist = [len(line) for line in self.text]
+            longestline = self.text[lenlist.index(max(lenlist))]
+            (boxwidth,_) = self.font.size(longestline)
+            boxheight = len(self.text)*self.font.get_height()
+
             (absx,absy) = pygame.mouse.get_pos()
-            ttbox = Box(Rect_f(absx/screenDims[0],absy/screenDims[1],self.width,self.height),BASEBOX)
+
+            ttbox = Box(Rect_f(absx/screenDims[0],absy/screenDims[1],boxwidth/screenDims[0],boxheight/screenDims[1]),BASEBOX)
             pygame.draw.rect(surface, self.bgcolor, ttbox.absrect)
 
             for linenum,line in enumerate(self.text):
                 if (self.textalignment == "topLeft"):
-                    textpos = ( ttbox.absrect.left+ttbox.absrect.width , ttbox.absrect.top+linenum*self.font.get_height()+ttbox.absrect.height )
+                    textpos = ( ttbox.absrect.left , ttbox.absrect.top+linenum*self.font.get_height() )
                 elif (self.textalignment == "centre"):
-                    textpos = ( (ttbox.absrect.left+ttbox.absrect.right)/2 , (ttbox.absrect.top+ttbox.absrect.bottom)/2-(self.font.get_height()*len(self.text))/2+(linenum+1)*self.font.get_height()/2 )
+                    textpos = ( (ttbox.absrect.left)/2 , (ttbox.absrect.top+ttbox.absrect.bottom)/2-(self.font.get_height()*len(self.text))/2+(linenum+1)*self.font.get_height()/2 )
                 else:
-                    textpos = ( ttbox.absrect.left+ttbox.absrect.width , ttbox.absrect.top+linenum*self.font.get_height()+ttbox.absrect.height )
+                    textpos = ( ttbox.absrect.left, ttbox.absrect.top+linenum*self.font.get_height() )
                 renderTextAtPos(surface,line,textpos,alignment=self.textalignment,font=self.font,color=self.textcolor,backgroundcolor=self.bgcolor)
+
+
+"""
+
+
+"""
+class Screen:
+    def __init__(self,layernames):     
+        """Defines the layer structure of the screen. 
+        Parameters: 
+        layernames is a list of layers from top to bottom"""
+        self.NUMLAYERS = len(layernames)
+
+        #layers from top to bottom
+        self.layers = []
+        for name in layernames:
+            newlayer = Layer(name)
+            newlayer.surface.fill(ALPHACOLOR)
+            newlayer.surface.set_colorkey(ALPHACOLOR)
+            self.layers.append(newlayer)
+        return
+
+    def clear(self):
+        for layer in range(len(self.layers)):
+             self.layers[layer].surface.fill(ALPHACOLOR)
+    
+    def setLayer(self,name,source):
+        success = False
+        for layer in range(self.NUMLAYERS):
+            if (self.layers[layer].name == name):
+                success = True
+                self.layers[layer].surface.blit(source,(0,0))
+
+        if not success:
+            raise Exception("Layer " + name + " does not exist")
+
+    def getLayer(self,name):
+        for layer in self.layers:
+            if (layer.name == name):
+                return layer.surface
+        raise Exception("Layer " + name + " does not exist")
+
+    def clearLayer(self,name):
+        for layer in self.layers:
+            if (layer.name == name):
+                layer = Layer(name)
+                return
+        raise Exception("Layer " + name + " does not exist")
+
+    def draw(self,surface):
+        for layer in reversed(self.layers):
+            surface.blit(layer.surface,(0,0))
+        return
+
+class Layer:
+    def __init__(self,name):
+        self.name = name
+        self.surface = pygame.Surface(screenDims)
+        return        
 
 def renderTextAtPos(surface,text,pos,alignment="topLeft",font=DEFAULTFONT,color=pygame.Color("white"),backgroundcolor=BACKGROUNDCOLOR):
     textSurface = font.render(text,1,color)
@@ -202,13 +270,14 @@ def renderTextAtPos(surface,text,pos,alignment="topLeft",font=DEFAULTFONT,color=
     elif (alignment == "centre"):
         textpos = (pos[0] - textSurface.get_width()/2 , pos[1] - textSurface.get_height()/2)
     else:
-        raise Exception("invalid alignment given")
+        raise Exception("textRenderer: invalid position alignment argument")
 
     backFill = pygame.surface.Surface((textSurface.get_width(),textSurface.get_height()))
     backFill.fill(backgroundcolor)
     surface.blit(backFill,textpos)
     surface.blit(textSurface,textpos)
     return Rect(textpos,(textSurface.get_width(),textSurface.get_height()))
+
 
 BASEBOX = Box(
     relrect = Rect_f(0,0,1,1),

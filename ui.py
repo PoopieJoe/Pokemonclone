@@ -35,8 +35,16 @@ def getStatusText(beast):
         statustext.append("Healthy")
     return statustext
 
-def drawTargetSelect(surface,scene,beast):
-    MAJORBOX.draw(surface)
+def getTurntrackerTooltipText(scene):
+    text = []
+    for slot,beast in enumerate(scene.beasts[1:],start=1):
+        trackerpercentage = (scene.turnTracker[slot] % (scene.turnTrackerLength/2))/(scene.turnTrackerLength/2)*100 #0-100 going one way, 0-100 going back
+        text.append(beast.nickname + ": " + str(round(trackerpercentage,1)) + "% (" + str(beast.SPE) + " SPE)")
+    return text
+
+def drawTargetSelect(screen,scene,beast):
+    overlay = screen.getLayer("overlay")
+    MAJORBOX.draw(overlay)
 
     buttons = []
 
@@ -56,7 +64,7 @@ def drawTargetSelect(surface,scene,beast):
                                 action=beast.selecttarget,
                                 actionargs=[scene,slot]
                                 )
-        targetbutton.draw(surface)
+        targetbutton.draw(overlay)
         buttons.append(targetbutton)
     
     backbutton_x = 2 * (buttonwidth + interbox_margin_x)
@@ -71,7 +79,7 @@ def drawTargetSelect(surface,scene,beast):
                             action=scene.setstate,
                             actionargs=["Choose attack"]
                             )
-    backbutton.draw(surface)
+    backbutton.draw(overlay)
     buttons.append(backbutton)
 
     statusbox_rectf = Rect_f(3*(buttonwidth + interbox_margin_x),0,buttonwidth,1)
@@ -82,13 +90,15 @@ def drawTargetSelect(surface,scene,beast):
                             textcolor=pygame.Color("black"),
                             backgroundcolor=MOVESELECTFOREGROUNDCOLOR,
                             margin=Margin(0.03,0.1,0.03,0.1))
-    statusbox.draw(surface)
+    statusbox.draw(overlay)
 
     return buttons
 
-def drawMoveselect(surface,scene,beast):
-    drawScene(surface,scene)
-    MAJORBOX.draw(surface)
+def drawMoveselect(screen,scene,beast):
+    drawScene(screen,scene)
+
+    overlay = screen.getLayer("overlay")
+    MAJORBOX.draw(overlay)
     buttons = []
 
     for atk_id,atk in enumerate(beast.attacks):
@@ -107,7 +117,7 @@ def drawMoveselect(surface,scene,beast):
                                 action=beast.selectattack,
                                 actionargs=[atk_id]
                                 )
-        attackbutton.draw(surface)
+        attackbutton.draw(overlay)
         buttons.append(attackbutton)
 
     statusbox_rectf = Rect_f(3*(buttonwidth + interbox_margin_x),0,buttonwidth,1)
@@ -118,26 +128,15 @@ def drawMoveselect(surface,scene,beast):
                             textcolor=pygame.Color("black"),
                             backgroundcolor=MOVESELECTFOREGROUNDCOLOR,
                             margin=Margin(0.03,0.1,0.03,0.1))
-    statusbox.draw(surface)
-
-    #tooltips
-    healthbartttext = getStatusText(scene.beasts[1])
-
-    hpbarpos = (0.6,0.42)
-    Hpbarwidth = 0.33
-    Hpbarheight = 0.03
-
-    healthbar1tooltip = Tooltip(healthbartttext,
-                                region=Box(Rect_f(hpbarpos[0],hpbarpos[1],Hpbarwidth,Hpbarheight),BASEBOX),
-                                ttwidth=0.3,
-                                ttheight=0.3)
-    healthbar1tooltip.draw(surface)
+    statusbox.draw(overlay)
 
     return buttons
 
-def drawExecuteAttack(surface,scene,attacks):
-    drawScene(surface,scene)
-    MAJORBOX.draw(surface)
+def drawExecuteAttack(screen,scene,attacks):
+    drawScene(screen,scene)
+    overlay = screen.getLayer("overlay")
+
+    MAJORBOX.draw(overlay)
 
     buttons = []
 
@@ -152,7 +151,7 @@ def drawExecuteAttack(surface,scene,attacks):
         textalignment="centre",
         font=pygame.font.SysFont("None",30)
         )
-    title.draw(surface)
+    title.draw(overlay)
 
     # main body text
     boxoffset = 0.01
@@ -188,7 +187,7 @@ def drawExecuteAttack(surface,scene,attacks):
         font=pygame.font.SysFont("None",30),
         textalignment="topLeft"
         )
-    details.draw(surface)
+    details.draw(overlay)
 
     continuebutton_x = 0*(buttonwidth + interbox_margin_x)
     continuebutton_y = 5*(buttonheight + interbox_margin_y)
@@ -200,12 +199,15 @@ def drawExecuteAttack(surface,scene,attacks):
                                 border_radius=7,
                                 font=pygame.font.SysFont("None",30),
                                 action=continueaction)
-    continuebutton.draw(surface)
+    continuebutton.draw(overlay)
     buttons.append(continuebutton)
 
     return buttons
 
-def drawTurnTracker(surface,scene):
+def drawTurnTracker(screen,scene):
+    overlay = screen.getLayer("overlay")
+    tooltips = screen.getLayer("tooltips")
+    
     #turntracker
     turntrackerbox = Box(Rect_f(0.1,0.03,0.8,0.08),parent=BASEBOX)
     #turn tracker exists on 1 bar with 4 markers
@@ -215,7 +217,7 @@ def drawTurnTracker(surface,scene):
     bar_w = 1-2*bar_x
     bar_h = 1-2*bar_y
     barbox = Box(Rect_f(bar_x,bar_y,bar_w,bar_h),parent = turntrackerbox,color=TRACKERBARCOLOR)
-    barbox.draw(surface)    
+    barbox.draw(overlay)    
     for slot,beast in enumerate(scene.beasts[1:],start=1):
         if beast.isalive:
             #print name
@@ -238,7 +240,7 @@ def drawTurnTracker(surface,scene):
                 namealignment = "centreLeft"
                 slotcolor = SLOT4COLOR
 
-            renderTextAtPos(surface,beast.nickname,namepos,alignment=namealignment,font = trackerFont,color = slotcolor)
+            renderTextAtPos(overlay,beast.nickname,namepos,alignment=namealignment,font = trackerFont,color = slotcolor)
 
             #print marker
             markerwidth = barbox.absrect.height*1/2
@@ -255,10 +257,24 @@ def drawTurnTracker(surface,scene):
                 markerposy = barbox.absrect.centery-markerheight/2 + 1 #idk why but its off by 1 pixel and its infuriating
             markerpos = ( markerposx , markerposy )
             markerdims = ( markerwidth , markerheight )
-            pygame.draw.rect(surface,slotcolor,(markerpos,markerdims))
+            pygame.draw.rect(overlay,slotcolor,(markerpos,markerdims))
+    
+    for slot,target in enumerate(scene.beasts[1:],start=1):
+        if beast.isalive:
+            region = turntrackerbox
+            turntrackertooltip = Tooltip(   getTurntrackerTooltipText,
+                                            [scene],
+                                            region=region)
+            turntrackertooltip.draw(tooltips)
+    
+    screen.setLayer("overlay", overlay)
+    screen.setLayer("tooltips", tooltips)
     return
 
-def drawHealthbars(surface,scene):
+def drawHealthbars(screen,scene):
+    overlay = screen.getLayer("overlay")
+    tooltips = screen.getLayer("tooltips")
+
     slotreltextpos = [  
         (0,0),
         (0.6,0.42),
@@ -267,8 +283,8 @@ def drawHealthbars(surface,scene):
         (0.05,0.22)
     ]
 
-    Hpbarwidth = int(surface.get_width()*(0.33))
-    Hpbarheight = int(surface.get_height()*(0.01))
+    Hpbarwidth = int(screenDims[0]*(0.33))
+    Hpbarheight = int(screenDims[1]*(0.01))
 
     for slot, beast in enumerate(scene.beasts[1:],start=1):
         if beast.isalive:
@@ -279,8 +295,8 @@ def drawHealthbars(surface,scene):
             HPbaroffset = (0,int(NAMEFONTSIZE)/2)
             HPbarposition = addtuple(textpos,HPbaroffset)
 
-            pygame.draw.rect(surface,HPBACKGROUNDCOLOR,(HPbarposition,(Hpbarwidth,Hpbarheight)))
-            pygame.draw.rect(surface,HPFOREGROUNDCOLOR,(HPbarposition,(Hpbarwidth*healthfrac,Hpbarheight)))
+            pygame.draw.rect(overlay,HPBACKGROUNDCOLOR,(HPbarposition,(Hpbarwidth,Hpbarheight)))
+            pygame.draw.rect(overlay,HPFOREGROUNDCOLOR,(HPbarposition,(Hpbarwidth*healthfrac,Hpbarheight)))
 
             #name text
             if (slot == 1):
@@ -291,12 +307,43 @@ def drawHealthbars(surface,scene):
                 textcolor = SLOT3COLOR
             elif (slot == 4):
                 textcolor = SLOT4COLOR
-            renderTextAtPos(surface,slottext,textpos,"centreLeft",font=NAMEFONT,color=textcolor)
+            renderTextAtPos(overlay,slottext,textpos,"centreLeft",font=NAMEFONT,color=textcolor)
+
+    #tooltips
+    for slot,target in enumerate(scene.beasts[1:],start=1):
+        if beast.isalive:
+            if slot == 1:
+                region=Box(Rect_f(0.6,0.40,0.33,0.05),BASEBOX)
+            if slot == 2:
+                region=Box(Rect_f(0.6,0.45,0.33,0.05),BASEBOX)
+            if slot == 3:
+                region=Box(Rect_f(0.05,0.15,0.33,0.05),BASEBOX)
+            if slot == 4:
+                region=Box(Rect_f(0.05,0.20,0.33,0.05),BASEBOX)
+            healthbartooltip = Tooltip( getStatusText,
+                                        [scene.beasts[slot]],
+                                        region=region)
+            healthbartooltip.draw(tooltips)
+
+    screen.setLayer("overlay", overlay)
+    screen.setLayer("tooltips", tooltips)
     return
 
-def drawScene(surface,scene):
-    surface.fill(BACKGROUNDCOLOR)
+def drawBackground(screen,scene):
+    background = screen.getLayer("background")
+    background.fill(BACKGROUNDCOLOR)
+    screen.setLayer("background", background)
+    return
 
-    drawTurnTracker(surface,scene)
-    drawHealthbars(surface,scene)
+def drawScene(screen,scene):
+    drawBackground(screen,scene)
+    drawTurnTracker(screen,scene)
+    drawHealthbars(screen,scene)
+    
+    # overlay = screen.getLayer("overlay")
+    # screen.setLayer("overlay", overlay)
+    return
+
+def drawIdle(screen,scene):
+    drawScene(screen,scene)
     return
