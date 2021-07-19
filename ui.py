@@ -266,9 +266,6 @@ def drawTurnTracker(screen,scene):
                                             [scene],
                                             region=region)
             turntrackertooltip.draw(tooltips)
-    
-    screen.setLayer("overlay", overlay)
-    screen.setLayer("tooltips", tooltips)
     return
 
 def drawHealthbars(screen,scene):
@@ -324,9 +321,6 @@ def drawHealthbars(screen,scene):
                                         [scene.beasts[slot]],
                                         region=region)
             healthbartooltip.draw(tooltips)
-
-    screen.setLayer("overlay", overlay)
-    screen.setLayer("tooltips", tooltips)
     return
 
 def drawBackground(screen,scene):
@@ -339,9 +333,6 @@ def drawScene(screen,scene):
     drawBackground(screen,scene)
     drawTurnTracker(screen,scene)
     drawHealthbars(screen,scene)
-    
-    # overlay = screen.getLayer("overlay")
-    # screen.setLayer("overlay", overlay)
     return
 
 def drawIdle(screen,scene):
