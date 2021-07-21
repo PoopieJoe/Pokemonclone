@@ -326,7 +326,6 @@ def drawHealthbars(screen,scene):
 def drawBackground(screen,scene):
     background = screen.getLayer("background")
     background.fill(BACKGROUNDCOLOR)
-    screen.setLayer("background", background)
     return
 
 def drawScene(screen,scene):
