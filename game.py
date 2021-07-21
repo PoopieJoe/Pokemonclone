@@ -9,11 +9,8 @@ import classes as c
 from scenemanager import Scene
 import eventhandlers
 import ui
-<<<<<<< HEAD
 import globalconstants as gconst
-=======
 import teamimport as timport
->>>>>>> 1c6b14dbf93cee820a528376ff452fc0b0231c5f
 #from pygame.locals import *
 
 pygame.init()
@@ -25,19 +22,16 @@ screen = ui.Screen([    "tooltips",
                         "background"])
 
 #Build a beast: TODO put import from text here
-<<<<<<< HEAD
 Beast1 = c.Beast(species="Lurker",nickname="Greg",loadout=[None,"Metal chestplate",None,None,None])
 Beast2 = c.Beast(species="Viper",nickname="Bob",loadout=[None,"Metal chestplate","Tail blade"])
 
 Beast3 = c.Beast(species="Lizion",nickname="Micheala",loadout=["Icy mask",None,None,None,"Tail blade"])
 Beast4 = c.Beast(species="Halfling",nickname="Claire",loadout=[None,"Metal chestplate",None,None,None])
-=======
 # Beast1 = Beast(species="Lurker",nickname="Greg",loadout=[None,"Metal chestplate",None,None,None])
 # Beast2 = Beast(species="Viper",nickname="Bob",loadout=[None,"Metal chestplate","Tail blade"])
 
 # Beast3 = Beast(species="Lizion",nickname="Micheala",loadout=["Icy mask",None,None,None,"Tail blade"])
 # Beast4 = Beast(species="Halfling",nickname="Claire",loadout=[None,"Metal chestplate",None,None,None])
->>>>>>> 1c6b14dbf93cee820a528376ff452fc0b0231c5f
 
 Team1 = timport.importteam(Path("./teams/Test_1.txt"))
 Team2 = timport.importteam(Path("./teams/Test_2.txt"))
