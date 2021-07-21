@@ -6,6 +6,12 @@ from fnmatch import fnmatch
 from time import sleep
 from globalconstants import *
 
+class Team:
+    def __init__(self):
+        self.beasts = []
+        self.subs = []
+        self.name = ""
+
 class Scene:
     def __init__(self):
         self.beasts = [None,None,None,None,None]

@@ -2,12 +2,11 @@ Priority:
 - improve ui:
     - buff icons
     - tooltips for attacks, targets and buffs/status
-- Import teams from text
 - Handle attack targeting & multitargeting
 - Fill database (~20 species, ~30 equipment pieces, ~50 attacks)
 - Victory screen
 - Title screen
 
 Other:
-- Implement instant attack effect
+- Implement instant attack effects
 - implement equipment and attacks flag functionality

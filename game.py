@@ -9,27 +9,28 @@ from classes import *
 from scenemanager import Scene
 import eventhandlers
 import ui
+import teamimport as timport
 #from pygame.locals import *
 
 pygame.init()
 screen = pygame.display.set_mode(ui.screenDims)
 
 #Build a beast: TODO put import from text here
-Beast1 = Beast(species="Lurker",nickname="Greg",loadout=[None,"Metal chestplate",None,None,None])
-Beast2 = Beast(species="Viper",nickname="Bob",loadout=[None,"Metal chestplate","Tail blade"])
+# Beast1 = Beast(species="Lurker",nickname="Greg",loadout=[None,"Metal chestplate",None,None,None])
+# Beast2 = Beast(species="Viper",nickname="Bob",loadout=[None,"Metal chestplate","Tail blade"])
 
-Beast3 = Beast(species="Lizion",nickname="Micheala",loadout=["Icy mask",None,None,None,"Tail blade"])
-Beast4 = Beast(species="Halfling",nickname="Claire",loadout=[None,"Metal chestplate",None,None,None])
+# Beast3 = Beast(species="Lizion",nickname="Micheala",loadout=["Icy mask",None,None,None,"Tail blade"])
+# Beast4 = Beast(species="Halfling",nickname="Claire",loadout=[None,"Metal chestplate",None,None,None])
 
-team1name = Beast1.nickname + " & " + Beast2.nickname
-team2name = Beast3.nickname + " & " + Beast4.nickname
+Team1 = timport.importteam(Path("./teams/Test_1.txt"))
+Team2 = timport.importteam(Path("./teams/Test_2.txt"))
 
 #Build scene
 scene = Scene()
-scene.addBeast(beast = Beast1,slot = 1)
-scene.addBeast(beast = Beast2,slot = 2)
-scene.addBeast(beast = Beast3,slot = 3)
-scene.addBeast(beast = Beast4,slot = 4)
+scene.addBeast(beast = Team1.beasts[0],slot = 1)
+scene.addBeast(beast = Team1.beasts[1],slot = 2)
+scene.addBeast(beast = Team2.beasts[0],slot = 3)
+scene.addBeast(beast = Team2.beasts[1],slot = 4)
 
 scene.setupBattle()
 ui.drawScene(screen,scene)
@@ -105,10 +106,10 @@ while (battle_active):
     #check if only one teams beasts are remaining (that teams wins, and the battle ends)
     if (not (scene.beasts[1].isalive or scene.beasts[2].isalive)):
         battle_active = False
-        winner = team2name
+        winner = Team2.name
     elif (not (scene.beasts[3].isalive or scene.beasts[4].isalive)):
         battle_active = False
-        winner = team1name
+        winner = Team1.name
 
 scene.printScene()
 print("Team " + winner + " wins!")
