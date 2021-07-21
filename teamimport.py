@@ -58,16 +58,17 @@ def importteam(file):
                         raise Exception("[Line " + str(linenum) + "] " + ex_missingspecies)
                 elif (prop in ["@Head","@Chest","@Arm","@Legs","@Tail"]):
                     if (beastnum >= 0):
-                        try:
-                            if ( detail != "" ):
+                        if ( detail != "" ):
+                            try:
                                 piece = c.getEquipment(detail)
-                                if (piece.part == team.beasts[beastnum].anatomy.parts[equipmentcntr]):
-                                    team.beasts[beastnum].equipItem(piece)
-                                else:
-                                    raise Exception("[Line " + str(linenum) + "] Item '" + piece.name + "' does not match the limb '" +  team.beasts[beastnum].anatomy.parts[equipmentcntr] + "'")
-                            equipmentcntr += 1
-                        except Exception:
-                            raise Exception("[Line " + str(linenum) + "] " + ex_invalid_equipment + " (" + piece.name + ")")
+                            except Exception:
+                                raise Exception("[Line " + str(linenum) + "] " + ex_invalid_equipment + " (" + piece.name + ")")
+                                
+                            if (piece.part == team.beasts[beastnum].anatomy.parts[equipmentcntr]):
+                                team.beasts[beastnum].equipItem(piece)
+                            else:
+                                raise Exception("[Line " + str(linenum) + "] Item '" + piece.name + "' does not match the limb '" +  team.beasts[beastnum].anatomy.parts[equipmentcntr] + "'")
+                        equipmentcntr += 1
                     else:
                         raise Exception("[Line " + str(linenum) + "] " + ex_missingspecies)
                 else:

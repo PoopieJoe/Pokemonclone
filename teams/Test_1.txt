@@ -3,7 +3,6 @@ Team name:  Bobbers
 
 ---Team
 
-- Bruiser
 Species:    Lurker
 Name:       Greg
 @Head:      Straw hat
@@ -12,7 +11,6 @@ Name:       Greg
 @Arm:       Skull shield
 @Legs:      Running shoes
 
-- Statuser
 Species:    Viper
 Name:       Bob
 @Head:      Icy mask
