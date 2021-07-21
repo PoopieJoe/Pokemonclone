@@ -1,0 +1,18 @@
+Format:     Doubles
+Team name:  Kitchen Princesses
+
+Species:    Lizion
+Name:       Micheala
+@Head:      Icy mask
+@Head:      Icy mask
+@Head:      Straw hat
+@Legs:      Running shoes
+@Tail:      Tail blade
+
+Species:    Halfling
+Name:       Claire
+@Head:      Straw hat
+@Chest:     Metal chestplate
+@Arm:       Ignition arm
+@Arm:       Skull shield
+@Legs:      Running shoes

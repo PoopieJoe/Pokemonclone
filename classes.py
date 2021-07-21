@@ -9,9 +9,10 @@ class Beast:
         #details
         self.species = getSpecies(species)
         if (nickname == None):
-            self.nickname = species.name
+            self.nickname = self.species.name
         else:
             self.nickname = nickname
+        self.anatomy = getAnatomy(self.species.anatomy)
 
         #stats
         self.maxHP = self.species.maxHP
@@ -31,23 +32,27 @@ class Beast:
 
         #Equipment
         if (loadout == []): #an empty loadout
-            for limb in getAnatomy(self.species.anatomy).parts:
+            for limb in self.anatomy.parts:
                 loadout.append(None)
-
-        if (len(loadout) != len(getAnatomy(self.species.anatomy).parts)):
-            raise Exception("number of loadout items does not match the number of limbs")
+        else:
+            if (len(loadout) != len(self.anatomy.parts)):
+                raise Exception("number of loadout items does not match the number of limbs")
             
         self.equipment = []
         for n,piece in enumerate(loadout):
             if (piece != None):
                 piece = getEquipment(piece)
-                if (piece.part == getAnatomy(self.species.anatomy).parts[n]):
+                if (piece.part == self.anatomy.parts[n]):
                     self.equipItem(piece)
                 else:
-                    raise Exception("Item " + piece.part + " does not match the limb part " + getAnatomy(self.species.anatomy).parts[n])
+                    raise Exception("Item " + piece.part + " does not match the limb part " + self.anatomy.parts[n])
 
         #Flags
         self.flags = [["execute_attack",False],["choose_attack",False]]
+    
+    def validityCheck(self):
+
+        return True
 
     def calcBurnDMG(self):
         dmgpertick = BURNDMG*self.maxHP*100/TURNTRACKER_LENGTH

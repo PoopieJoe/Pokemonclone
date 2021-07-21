@@ -1,15 +1,32 @@
+Format:     Doubles
 Team name:  Bobbers
 
-Name:       Greg
+---Team
+
 Species:    Lurker
+Name:       Greg
 @Head:      Straw hat
 @Chest:     Metal chestplate
 @Arm:       Ignition arm
 @Arm:       Skull shield
 @Legs:      Running shoes
 
-Name:       Bob
 Species:    Viper
+Name:       Bob
+@Head:      Icy mask
+@Chest:     Cloth wrap
+@Tail:      Tail blade
+
+---Subs
+
+Species:    Viper
+Name:       Ed
+@Head:      Icy mask
+@Chest:     Cloth wrap
+@Tail:      Tail blade
+
+Species:    Viper
+Name:       Fred
 @Head:      Icy mask
 @Chest:     Cloth wrap
 @Tail:      Tail blade

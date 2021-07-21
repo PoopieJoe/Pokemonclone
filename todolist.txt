@@ -2,14 +2,17 @@ Priority:
 - improve ui:
     - buff icons
     - tooltips for attacks, targets and buffs/status
+<<<<<<< HEAD
     - Change layer structure to put tooltips on top
 - Remake equipment modifier application
 - Import teams from text
+=======
+>>>>>>> 1c6b14dbf93cee820a528376ff452fc0b0231c5f
 - Handle attack targeting & multitargeting
 - Fill database (~20 species, ~30 equipment pieces, ~50 attacks)
 - Victory screen
 - Title screen
 
 Other:
-- Implement instant attack effect
+- Implement instant attack effects
 - implement equipment and attacks flag functionality
