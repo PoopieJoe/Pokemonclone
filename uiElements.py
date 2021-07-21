@@ -167,6 +167,8 @@ class Tooltip:
         self.width = ttwidth
         self.height = ttheight
         self.textalignment = textalignment
+        self.border_radius = 10
+        self.margin = Margin(0.05, 0.05, 0.1, 0.1)
 
     def collidemouse(self):
         if self.region.absrect.collidepoint(pygame.mouse.get_pos()):
@@ -184,23 +186,24 @@ class Tooltip:
 
             (absx,absy) = pygame.mouse.get_pos()
 
-            ttbox = Box(Rect_f(absx/screenDims[0],absy/screenDims[1],boxwidth/screenDims[0],boxheight/screenDims[1]),BASEBOX)
-            pygame.draw.rect(surface, self.bgcolor, ttbox.absrect)
+            ttbox = Box(Rect_f( absx/screenDims[0],
+                                absy/screenDims[1],
+                                boxwidth/screenDims[0]*(1+self.margin.left+self.margin.right),
+                                boxheight/screenDims[1]*(1+self.margin.top+self.margin.bottom)),
+                        BASEBOX,
+                        color=self.bgcolor,
+                        border_radius=self.border_radius)
+            tttextbox = TextBox(ttbox, 
+                                self.text,
+                                margin=self.margin,
+                                font=self.font,
+                                textcolor=self.textcolor,
+                                backgroundcolor=self.bgcolor,
+                                border_radius=self.border_radius,
+                                textalignment="topLeft")
+            tttextbox.draw(surface)
+        return
 
-            for linenum,line in enumerate(self.text):
-                if (self.textalignment == "topLeft"):
-                    textpos = ( ttbox.absrect.left , ttbox.absrect.top+linenum*self.font.get_height() )
-                elif (self.textalignment == "centre"):
-                    textpos = ( (ttbox.absrect.left)/2 , (ttbox.absrect.top+ttbox.absrect.bottom)/2-(self.font.get_height()*len(self.text))/2+(linenum+1)*self.font.get_height()/2 )
-                else:
-                    textpos = ( ttbox.absrect.left, ttbox.absrect.top+linenum*self.font.get_height() )
-                renderTextAtPos(surface,line,textpos,alignment=self.textalignment,font=self.font,color=self.textcolor,backgroundcolor=self.bgcolor)
-
-
-"""
-
-
-"""
 class Screen:
     def __init__(self,layernames):     
         """Defines the layer structure of the screen. 

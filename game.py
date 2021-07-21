@@ -3,6 +3,7 @@ here's ur damn docstring
 """
 
 import sys
+from pathlib import Path
 from random import shuffle
 import pygame
 import classes as c

@@ -2,10 +2,9 @@ Priority:
 - improve ui:
     - buff icons
     - tooltips for attacks, targets and buffs/status
-    - Change layer structure to put tooltips on top
 - Remake equipment modifier application
-- Import teams from text
 - Handle attack targeting & multitargeting
+- Rework data structure of Scene
 - Fill database (~20 species, ~30 equipment pieces, ~50 attacks)
 - Victory screen
 - Title screen

@@ -35,6 +35,21 @@ def getStatusText(beast):
         statustext.append("Healthy")
     return statustext
 
+def getShortStatusText(beast):
+    statustext = [beast.nickname]
+    #print HP total
+    hptext = str(beast.HP) + "/" + str(beast.maxHP) + " HP (" + str(max(round(beast.HP/beast.maxHP*100),1)) + "%)"
+    statustext.append(hptext)
+    if (beast.statuseffects):
+        for status in beast.statuseffects:
+            #different statuses need other things printed
+            if (status["name"] == BURNNAME):
+                statustext.append(BURNNAME)
+            elif (status["name"] == SLOWNAME):
+                statustext.append(SLOWNAME + " (" + str(ceil(status["trackleft"]/TURNTRACKER_LENGTH)) + " turns left)")
+    return statustext
+
+
 def getTurntrackerTooltipText(scene):
     text = []
     for slot,beast in enumerate(scene.beasts[1:],start=1):
@@ -317,7 +332,7 @@ def drawHealthbars(screen,scene):
                 region=Box(Rect_f(0.05,0.15,0.33,0.05),BASEBOX)
             if slot == 4:
                 region=Box(Rect_f(0.05,0.20,0.33,0.05),BASEBOX)
-            healthbartooltip = Tooltip( getStatusText,
+            healthbartooltip = Tooltip( getShortStatusText,
                                         [scene.beasts[slot]],
                                         region=region)
             healthbartooltip.draw(tooltips)
