@@ -28,49 +28,50 @@ def importteam(file):
     beastnum = -1
     equipmentcntr = 0
     for linenum, line in enumerate(teamreader.readlines()):
-        if (len(line) > 1):
-            colonpos = line.find(':')
-            if colonpos < 0:
-                raise Exception("[Line " + str(linenum) + "] " + ex_missingcolon + " (" + line + ")")
-            prop = line[0:colonpos]
-            detail = line[colonpos+1:len(line)].replace('\n','').strip()
-            
-            if (prop == "Team name"):
-                team.name = detail
-            elif (prop == "Format"):
-                if (detail in ["Doubles"]):
-                    battleformat = detail
-                else:
-                    raise Exception("[Line " + str(linenum) + "] " + ex_invalid_format)
-            elif (prop == "Species"):
-                try:
-                    beastnum += 1
-                    equipmentcntr = 0
-                    newbeast = c.Beast(detail,None,[])
-                    team.beasts.append(newbeast)
-                except Exception:
-                    raise Exception("[Line " + str(linenum) + "] " + ex_invalid_species)
-            elif (prop == "Name"):
-                if (beastnum >= 0):
-                    team.beasts[beastnum].nickname = detail
-                else:
-                    raise Exception("[Line " + str(linenum) + "] " + ex_missingspecies)
-            elif (prop in ["@Head","@Chest","@Arm","@Legs","@Tail"]):
-                if (beastnum >= 0):
+        if (line[0] != '-'):
+            if (len(line) > 1):
+                colonpos = line.find(':')
+                if colonpos < 0:
+                    raise Exception("[Line " + str(linenum) + "] " + ex_missingcolon + " (" + line + ")")
+                prop = line[0:colonpos]
+                detail = line[colonpos+1:len(line)].replace('\n','').strip()
+                
+                if (prop == "Team name"):
+                    team.name = detail
+                elif (prop == "Format"):
+                    if (detail in ["Doubles"]):
+                        battleformat = detail
+                    else:
+                        raise Exception("[Line " + str(linenum) + "] " + ex_invalid_format)
+                elif (prop == "Species"):
                     try:
-                        if ( detail != "" ):
-                            piece = c.getEquipment(detail)
-                            if (piece.part == team.beasts[beastnum].anatomy.parts[equipmentcntr]):
-                                team.beasts[beastnum].equipItem(piece)
-                            else:
-                                raise Exception("[Line " + str(linenum) + "] Item '" + piece.name + "' does not match the limb '" +  team.beasts[beastnum].anatomy.parts[equipmentcntr] + "'")
-                        equipmentcntr += 1
+                        beastnum += 1
+                        equipmentcntr = 0
+                        newbeast = c.Beast(detail,None,[])
+                        team.beasts.append(newbeast)
                     except Exception:
-                        raise Exception("[Line " + str(linenum) + "] " + ex_invalid_equipment + " (" + piece.name + ")")
+                        raise Exception("[Line " + str(linenum) + "] " + ex_invalid_species)
+                elif (prop == "Name"):
+                    if (beastnum >= 0):
+                        team.beasts[beastnum].nickname = detail
+                    else:
+                        raise Exception("[Line " + str(linenum) + "] " + ex_missingspecies)
+                elif (prop in ["@Head","@Chest","@Arm","@Legs","@Tail"]):
+                    if (beastnum >= 0):
+                        try:
+                            if ( detail != "" ):
+                                piece = c.getEquipment(detail)
+                                if (piece.part == team.beasts[beastnum].anatomy.parts[equipmentcntr]):
+                                    team.beasts[beastnum].equipItem(piece)
+                                else:
+                                    raise Exception("[Line " + str(linenum) + "] Item '" + piece.name + "' does not match the limb '" +  team.beasts[beastnum].anatomy.parts[equipmentcntr] + "'")
+                            equipmentcntr += 1
+                        except Exception:
+                            raise Exception("[Line " + str(linenum) + "] " + ex_invalid_equipment + " (" + piece.name + ")")
+                    else:
+                        raise Exception("[Line " + str(linenum) + "] " + ex_missingspecies)
                 else:
-                    raise Exception("[Line " + str(linenum) + "] " + ex_missingspecies)
-            else:
-                    raise Exception("[Line " + str(linenum) + "] " + ex_invalid_property + " (" + line + ")")
+                        raise Exception("[Line " + str(linenum) + "] " + ex_invalid_property + " (" + line + ")")
 
     #Check validity and move beasts to subs where necessary based on format
     if (battleformat == ""):
