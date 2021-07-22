@@ -15,25 +15,8 @@ import teamimport as timport
 #from pygame.locals import *
 
 pygame.init()
-windowoutput = pygame.display.set_mode(ui.screenDims)
-screen = ui.Screen([    "tooltips",
-                        "overlay",
-                        "effects",
-                        "sprites",
-                        "background"])
 
-#Build a beast: TODO put import from text here
-Beast1 = c.Beast(species="Lurker",nickname="Greg",loadout=[None,"Metal chestplate",None,None,None])
-Beast2 = c.Beast(species="Viper",nickname="Bob",loadout=[None,"Metal chestplate","Tail blade"])
-
-Beast3 = c.Beast(species="Lizion",nickname="Micheala",loadout=["Icy mask",None,None,None,"Tail blade"])
-Beast4 = c.Beast(species="Halfling",nickname="Claire",loadout=[None,"Metal chestplate",None,None,None])
-# Beast1 = Beast(species="Lurker",nickname="Greg",loadout=[None,"Metal chestplate",None,None,None])
-# Beast2 = Beast(species="Viper",nickname="Bob",loadout=[None,"Metal chestplate","Tail blade"])
-
-# Beast3 = Beast(species="Lizion",nickname="Micheala",loadout=["Icy mask",None,None,None,"Tail blade"])
-# Beast4 = Beast(species="Halfling",nickname="Claire",loadout=[None,"Metal chestplate",None,None,None])
-
+#Import teams from file:
 Team1 = timport.importteam(Path("./teams/Test_1.txt"))
 Team2 = timport.importteam(Path("./teams/Test_2.txt"))
 
@@ -45,13 +28,20 @@ scene.addBeast(beast = Team2.beasts[0],slot = 3)
 scene.addBeast(beast = Team2.beasts[1],slot = 4)
 
 scene.setupBattle()
+
+#initialize ui
+windowoutput = pygame.display.set_mode(ui.screenDims)
+screen = ui.Screen([    "tooltips",
+                        "overlay",
+                        "effects",
+                        "sprites",
+                        "background"])
 ui.drawScene(screen,scene)
 windowoutput.fill(gconst.BACKGROUNDCOLOR)
 screen.draw(windowoutput)
 pygame.display.flip()
 
 battle_active = True
-winner = 0
 menuButtons = []
 while (battle_active):
     for event in pygame.event.get():

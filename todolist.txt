@@ -4,7 +4,7 @@ Priority:
     - tooltips for attacks, targets and buffs/status
 - Remake equipment modifier application
 - Handle attack targeting & multitargeting
-- Rework data structure of Scene
+- Rework data structure of Scene and rework battle setup based on team import
 - Fill database (~20 species, ~30 equipment pieces, ~50 attacks)
 - Victory screen
 - Title screen

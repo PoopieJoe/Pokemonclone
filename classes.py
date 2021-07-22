@@ -117,9 +117,10 @@ class Beast:
         #    elif (bonus[0] == "shockRES"):
         #        self.shockRES += bonus[1]
         
-        for attack in equipment.attacks:
-            if (attack not in self.attacks):
-                self.attacks.append(getAttack(attack))
+        for attackid in equipment.attacks:
+            attack = getAttack(attackid)
+            if (attack.name not in [x.name for x in self.attacks]):
+                self.attacks.append(attack)
 
 class Anatomy:
     def __init__(
