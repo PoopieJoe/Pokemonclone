@@ -49,6 +49,10 @@ def getShortStatusText(beast):
                 statustext.append(SLOWNAME + " (" + str(ceil(status["trackleft"]/TURNTRACKER_LENGTH)) + " turns left)")
     return statustext
 
+def getStatusInfo(status):
+    #TODO: make this
+    return ["idk","make this"]
+
 
 def getTurntrackerTooltipText(scene):
     text = []
@@ -307,40 +311,66 @@ def drawHealthbars(screen,scene):
             HPbaroffset = (0,int(NAMEFONTSIZE)/2)
             HPbarposition = addtuple(textpos,HPbaroffset)
 
+            if (slot == 1):
+                textcolor = SLOT1COLOR
+                region=Box(Rect_f(0.6,0.40,0.33,0.05),BASEBOX)
+            elif (slot == 2):
+                textcolor = SLOT2COLOR
+                region=Box(Rect_f(0.6,0.45,0.33,0.05),BASEBOX)
+            elif (slot == 3):
+                textcolor = SLOT3COLOR
+                region=Box(Rect_f(0.05,0.15,0.33,0.05),BASEBOX)
+            elif (slot == 4):
+                textcolor = SLOT4COLOR
+                region=Box(Rect_f(0.05,0.20,0.33,0.05),BASEBOX)
+
+            #bars
             pygame.draw.rect(overlay,HPBACKGROUNDCOLOR,(HPbarposition,(Hpbarwidth,Hpbarheight)))
             pygame.draw.rect(overlay,HPFOREGROUNDCOLOR,(HPbarposition,(Hpbarwidth*healthfrac,Hpbarheight)))
 
             #name text
-            if (slot == 1):
-                textcolor = SLOT1COLOR
-            elif (slot == 2):
-                textcolor = SLOT2COLOR
-            elif (slot == 3):
-                textcolor = SLOT3COLOR
-            elif (slot == 4):
-                textcolor = SLOT4COLOR
             renderTextAtPos(overlay,slottext,textpos,"centreLeft",font=NAMEFONT,color=textcolor)
 
-    #tooltips
-    for slot,target in enumerate(scene.beasts[1:],start=1):
-        if beast.isalive:
-            if slot == 1:
-                region=Box(Rect_f(0.6,0.40,0.33,0.05),BASEBOX)
-            if slot == 2:
-                region=Box(Rect_f(0.6,0.45,0.33,0.05),BASEBOX)
-            if slot == 3:
-                region=Box(Rect_f(0.05,0.15,0.33,0.05),BASEBOX)
-            if slot == 4:
-                region=Box(Rect_f(0.05,0.20,0.33,0.05),BASEBOX)
+            #statustooltip
+            textsize = NAMEFONT.size(slottext)
             healthbartooltip = Tooltip( getShortStatusText,
                                         [scene.beasts[slot]],
-                                        region=region)
+                                        region=Box(Rect_f(slotreltextpos[slot][0],slotreltextpos[slot][1]-textsize[1]/(2*screenDims[1]),textsize[0]/screenDims[0],textsize[1]/screenDims[1]),BASEBOX))
             healthbartooltip.draw(tooltips)
+
+            #(De-)Buff icons
+            iconx = textpos[0] + NAMEFONT.size(slottext)[0]
+            icony = textpos[1]- NAMEFONT.size(slottext)[1]/2
+            radius = int(NAMEFONT.get_height()/2)
+            for effect in beast.statuseffects:
+                #icon
+                if ( effect["name"] == BURNNAME ):
+                    pygame.draw.circle(overlay,pygame.Color("red"),(iconx+radius,icony+radius),radius)
+                elif ( effect["name"] == SLOWNAME ):
+                    pygame.draw.circle(overlay,pygame.Color("lightblue"),(iconx+radius,icony+radius),radius)
+                else:
+                    iconx -= 2*radius
+                iconx += 2*radius
+
+                #tooltip
+                bufftooltip = Tooltip(  getStatusInfo,
+                                        [effect],
+                                        region = Box(   Rect_f( (iconx-2*radius)/screenDims[0],
+                                                                (icony)/screenDims[1],
+                                                                (2*radius)/screenDims[0],
+                                                                (2*radius)/screenDims[1]),
+                                                        BASEBOX))
+                bufftooltip.draw(tooltips)
+
     return
 
 def drawBackground(screen,scene):
     background = screen.getLayer("background")
+    bgimg = pygame.image.load("./images/scene.png")
+    
     background.fill(BACKGROUNDCOLOR)
+    bgimg = pygame.transform.scale(bgimg,(background.get_width(),int(background.get_height()*0.525)))
+    background.blit(bgimg,(0,0))
     return
 
 def drawScene(screen,scene):
