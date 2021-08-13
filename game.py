@@ -33,8 +33,6 @@ scene.setupBattle()
 windowoutput = pygame.display.set_mode(ui.screenDims)
 screen = ui.Screen([    "tooltips",
                         "overlay",
-                        "effects",
-                        "sprites",
                         "background"])
 ui.drawScene(screen,scene)
 windowoutput.fill(gconst.BACKGROUNDCOLOR)
