@@ -1,7 +1,6 @@
 Priority:
 - improve ui:
-    - buff icons
-    - tooltips for attacks, targets and buffs/status
+    - tooltips for targets
 - Remake equipment modifier application
 - Handle attack targeting & multitargeting
 - Rework data structure of Scene and rework battle setup based on team import

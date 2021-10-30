@@ -3,10 +3,12 @@ from pygame.locals import *
 import scenemanager
 import classes
 from math import floor,ceil
+from fnmatch import fnmatch
 from eventhandlers import continueaction
 from globalconstants import *
 from uiElements import *
 from tuplemath import addtuple,multtuple
+from classes import *
 
 pygame.init()
 
@@ -49,9 +51,16 @@ def getShortStatusText(beast):
                 statustext.append(SLOWNAME + " (" + str(ceil(status["trackleft"]/TURNTRACKER_LENGTH)) + " turns left)")
     return statustext
 
+def getAttackTooltipText(attack):
+    return attack.tooltip
+
 def getStatusInfo(status):
-    #TODO: make this
-    return ["idk","make this"]
+    if ( fnmatch(status["name"], BURNNAME) ):
+        return getStaticText("Burntooltip")
+    elif ( fnmatch(status["name"], SLOWNAME) ):
+        return getStaticText("Slowtooltip")
+    
+    return ["Tooltip not implemented"]
 
 
 def getTurntrackerTooltipText(scene):
@@ -117,6 +126,7 @@ def drawMoveselect(screen,scene,beast):
     drawScene(screen,scene)
 
     overlay = screen.getLayer("overlay")
+    tooltips = screen.getLayer("tooltips")
     MAJORBOX.draw(overlay)
     buttons = []
 
@@ -138,6 +148,9 @@ def drawMoveselect(screen,scene,beast):
                                 )
         attackbutton.draw(overlay)
         buttons.append(attackbutton)
+
+        attacktooltip = Tooltip(getAttackTooltipText,[atk],attackbutton.box)
+        attacktooltip.draw(tooltips)
 
     statusbox_rectf = Rect_f(3*(buttonwidth + interbox_margin_x),0,buttonwidth,1)
     statustext = getStatusText(beast)

@@ -18,10 +18,12 @@ critmulti = 1.5 #critical hit dmg multiplier
 
 # Status effects
 BURNNAME = "Burn"
-BURNDMG = 1/8 #dmg per turn
+BURNDMG = 1/8 #dmg per 100 ticks
+BURNTOOLTIP = "Take continuous damage over time"
 
 SLOWNAME = "Slow"
 SLOWMOD = 0.5 #speed multiplier during slow
+SLOWTOOLTIP = "Reduced speed"
 
 # UI colors and fonts
 screenDims = (1280,720)

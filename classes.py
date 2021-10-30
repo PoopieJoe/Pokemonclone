@@ -195,7 +195,8 @@ class Attack:
         accuracy, 
         critRate, 
         flags, 
-        effects
+        effects,
+        tooltip
     ):
         self.id = atkid
         self.name = name
@@ -204,6 +205,7 @@ class Attack:
         self.critRate = critRate
         self.flags = flags
         self.effects = effects
+        self.tooltip = [tooltip]
 
 class Species:
     def __init__(
@@ -235,6 +237,15 @@ class Species:
         self.SPE = SPE
         self.ability = ability
         self.flags = flags
+
+class StaticText:
+    def __init__(
+        self,
+        tag,
+        text
+    ):
+        self.tag = tag
+        self.text = text
 
 def getAttack(ID):
     """Returns the attack object by ID or by full name string"""
@@ -280,6 +291,13 @@ def getSpecies(ID):
     else:
         raise Exception("Species " + ID + " does not exist")
 
+def getStaticText(tag):
+    for entry in STATICTEXT:
+        if (entry.tag == tag):
+            return entry.text
+    else:
+        raise Exception("Statictext entry" + tag + " does not exist")
+
 def importAttacks(filepath):
     attacks = []
     with open(filepath,"rt",encoding="utf-8") as f:
@@ -296,7 +314,8 @@ def importAttacks(filepath):
                 accuracy=float(row["Accuracy"]),
                 critRate=float(row["Crit rate mod"]),
                 flags=[flag for flag in row["Flags"].split(",") if flag != ""],
-                effects=[effect for effect in row["Effects"].split(",") if effect != ""]
+                effects=[effect for effect in row["Effects"].split(",") if effect != ""],
+                tooltip=str(row["Tooltip"])
                 )
             attacks.append(newattack)
     return attacks
@@ -374,8 +393,23 @@ def importSpecies(filepath):
 
     return species
 
+def importStatictext(filepath):
+    statictext = []
+    with open(filepath,"rt",encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+
+        for row in reader:
+            newstatictext = StaticText(
+                tag = row["Tag"],
+                text = [text for text in row["Text"].split("\\") ]
+                )
+            statictext.append(newstatictext)
+
+    return statictext
+
 dbpath = "./database/"
 ATTACKS = importAttacks(Path(dbpath+"attacks.csv"))
 EQUIPMENT = importEquipment(Path(dbpath+"equipment.csv"))
 ANATOMIES = importAnatomies(Path(dbpath+"anatomies.csv"))
 SPECIES = importSpecies(Path(dbpath+"species.csv"))
+STATICTEXT = importStatictext(Path(dbpath+"statictext.csv"))

@@ -157,15 +157,15 @@ class TextBox:
         self.box.setparent(parent)
 
 class Tooltip:
-    def __init__(self, gettext, gettextargs = [], region = Box(Rect_f(0,0,0.5,0.5),None), ttwidth = 0.5, ttheight = 0.5, font=NAMEFONT, bgcolor = pygame.Color("white"), textcolor = pygame.Color("black"),textalignment="topLeft"):
+    def __init__(self, gettext, gettextargs = [], region = Box(Rect_f(0,0,0.5,0.5),None), ttwidth = 0.5, ttheight = 0.5, font=NAMEFONT, bgcolor = pygame.Color(255,255,205), textcolor = pygame.Color("black"),textalignment="topLeft"):
         self.gettext = gettext
         self.gettextargs = gettextargs
         self.font = font
         self.region = region
         self.bgcolor = bgcolor
         self.textcolor = textcolor
-        self.width = ttwidth
-        self.height = ttheight
+        self.width = ttwidth    #max width - not implemented
+        self.height = ttheight  #max height - not implemented
         self.textalignment = textalignment
         self.border_radius = 10
         self.margin = Margin(0.05, 0.05, 0.1, 0.1)
