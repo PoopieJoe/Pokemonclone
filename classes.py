@@ -20,12 +20,16 @@ class Beast:
         self.physATK = self.species.physATK
         self.armor = self.species.armor
         self.magATK = self.species.magATK
-        self.RES = [1-(100/self.armor),self.species.heatRES,self.species.coldRES,self.species.shockRES]
         self.SPE = self.species.SPE
+        self.heatRES = self.species.heatRES
+        self.coldRES = self.species.coldRES
+        self.shockRES = self.species.shockRES
+        self.calcRES()
 
         #status
         self.isalive = False
         self.statuseffects = []
+        self.equipmentflags = []
 
         self.attacks = []
         self.selected_attack = [None,0]
@@ -51,8 +55,12 @@ class Beast:
         self.flags = [["execute_attack",False],["choose_attack",False]]
     
     def validityCheck(self):
-
+        #TODO: check if build is legal
         return True
+
+    def calcRES(self):
+        self.RES = [1-(100/self.armor),self.heatRES,self.coldRES,self.shockRES]
+        return
 
     def calcBurnDMG(self):
         dmgpertick = BURNDMG*self.maxHP*100/TURNTRACKER_LENGTH
@@ -100,23 +108,29 @@ class Beast:
 
     def equipItem(self,equipment):
         self.equipment.append(equipment)
-        #TODO remake this
-        #for bonus in equipment.statbonuses:
-        #    if (bonus[0] == "maxHP"):
-        #        self.maxHP += bonus[1]
-        #    elif (bonus[0] == "ATK"):
-        #        self.ATK += bonus[1]
-        #    elif (bonus[0] == "SPE"):
-        #        self.SPE += bonus[1]
-        #    elif (bonus[0] == "DEF"):
-        #        self.DEF += bonus[1]
-        #    elif (bonus[0] == "heatRES"):
-        #        self.heatRES += bonus[1]
-        #    elif (bonus[0] == "coldRES"):
-        #        self.coldRES += bonus[1]
-        #    elif (bonus[0] == "shockRES"):
-        #        self.shockRES += bonus[1]
+
+        self.maxHP += equipment.addmaxHP
+        self.physATK += equipment.addphysATK
+        self.armor += equipment.addarmor
+        self.magATK += equipment.addmagATK
+        self.heatRES += equipment.addheatRES
+        self.coldRES += equipment.addcoldRES
+        self.shockRES += equipment.addshockRES
+        self.SPE += equipment.addSPE
         
+        self.maxHP = round(self.maxHP*equipment.maxHPmult)
+        self.physATK *= equipment.physATKmult
+        self.armor *= equipment.armormult
+        self.magATK *= equipment.magATKmult
+        self.heatRES *= equipment.heatRESmult
+        self.coldRES *= equipment.coldRESmult
+        self.shockRES *= equipment.shockRESmult
+        self.SPE *= equipment.SPEmult
+        
+        self.calcRES()
+
+        #TODO set flags and effects
+
         for attackid in equipment.attacks:
             attack = getAttack(attackid)
             if (attack.name not in [x.name for x in self.attacks]):

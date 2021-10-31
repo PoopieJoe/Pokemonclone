@@ -22,7 +22,7 @@ buttonfont = pygame.font.SysFont(None,int(200*buttonheight))
 statusfont = pygame.font.SysFont(None,int(250*buttonheight))
 
 def getStatusText(beast):
-    statustext = [beast.nickname,"","Status:"]
+    statustext = [beast.nickname,""]
     #print HP total
     hptext = str(beast.HP) + "/" + str(beast.maxHP) + " HP (" + str(max(round(beast.HP/beast.maxHP*100),1)) + "%)"
     statustext.append(hptext)
@@ -35,6 +35,14 @@ def getStatusText(beast):
                 statustext.append(SLOWNAME + " (" + str(ceil(status["trackleft"]/TURNTRACKER_LENGTH)) + " turns left)")
     else:
         statustext.append("Healthy")
+    statustext.append("")
+    statustext.append("physATK: " + str(round(beast.physATK,2)))
+    statustext.append("magATK: " + str(round(beast.magATK,2)))
+    statustext.append("physRES: " + str(round(beast.RES[0],2)))
+    statustext.append("heatRES: " + str(round(beast.RES[1],2)))
+    statustext.append("coldRES: " + str(round(beast.RES[2],2)))
+    statustext.append("shockRES: " + str(round(beast.RES[3],2)))
+    
     return statustext
 
 def getShortStatusText(beast):
@@ -53,6 +61,9 @@ def getShortStatusText(beast):
 
 def getAttackTooltipText(attack):
     return attack.tooltip
+
+def getTargetTooltipText(target):
+    return getShortStatusText(target)
 
 def getStatusInfo(status):
     if ( fnmatch(status["name"], BURNNAME) ):
@@ -73,6 +84,7 @@ def getTurntrackerTooltipText(scene):
 def drawTargetSelect(screen,scene,beast):
     overlay = screen.getLayer("overlay")
     MAJORBOX.draw(overlay)
+    tooltips = screen.getLayer("tooltips")
 
     buttons = []
 
@@ -94,6 +106,9 @@ def drawTargetSelect(screen,scene,beast):
                                 )
         targetbutton.draw(overlay)
         buttons.append(targetbutton)
+
+        targettooltip = Tooltip(getTargetTooltipText,[target],targetbutton.box)
+        targettooltip.draw(tooltips)
     
     backbutton_x = 2 * (buttonwidth + interbox_margin_x)
     backbutton_y = 0 * (buttonheight + interbox_margin_y)
