@@ -83,8 +83,28 @@ def getTurntrackerTooltipText(scene):
 
 def drawTargetSelect(screen,scene,beast):
     overlay = screen.getLayer("overlay")
-    MAJORBOX.draw(overlay)
     tooltips = screen.getLayer("tooltips")
+
+    MAJORBOX.draw(overlay)
+
+    attackflags = beast.selected_attack[0].flags
+    beastslot = scene.beasts.index(beast)
+
+    valid_targets = [1,2,3,4]
+    if "Target_other" in attackflags: #effect on 1 other (friendly or enemy)
+        valid_targets.remove(beastslot)
+    elif "Target_team" in attackflags: #effect on team (friendly or enemy)
+        valid_targets.remove(beastslot)
+        if beastslot == 1 or beastslot == 3:
+            valid_targets.remove(beastslot + 1)
+        else:
+            valid_targets.remove(beastslot - 1)
+    elif "Target_all_others" in attackflags: #effect on all others
+        raise Exception("Not implemented: Target_all_others")
+    elif "Target_self" in attackflags: #effect on self
+        raise Exception("Not implemented: Target_self")
+    else:   #no target (e.g. only set field conditions such as weather or terrain)
+        raise Exception("Not implemented: no target")
 
     buttons = []
 
@@ -94,18 +114,30 @@ def drawTargetSelect(screen,scene,beast):
 
         targetbutton_x = col_num * (buttonwidth + interbox_margin_x)
         targetbutton_y = row_num * (buttonheight + interbox_margin_y)
-        targetbutton = Button(  "target",
-                                target.nickname,
-                                Box(Rect_f(targetbutton_x,targetbutton_y,buttonwidth,buttonheight),MINORBOX),
-                                font=buttonfont,
-                                textcolor=pygame.Color("black"),
-                                backgroundcolor=MOVESELECTFOREGROUNDCOLOR,
-                                hovercolor=BUTTONHOVERCOLOR,
-                                action=beast.selecttarget,
-                                actionargs=[scene,slot]
-                                )
+
+        if slot in valid_targets:
+            targetbutton = Button(  "target",
+                                    target.nickname,
+                                    Box(Rect_f(targetbutton_x,targetbutton_y,buttonwidth,buttonheight),MINORBOX),
+                                    font=buttonfont,
+                                    textcolor=pygame.Color("black"),
+                                    backgroundcolor=MOVESELECTFOREGROUNDCOLOR,
+                                    hovercolor=BUTTONHOVERCOLOR,
+                                    action=beast.selecttarget,
+                                    actionargs=[scene,slot]
+                                    )
+            buttons.append(targetbutton)
+        else:
+            targetbutton = Button(  "target",
+                                    target.nickname,
+                                    Box(Rect_f(targetbutton_x,targetbutton_y,buttonwidth,buttonheight),MINORBOX),
+                                    font=buttonfont,
+                                    textcolor=pygame.Color("black"),
+                                    backgroundcolor=MOVESELECTGREY,
+                                    hovercolor=MOVESELECTGREY,
+                                    actionargs=[scene,slot]
+                                    )
         targetbutton.draw(overlay)
-        buttons.append(targetbutton)
 
         targettooltip = Tooltip(getTargetTooltipText,[target],targetbutton.box)
         targettooltip.draw(tooltips)

@@ -1,7 +1,7 @@
 ID,Name,Physical power,Heat power,Cold power,Shock power,Accuracy,Crit rate mod,Flags,Effects,Tooltip
-0,Heavy slam,1.2,0,0,0,0.8,1,Contact,,Hit thing hard
-1,Tail swipe,0.6,0,0,0,1,1,Contact,Slow_1(1),Sweep legs make slow
-2,Ignition,0,0.1,0,0,1,1,Contact,Burn(1),Burn
-3,Frigid gaze,0,0,0.1,0,0.9,1,Team_target,,Resting Bitch Face
-4,Blazing flurry,0.1,0.3,0,0,0.4,1,Contact,"Multihit_5,Burn(0.2)",Consecutive regular punches
-5,Ice lash,0,0,1,0,1,1,,,Lash
+0,Heavy slam,1.2,0,0,0,0.8,1,"Target_other,Contact",,Hit thing hard
+1,Tail swipe,0.6,0,0,0,1,1,"Target_other,Contact",Slow_1(1),Sweep legs make slow
+2,Ignition,0,0.1,0,0,1,1,"Target_other,Contact",Burn(1),Burn
+3,Frigid gaze,0,0,0.1,0,0.9,1,Target_team,,Resting Bitch Face
+4,Blazing flurry,0.1,0.3,0,0,0.4,1,"Target_other,Contact","Multihit_5,Burn(0.2)",Consecutive regular punches
+5,Ice lash,0,0,1,0,1,1,Target_other,,Lash

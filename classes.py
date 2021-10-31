@@ -219,7 +219,7 @@ class Attack:
         self.critRate = critRate
         self.flags = flags
         self.effects = effects
-        self.tooltip = [tooltip]
+        self.tooltip = tooltip
 
 class Species:
     def __init__(
@@ -329,7 +329,7 @@ def importAttacks(filepath):
                 critRate=float(row["Crit rate mod"]),
                 flags=[flag for flag in row["Flags"].split(",") if flag != ""],
                 effects=[effect for effect in row["Effects"].split(",") if effect != ""],
-                tooltip=str(row["Tooltip"])
+                tooltip=[text for text in row["Tooltip"].split("\\") ]
                 )
             attacks.append(newattack)
     return attacks
