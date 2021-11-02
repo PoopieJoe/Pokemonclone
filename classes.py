@@ -63,11 +63,11 @@ class Beast:
         return
 
     def calcBurnDMG(self):
-        dmgpertick = BURNDMG*self.maxHP*100/TURNTRACKER_LENGTH
+        dmgpertick = BURNDMG*self.maxHP*100/TURNTRACKER_LENGTH*self.RES[1]
         return (max(1,floor(dmgpertick)), max(1,floor(1/dmgpertick)))
 
     def selectattack(self,atk_id):
-        print(str(self.nickname) + " selected " + self.attacks[atk_id].name + " as their attack!")
+        print(str(self.nickname) + " selected " + str(self.attacks[atk_id].name) + " as their attack!")
         try:
             self.selected_attack[0] = self.attacks[atk_id]
             return True
@@ -109,15 +109,6 @@ class Beast:
     def equipItem(self,equipment):
         self.equipment.append(equipment)
 
-        self.maxHP += equipment.addmaxHP
-        self.physATK += equipment.addphysATK
-        self.armor += equipment.addarmor
-        self.magATK += equipment.addmagATK
-        self.heatRES += equipment.addheatRES
-        self.coldRES += equipment.addcoldRES
-        self.shockRES += equipment.addshockRES
-        self.SPE += equipment.addSPE
-        
         self.maxHP = round(self.maxHP*equipment.maxHPmult)
         self.physATK *= equipment.physATKmult
         self.armor *= equipment.armormult
@@ -126,6 +117,15 @@ class Beast:
         self.coldRES *= equipment.coldRESmult
         self.shockRES *= equipment.shockRESmult
         self.SPE *= equipment.SPEmult
+
+        self.maxHP += equipment.addmaxHP
+        self.physATK += equipment.addphysATK
+        self.armor += equipment.addarmor
+        self.magATK += equipment.addmagATK
+        self.heatRES += equipment.addheatRES
+        self.coldRES += equipment.addcoldRES
+        self.shockRES += equipment.addshockRES
+        self.SPE += equipment.addSPE
         
         self.calcRES()
 

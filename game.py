@@ -8,7 +8,7 @@ from random import shuffle
 import pygame
 import classes as c
 from scenemanager import Scene
-import eventhandlers
+import eventhandlers as evth
 import ui
 import globalconstants as gconst
 import teamimport as timport
@@ -72,12 +72,12 @@ while (battle_active):
     if (scene.state == "Execute attack"):
         if (scene.active_beast.getflag(0)):
             #TODO: multitarget attacks handled here?
-            scene.attackresult.append( eventhandlers.performattack(scene.active_beast,scene.beasts[scene.active_beast.selected_attack[1]]) )
+            scene.attackresult.append( evth.performattack(scene.active_beast,scene.beasts[scene.active_beast.selected_attack[1]]) )
             if (scene.attackresult[0]["chain"]["type"] == "num_left"):
                 #chains multiple identical attack
                 scene.chainsleft = scene.attackresult[0]["chain"]["value"]
                 while (scene.chainsleft > 0):
-                    scene.attackresult.append( eventhandlers.performattack(scene.active_beast,scene.beasts[scene.active_beast.selected_attack[1]],chained = True) )
+                    scene.attackresult.append( evth.performattack(scene.active_beast,scene.beasts[scene.active_beast.selected_attack[1]],chained = True) )
                     scene.chainsleft = scene.chainsleft - 1
             elif (scene.attackresult[0]["chain"]["type"] == "by_id"):
                 print("yea no this doesnt work yet")
@@ -85,7 +85,8 @@ while (battle_active):
             scene.active_beast.clearflag(0)
             scene.active_beast.selected_attack = [None,0]
 
-    scene.tick()
+    if (len(scene.raisedFlags) == 0 and scene.state == "Idle"):
+        scene.tick()
 
     #wipe internal buffer
     screen.clear()
@@ -103,7 +104,7 @@ while (battle_active):
             ui.drawScene(screen,scene)
             menuButtons = ui.drawExecuteAttack(screen,scene,scene.attackresult)
     else:
-        pass
+        pass #just black screen?
 
     screen.draw(windowoutput)
     pygame.display.flip()
