@@ -12,9 +12,16 @@ class Team:
         self.subs = []
         self.name = ""
 
+    def isalive(self):
+        "Check if any beast in the team (no subs) is still alive"
+        for beast in self.beasts:
+            if beast.isalive:
+                return True
+        return False
+
 class Scene:
     def __init__(self):
-        self.beasts = [None,None,None,None,None]
+        self.teams = []
         self.turnTracker = [0,0,0,0,0]
         self.turnTrackerLength = TURNTRACKER_LENGTH
         self.flags = [[]]
@@ -25,11 +32,34 @@ class Scene:
         self.raisedFlags = []
         self.attackresult = []
 
-    def addBeast(self, beast, slot):
-        self.beasts[slot] = beast
-    
-    def removeBeast(self, beast, slot):
-        self.beasts[slot] = None
+    def addTeams(self,teams,names=None):
+        if isinstance(teams,list):
+            for i,team in enumerate(teams):
+                if names != None: 
+                    team.name = str(names[i])
+
+                if isinstance(team,Team):
+                    self.teams.append(team)
+                else:
+                    raise Exception("Invalid team type: " + type(team))
+                
+        elif isinstance(teams,Team):
+            if names != None: 
+                teams.name = str(names)
+            self.teams.append(teams)
+
+        else:
+            raise Exception("Invalid team type: " + type(teams))
+
+    def delTeam(self,team):
+        if isinstance(team,Team):
+            #by object (must perfectly match)
+            self.teams.remove(team)
+        elif isinstance(team,str):
+            #by name
+            for t in self.teams:
+                if (t.name == team):
+                    self.teams.remove(t)
     
     def setupBattle(self):
         for beast in self.beasts[1:]:
