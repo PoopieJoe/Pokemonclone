@@ -12,10 +12,16 @@ class Team:
         self.subs = []
         self.name = ""
 
+class Slot:
+    def __init__(self, beast:Beast, team:int):
+        self.slot = -1
+        self.beast = beast
+        self.team = team
+        self.turntracker = 0
+
 class Scene:
     def __init__(self):
-        self.beasts = [None,None,None,None,None]
-        self.turnTracker = [0,0,0,0,0]
+        self.slots = [None]
         self.turnTrackerLength = TURNTRACKER_LENGTH
         self.flags = [[]]
 
@@ -25,8 +31,8 @@ class Scene:
         self.raisedFlags = []
         self.attackresult = []
 
-    def addBeast(self, beast, slot):
-        self.beasts[slot] = beast
+    def addBeast(self, beast, team):
+        self.beasts.append(beast)
     
     def removeBeast(self, beast, slot):
         self.beasts[slot] = None
