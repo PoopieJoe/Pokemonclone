@@ -22,6 +22,7 @@ class Team:
 class Scene:
     def __init__(self):
         self.teams = []
+        self.turnTracker = [0,0,0,0,0]
         self.turnTrackerLength = TURNTRACKER_LENGTH
         self.flags = [[]]
 
@@ -61,14 +62,14 @@ class Scene:
                     self.teams.remove(t)
     
     def setupBattle(self):
-        for team in self.teams:
-            for beast in team.beasts:
-                if (beast != None):
-                    beast.clearALLflags()
-                    beast.isalive = True
-                    beast.HP = beast.maxHP
-                    beast.setflag(1)
-                    beast.turnTracker = 0
+        for beast in self.beasts[1:]:
+            if (beast != None):
+                beast.clearALLflags()
+                beast.isalive = True
+                beast.HP = beast.maxHP
+                beast.setflag(1)
+                
+        self.turnTracker = [0,0,0,0,0]
 
     def printScene(self):
         print("\n###########################################")
@@ -99,20 +100,19 @@ class Scene:
         #rules: from first resolved to last resolved: choose move, attacks
         #       multiple flags of the same type are resolved in random order
         priority_order = ["choose_attack","execute_attack"]
-        segmented_flaglist = [[] for _ in priority_order]
-        for team_n,team in enumerate(self.teams):
-            for beast_n,beast in enumerate(team.beasts):
-                slot = team_n*2+beast_n+1
-                for flag in beast.flags:
-                    if (flag[1]):
-                        priority = priority_order.index(flag[0])
-                        segmented_flaglist[priority].append([priority_order[priority],slot])
+        segmented_flaglist = [[] for x in priority_order]
+        for slot, beast in enumerate(self.beasts[1:],start=1):
+            for flag in beast.flags:
+                if (flag[1]):
+                    priority = priority_order.index(flag[0])
+                    segmented_flaglist[priority].append([priority_order[priority],slot])
 
         #Shuffle flags with same priority
         for segment in segmented_flaglist:
             shuffle(segment)
 
         #concatenate segments
+        flaglist = []
         for segment in segmented_flaglist:
             for flag in segment:
                 self.raisedFlags.append(flag)

@@ -75,11 +75,9 @@ def getStatusInfo(status):
 
 def getTurntrackerTooltipText(scene):
     text = []
-    for team_n,team in enumerate(scene.teams):
-        for beast_n,beast in enumerate(team.beasts):
-            slot = team_n*2+beast_n+1
-            trackerpercentage = (beast.turnTracker % (scene.turnTrackerLength/2))/(scene.turnTrackerLength/2)*100 #0-100 going one way, 0-100 going back
-            text.append(beast.nickname + ": " + str(round(trackerpercentage,1)) + "% (" + str(beast.SPE) + " SPE)")
+    for slot,beast in enumerate(scene.beasts[1:],start=1):
+        trackerpercentage = (scene.turnTracker[slot] % (scene.turnTrackerLength/2))/(scene.turnTrackerLength/2)*100 #0-100 going one way, 0-100 going back
+        text.append(beast.nickname + ": " + str(round(trackerpercentage,1)) + "% (" + str(beast.SPE) + " SPE)")
     return text
 
 def drawTargetSelect(screen,scene,beast):
@@ -298,57 +296,54 @@ def drawTurnTracker(screen,scene):
     bar_h = 1-2*bar_y
     barbox = Box(Rect_f(bar_x,bar_y,bar_w,bar_h),parent = turntrackerbox,color=TRACKERBARCOLOR)
     barbox.draw(overlay)    
-    for team_n,team in enumerate(scene.teams):
-        for beast_n,beast in enumerate(team.beasts):
-            slot = team_n*2+beast_n+1
-            if beast.isalive:
-                #print name
-                nameoffset = 0.005
-                trackerFont = pygame.font.SysFont(None,int(turntrackerbox.absrect.height*0.5))
-                if (slot == 1):
-                    namepos = (barbox.absrect.left-nameoffset*barbox.parent.absrect.width,barbox.absrect.top+barbox.absrect.height*0)
-                    namealignment = "centreRight"
-                    slotcolor = SLOT1COLOR
-                elif (slot == 2):
-                    namepos = (barbox.absrect.left-nameoffset*barbox.parent.absrect.width,barbox.absrect.top+barbox.absrect.height*1)
-                    namealignment = "centreRight"
-                    slotcolor = SLOT2COLOR
-                elif (slot == 3):
-                    namepos = (barbox.absrect.right+nameoffset*barbox.parent.absrect.width,barbox.absrect.top+barbox.absrect.height*0)
-                    namealignment = "centreLeft"
-                    slotcolor = SLOT3COLOR
-                elif (slot == 4):
-                    namepos = (barbox.absrect.right+nameoffset*barbox.parent.absrect.width,barbox.absrect.top+barbox.absrect.height*1)
-                    namealignment = "centreLeft"
-                    slotcolor = SLOT4COLOR
+    for slot,beast in enumerate(scene.beasts[1:],start=1):
+        if beast.isalive:
+            #print name
+            nameoffset = 0.005
+            trackerFont = pygame.font.SysFont(None,int(turntrackerbox.absrect.height*0.5))
+            if (slot == 1):
+                namepos = (barbox.absrect.left-nameoffset*barbox.parent.absrect.width,barbox.absrect.top+barbox.absrect.height*0)
+                namealignment = "centreRight"
+                slotcolor = SLOT1COLOR
+            elif (slot == 2):
+                namepos = (barbox.absrect.left-nameoffset*barbox.parent.absrect.width,barbox.absrect.top+barbox.absrect.height*1)
+                namealignment = "centreRight"
+                slotcolor = SLOT2COLOR
+            elif (slot == 3):
+                namepos = (barbox.absrect.right+nameoffset*barbox.parent.absrect.width,barbox.absrect.top+barbox.absrect.height*0)
+                namealignment = "centreLeft"
+                slotcolor = SLOT3COLOR
+            elif (slot == 4):
+                namepos = (barbox.absrect.right+nameoffset*barbox.parent.absrect.width,barbox.absrect.top+barbox.absrect.height*1)
+                namealignment = "centreLeft"
+                slotcolor = SLOT4COLOR
 
-                renderTextAtPos(overlay,beast.nickname,namepos,alignment=namealignment,font = trackerFont,color = slotcolor)
+            renderTextAtPos(overlay,beast.nickname,namepos,alignment=namealignment,font = trackerFont,color = slotcolor)
 
-                #print marker
-                markerwidth = barbox.absrect.height*1/2
-                if (beast.turnTracker < scene.turnTrackerLength/2): #moving forward to attack
-                    progresstoattack = beast.turnTracker/TURNTRACKER_LENGTH*2
-                    markerposx = barbox.absrect.left + barbox.absrect.width*min(progresstoattack,1)
-                    markerheight = barbox.absrect.height*2
-                    markerposy = barbox.absrect.centery-markerheight/2 + 1 #idk why but its off by 1 pixel and its infuriating
-            
-                else: #moving back to move select
-                    progresstomovesel = (beast.turnTracker-scene.turnTrackerLength/2)/scene.turnTrackerLength*2
-                    markerposx = barbox.absrect.right - barbox.absrect.width*min(progresstomovesel,1) - markerwidth
-                    markerheight = barbox.absrect.height
-                    markerposy = barbox.absrect.centery-markerheight/2 + 1 #idk why but its off by 1 pixel and its infuriating
-                markerpos = ( markerposx , markerposy )
-                markerdims = ( markerwidth , markerheight )
-                pygame.draw.rect(overlay,slotcolor,(markerpos,markerdims))
+            #print marker
+            markerwidth = barbox.absrect.height*1/2
+            if (scene.turnTracker[slot] < scene.turnTrackerLength/2): #moving forward to attack
+                progresstoattack = scene.turnTracker[slot]/TURNTRACKER_LENGTH*2
+                markerposx = barbox.absrect.left + barbox.absrect.width*min(progresstoattack,1)
+                markerheight = barbox.absrect.height*2
+                markerposy = barbox.absrect.centery-markerheight/2 + 1 #idk why but its off by 1 pixel and its infuriating
+        
+            else: #moving back to move select
+                progresstomovesel = (scene.turnTracker[slot]-scene.turnTrackerLength/2)/scene.turnTrackerLength*2
+                markerposx = barbox.absrect.right - barbox.absrect.width*min(progresstomovesel,1) - markerwidth
+                markerheight = barbox.absrect.height
+                markerposy = barbox.absrect.centery-markerheight/2 + 1 #idk why but its off by 1 pixel and its infuriating
+            markerpos = ( markerposx , markerposy )
+            markerdims = ( markerwidth , markerheight )
+            pygame.draw.rect(overlay,slotcolor,(markerpos,markerdims))
     
-    for team in scene.teams:
-        for beast in team.beasts:
-            if beast.isalive:
-                region = turntrackerbox
-                turntrackertooltip = Tooltip(   getTurntrackerTooltipText,
-                                                [scene],
-                                                region=region)
-                turntrackertooltip.draw(tooltips)
+    for slot,target in enumerate(scene.beasts[1:],start=1):
+        if beast.isalive:
+            region = turntrackerbox
+            turntrackertooltip = Tooltip(   getTurntrackerTooltipText,
+                                            [scene],
+                                            region=region)
+            turntrackertooltip.draw(tooltips)
     return
 
 def drawHealthbars(screen,scene):
@@ -366,67 +361,65 @@ def drawHealthbars(screen,scene):
     Hpbarwidth = int(screenDims[0]*(0.33))
     Hpbarheight = int(screenDims[1]*(0.01))
 
-    for team_n,team in enumerate(scene.teams):
-        for beast_n,beast in enumerate(team.beasts):
-            slot = team_n*2+beast_n+1
-            if beast.isalive:
-                #HP bar
-                healthfrac = beast.HP/beast.maxHP
-                slottext = beast.nickname + " " + str(beast.HP) + "/" + str(beast.maxHP) + " HP (" + str(max(round(healthfrac*100),1)) + "%)"
-                textpos = multtuple(slotreltextpos[slot],screenDims)
-                HPbaroffset = (0,int(NAMEFONTSIZE)/2)
-                HPbarposition = addtuple(textpos,HPbaroffset)
+    for slot, beast in enumerate(scene.beasts[1:],start=1):
+        if beast.isalive:
+            #HP bar
+            healthfrac = beast.HP/beast.maxHP
+            slottext = beast.nickname + " " + str(beast.HP) + "/" + str(beast.maxHP) + " HP (" + str(max(round(healthfrac*100),1)) + "%)"
+            textpos = multtuple(slotreltextpos[slot],screenDims)
+            HPbaroffset = (0,int(NAMEFONTSIZE)/2)
+            HPbarposition = addtuple(textpos,HPbaroffset)
 
-                if (slot == 1):
-                    textcolor = SLOT1COLOR
-                    region=Box(Rect_f(0.6,0.40,0.33,0.05),BASEBOX)
-                elif (slot == 2):
-                    textcolor = SLOT2COLOR
-                    region=Box(Rect_f(0.6,0.45,0.33,0.05),BASEBOX)
-                elif (slot == 3):
-                    textcolor = SLOT3COLOR
-                    region=Box(Rect_f(0.05,0.15,0.33,0.05),BASEBOX)
-                elif (slot == 4):
-                    textcolor = SLOT4COLOR
-                    region=Box(Rect_f(0.05,0.20,0.33,0.05),BASEBOX)
+            if (slot == 1):
+                textcolor = SLOT1COLOR
+                region=Box(Rect_f(0.6,0.40,0.33,0.05),BASEBOX)
+            elif (slot == 2):
+                textcolor = SLOT2COLOR
+                region=Box(Rect_f(0.6,0.45,0.33,0.05),BASEBOX)
+            elif (slot == 3):
+                textcolor = SLOT3COLOR
+                region=Box(Rect_f(0.05,0.15,0.33,0.05),BASEBOX)
+            elif (slot == 4):
+                textcolor = SLOT4COLOR
+                region=Box(Rect_f(0.05,0.20,0.33,0.05),BASEBOX)
 
-                #bars
-                pygame.draw.rect(overlay,HPBACKGROUNDCOLOR,(HPbarposition,(Hpbarwidth,Hpbarheight)))
-                pygame.draw.rect(overlay,HPFOREGROUNDCOLOR,(HPbarposition,(Hpbarwidth*healthfrac,Hpbarheight)))
+            #bars
+            pygame.draw.rect(overlay,HPBACKGROUNDCOLOR,(HPbarposition,(Hpbarwidth,Hpbarheight)))
+            pygame.draw.rect(overlay,HPFOREGROUNDCOLOR,(HPbarposition,(Hpbarwidth*healthfrac,Hpbarheight)))
 
-                #name text
-                renderTextAtPos(overlay,slottext,textpos,"centreLeft",font=NAMEFONT,color=textcolor)
+            #name text
+            renderTextAtPos(overlay,slottext,textpos,"centreLeft",font=NAMEFONT,color=textcolor)
 
-                #statustooltip
-                textsize = NAMEFONT.size(slottext)
-                healthbartooltip = Tooltip( getShortStatusText,
-                                            [beast],
-                                            region=Box(Rect_f(slotreltextpos[slot][0],slotreltextpos[slot][1]-textsize[1]/(2*screenDims[1]),textsize[0]/screenDims[0],textsize[1]/screenDims[1]),BASEBOX))
-                healthbartooltip.draw(tooltips)
+            #statustooltip
+            textsize = NAMEFONT.size(slottext)
+            healthbartooltip = Tooltip( getShortStatusText,
+                                        [scene.beasts[slot]],
+                                        region=Box(Rect_f(slotreltextpos[slot][0],slotreltextpos[slot][1]-textsize[1]/(2*screenDims[1]),textsize[0]/screenDims[0],textsize[1]/screenDims[1]),BASEBOX))
+            healthbartooltip.draw(tooltips)
 
-                #(De-)Buff icons
-                iconx = textpos[0] + NAMEFONT.size(slottext)[0]
-                icony = textpos[1]- NAMEFONT.size(slottext)[1]/2
-                radius = int(NAMEFONT.get_height()/2)
-                for effect in beast.statuseffects:
-                    #icon
-                    if ( effect["name"] == BURNNAME ):
-                        pygame.draw.circle(overlay,pygame.Color("red"),(iconx+radius,icony+radius),radius)
-                    elif ( effect["name"] == SLOWNAME ):
-                        pygame.draw.circle(overlay,pygame.Color("lightblue"),(iconx+radius,icony+radius),radius)
-                    else:
-                        iconx -= 2*radius
-                    iconx += 2*radius
+            #(De-)Buff icons
+            iconx = textpos[0] + NAMEFONT.size(slottext)[0]
+            icony = textpos[1]- NAMEFONT.size(slottext)[1]/2
+            radius = int(NAMEFONT.get_height()/2)
+            for effect in beast.statuseffects:
+                #icon
+                if ( effect["name"] == BURNNAME ):
+                    pygame.draw.circle(overlay,pygame.Color("red"),(iconx+radius,icony+radius),radius)
+                elif ( effect["name"] == SLOWNAME ):
+                    pygame.draw.circle(overlay,pygame.Color("lightblue"),(iconx+radius,icony+radius),radius)
+                else:
+                    iconx -= 2*radius
+                iconx += 2*radius
 
-                    #tooltip
-                    bufftooltip = Tooltip(  getStatusInfo,
-                                            [effect],
-                                            region = Box(   Rect_f( (iconx-2*radius)/screenDims[0],
-                                                                    (icony)/screenDims[1],
-                                                                    (2*radius)/screenDims[0],
-                                                                    (2*radius)/screenDims[1]),
-                                                            BASEBOX))
-                    bufftooltip.draw(tooltips)
+                #tooltip
+                bufftooltip = Tooltip(  getStatusInfo,
+                                        [effect],
+                                        region = Box(   Rect_f( (iconx-2*radius)/screenDims[0],
+                                                                (icony)/screenDims[1],
+                                                                (2*radius)/screenDims[0],
+                                                                (2*radius)/screenDims[1]),
+                                                        BASEBOX))
+                bufftooltip.draw(tooltips)
 
     return
 
