@@ -3,6 +3,26 @@ from pathlib import Path
 from math import floor
 from globalconstants import *
 
+class Flag:
+    def __init__(self, type, raised):
+        self.slot = -1
+        self.type = type
+        self.raised = raised
+
+    def raisee(self):
+        self.raised = True
+
+    def clear(self):
+        self.raised = False
+
+    def israised(self):
+        return self.raised
+
+class SelectedAtk:
+    def __init__(self, attack, slot):
+        self.atk = attack
+        self.slot = slot
+
 class Beast:
     "Describes an ingame beast, complete with stats and equipment"
     def __init__(self, species, nickname = None, loadout = []):
@@ -32,11 +52,11 @@ class Beast:
         self.equipmentflags = []
 
         self.attacks = []
-        self.selected_attack = [None,0]
+        self.selected_attack = SelectedAtk(None,-1)
 
         #Equipment
         if (loadout == []): #an empty loadout
-            for limb in self.anatomy.parts:
+            for _ in self.anatomy.parts:
                 loadout.append(None)
         else:
             if (len(loadout) != len(self.anatomy.parts)):
@@ -52,7 +72,7 @@ class Beast:
                     raise Exception("Item " + piece.part + " does not match the limb part " + self.anatomy.parts[n])
 
         #Flags
-        self.flags = [["execute_attack",False],["choose_attack",False]]
+        self.flags = [Flag("execute_attack",False),Flag("choose_attack",False)]
     
     def validityCheck(self):
         #TODO: check if build is legal
@@ -69,21 +89,22 @@ class Beast:
     def selectattack(self,atk_id):
         print(str(self.nickname) + " selected " + str(self.attacks[atk_id].name) + " as their attack!")
         try:
-            self.selected_attack[0] = self.attacks[atk_id]
+            self.selected_attack.atk = self.attacks[atk_id]
             return True
         except Exception:
             return False
     
     def selecttarget(self,scene,slot):
-        print(str(self.nickname) + " selected " + str(scene.beasts[slot].nickname) + " as the target!")
+        targetslot = scene.slots[slot]
+        print(str(self.nickname) + " selected " + str(targetslot.beast.nickname) + " as the target!")
         try:
-            self.selected_attack[1] = slot
+            self.selected_attack.slot = targetslot
             return True
         except Exception:
             return False
     
     def setchainattack(self,atk_id):
-        self.selected_attack[0] = ATTACKS[atk_id]
+        self.selected_attack.atk = ATTACKS[atk_id]
 
     def addstatuseffect(self,effect):
         self.statuseffects.append(effect)
@@ -93,18 +114,24 @@ class Beast:
         self.SPE = 0
         self.isalive = False
 
-    def getflag(self,flag):
-        return self.flags[flag][1]
+    def getflag(self,flagtype):
+        for flag in self.flags:
+            if flag.type == flagtype:
+                return flag.israised()
 
-    def setflag(self,flag):
-        self.flags[flag][1] = True
+    def setflag(self,flagtype):
+        for flag in self.flags:
+            if flag.type == flagtype:
+                flag.raisee()
 
-    def clearflag(self,flag):
-        self.flags[flag][1] = False
+    def clearflag(self,flagtype):
+        for flag in self.flags:
+            if flag.type == flagtype:
+                flag.clear()
 
     def clearALLflags(self):
         for flag in self.flags:
-            flag[1] = False
+            flag.clear()
 
     def equipItem(self,equipment):
         self.equipment.append(equipment)

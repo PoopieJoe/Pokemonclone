@@ -1,4 +1,4 @@
-from classes import Beast, Attack
+from classes import Beast, Flag, Attack
 from math import floor,ceil
 from itertools import chain
 from random import shuffle
@@ -14,14 +14,19 @@ class Team:
 
 class Slot:
     def __init__(self, beast:Beast, team:int):
-        self.slot = -1
+        self.num = -1
         self.beast = beast
         self.team = team
         self.turntracker = 0
 
+class FlagListItem:
+    def __init__(self, flag:Flag, slot:Slot):
+        self.flag = flag
+        self.slot = slot
+
 class Scene:
     def __init__(self):
-        self.slots = [None]
+        self.slots = []
         self.turnTrackerLength = TURNTRACKER_LENGTH
         self.flags = [[]]
 
@@ -32,36 +37,39 @@ class Scene:
         self.attackresult = []
 
     def addBeast(self, beast, team):
-        self.beasts.append(beast)
+        newslot = Slot(beast,team)
+        newslot.num = len(self.slots)
+        self.slots.append(newslot)
     
-    def removeBeast(self, beast, slot):
-        self.beasts[slot] = None
+    def removeBeast(self, slot):
+        self.slots.pop(slot)
     
     def setupBattle(self):
-        for beast in self.beasts[1:]:
-            if (beast != None):
-                beast.clearALLflags()
-                beast.isalive = True
-                beast.HP = beast.maxHP
-                beast.setflag(1)
-                
-        self.turnTracker = [0,0,0,0,0]
+        for slot in self.slots:
+            if (slot.beast != None):
+                slot.beast.clearALLflags()
+                slot.beast.isalive = True
+                slot.beast.HP = slot.beast.maxHP
+                slot.beast.setflag("choose_attack")
+            slot.turntracker = 0
 
     def printScene(self):
-        print("\n###########################################")
-        if (self.beasts[1].isalive or self.beasts[2].isalive):
-            print("Team A: ")
-            if (self.beasts[1].isalive):
-                print("  Slot 1: " + self.beasts[1].nickname.ljust(16," ") + str(self.beasts[1].HP).ljust(3," ") + "/" + str(self.beasts[1].maxHP).ljust(3," ") + " HP (" + str(round(self.beasts[1].HP/self.beasts[1].maxHP*100)).ljust(3," ") + "%)")
-            if (self.beasts[2].isalive):
-                print("  Slot 2: " + self.beasts[2].nickname.ljust(16," ") + str(self.beasts[2].HP).ljust(3," ") + "/" + str(self.beasts[2].maxHP).ljust(3," ") + " HP (" + str(round(self.beasts[2].HP/self.beasts[2].maxHP*100)).ljust(3," ") + "%)")
-        if (self.beasts[3].isalive or self.beasts[4].isalive):
-            print("Team B: ")
-            if (self.beasts[3].isalive):
-                print("  Slot 3: " + self.beasts[3].nickname.ljust(16," ") + str(self.beasts[3].HP).ljust(3," ") + "/" + str(self.beasts[3].maxHP).ljust(3," ") + " HP (" + str(round(self.beasts[3].HP/self.beasts[3].maxHP*100)).ljust(3," ") + "%)")
-            if (self.beasts[4].isalive):
-                print("  Slot 4: " + self.beasts[4].nickname.ljust(16," ") + str(self.beasts[4].HP).ljust(3," ") + "/" + str(self.beasts[4].maxHP).ljust(3," ") + " HP (" + str(round(self.beasts[4].HP/self.beasts[4].maxHP*100)).ljust(3," ") + "%)")
-        print("###########################################")
+        #TODO remake this
+        # print("\n###########################################")
+        # if (self.beasts[1].isalive or self.beasts[2].isalive):
+        #     print("Team A: ")
+        #     if (self.beasts[1].isalive):
+        #         print("  Slot 1: " + self.beasts[1].nickname.ljust(16," ") + str(self.beasts[1].HP).ljust(3," ") + "/" + str(self.beasts[1].maxHP).ljust(3," ") + " HP (" + str(round(self.beasts[1].HP/self.beasts[1].maxHP*100)).ljust(3," ") + "%)")
+        #     if (self.beasts[2].isalive):
+        #         print("  Slot 2: " + self.beasts[2].nickname.ljust(16," ") + str(self.beasts[2].HP).ljust(3," ") + "/" + str(self.beasts[2].maxHP).ljust(3," ") + " HP (" + str(round(self.beasts[2].HP/self.beasts[2].maxHP*100)).ljust(3," ") + "%)")
+        # if (self.beasts[3].isalive or self.beasts[4].isalive):
+        #     print("Team B: ")
+        #     if (self.beasts[3].isalive):
+        #         print("  Slot 3: " + self.beasts[3].nickname.ljust(16," ") + str(self.beasts[3].HP).ljust(3," ") + "/" + str(self.beasts[3].maxHP).ljust(3," ") + " HP (" + str(round(self.beasts[3].HP/self.beasts[3].maxHP*100)).ljust(3," ") + "%)")
+        #     if (self.beasts[4].isalive):
+        #         print("  Slot 4: " + self.beasts[4].nickname.ljust(16," ") + str(self.beasts[4].HP).ljust(3," ") + "/" + str(self.beasts[4].maxHP).ljust(3," ") + " HP (" + str(round(self.beasts[4].HP/self.beasts[4].maxHP*100)).ljust(3," ") + "%)")
+        # print("###########################################")
+        return
 
     ###################################
     # FLAG AND EVENT MANAGEMENT
@@ -76,22 +84,17 @@ class Scene:
         #rules: from first resolved to last resolved: choose move, attacks
         #       multiple flags of the same type are resolved in random order
         priority_order = ["choose_attack","execute_attack"]
-        segmented_flaglist = [[] for x in priority_order]
-        for slot, beast in enumerate(self.beasts[1:],start=1):
-            for flag in beast.flags:
-                if (flag[1]):
-                    priority = priority_order.index(flag[0])
-                    segmented_flaglist[priority].append([priority_order[priority],slot])
+        segmented_flaglist = [[] for _ in priority_order]
+        for slot in self.slots:
+            for flag in slot.beast.flags:
+                if (flag.israised()):
+                    priority = priority_order.index(flag.type)
+                    segmented_flaglist[priority].append(FlagListItem(flag,slot))
 
-        #Shuffle flags with same priority
+        #Shuffle flags with same priority and concatanate them on the total list
         for segment in segmented_flaglist:
             shuffle(segment)
-
-        #concatenate segments
-        flaglist = []
-        for segment in segmented_flaglist:
-            for flag in segment:
-                self.raisedFlags.append(flag)
+            self.raisedFlags.extend(segment)
         return
 
     def noflags(self):
@@ -100,8 +103,8 @@ class Scene:
     def popflag(self):
         if ((self.active_flag == None) and (len(self.raisedFlags) > 0)):
             self.active_flag = self.raisedFlags.pop(0)
-            flag_name = self.active_flag[0]
-            self.active_beast = self.beasts[self.active_flag[1]]
+            flag_name = self.active_flag.flag.type
+            self.active_slot = self.active_flag.slot
             if (flag_name == "choose_attack"):
                 self.state = "Choose attack"
             elif (flag_name == "execute_attack"):
@@ -117,8 +120,9 @@ class Scene:
         sleep(1/30) #worlds shittiestly programmed framerate
 
         #check relevant status flags
-        for slot, beast in enumerate(self.beasts[1:],start=1):
-            if (beast.isalive):
+        for slot in self.slots:
+            if (slot.beast.isalive):
+                beast = slot.beast
                 status_ended = []
                 for n,status in enumerate(beast.statuseffects):
                     if ( fnmatch(status["name"], BURNNAME) ):
@@ -146,29 +150,32 @@ class Scene:
                     beast.statuseffects.pop(index) #remove status
 
         #check if anyone died last tick
-        for slot, beast in enumerate(self.beasts[1:],start=1):
+        for slot in self.slots:
+            beast = slot.beast
             if (beast.HP <= 0 and beast.isalive):
                 beast.death()
-                print("> " + beast.nickname + " died!")
+                print("> " + slot.beast.nickname + " died!")
 
         #increment turn tracker
-        for slot, beast in enumerate(self.beasts[1:],start=1):
+        for slot in self.slots:
+            beast = slot.beast
             if (beast.isalive):
-                if ((self.turnTracker[slot] < TURNTRACKER_LENGTH/2) and (self.turnTracker[slot] + beast.SPE > TURNTRACKER_LENGTH/2)):
-                    self.turnTracker[slot] = TURNTRACKER_LENGTH/2
+                if ((slot.turntracker < TURNTRACKER_LENGTH/2) and (slot.turntracker + beast.SPE > TURNTRACKER_LENGTH/2)):
+                    slot.turntracker = TURNTRACKER_LENGTH/2
                 else:
-                    self.turnTracker[slot] = self.turnTracker[slot] + beast.SPE
+                    slot.turntracker = slot.turntracker + beast.SPE
 
-        #set flags
-        for slot, beast in enumerate(self.beasts[1:],start=1):
+        #set flags TODO fix
+        for slot in self.slots:
+            beast = slot.beast
             if (beast.isalive):
                 #check if tt exceeds threshold
-                if (beast.selected_attack[0] != None): #has any move selected (moving to attack)
-                    if (self.turnTracker[slot] >= self.turnTrackerLength/2):
-                        self.beasts[slot].setflag(0)
+                if (beast.selected_attack.atk != None): #has any move selected (moving to attack)
+                    if (slot.turntracker >= self.turnTrackerLength/2):
+                        beast.setflag("execute_attack")
                 else: #no move selected (moving from attack)
-                    if (self.turnTracker[slot] >= self.turnTrackerLength): #exceeded turn tracker length
-                        self.beasts[slot].setflag(1)
-                        self.turnTracker[slot] = 0
+                    if (slot.turntracker >= self.turnTrackerLength): #exceeded turn tracker length
+                        beast.setflag("choose_attack")
+                        slot.turntracker = 0
         
         return True

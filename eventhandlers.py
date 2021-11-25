@@ -9,7 +9,7 @@ def performattack(attackingBeast,defendingBeast,chained = False):
     attackresult = {
         "attacker": attackingBeast,
         "defender": defendingBeast,
-        "attack": attackingBeast.selected_attack[0],
+        "attack": attackingBeast.selected_attack.atk,
         "success": False,
         "hit": False,
         "crit": False,

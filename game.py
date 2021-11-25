@@ -22,10 +22,10 @@ Team2 = timport.importteam(Path("./teams/Test_2.txt"))
 
 #Build scene
 scene = Scene()
-scene.addBeast(beast = Team1.beasts[0],slot = 1)
-scene.addBeast(beast = Team1.beasts[1],slot = 2)
-scene.addBeast(beast = Team2.beasts[0],slot = 3)
-scene.addBeast(beast = Team2.beasts[1],slot = 4)
+scene.addBeast(beast = Team1.beasts[0],team = 0)
+scene.addBeast(beast = Team1.beasts[1],team = 0)
+scene.addBeast(beast = Team2.beasts[0],team = 1)
+scene.addBeast(beast = Team2.beasts[1],team = 1)
 
 scene.setupBattle()
 
@@ -52,12 +52,12 @@ while (battle_active):
                         if scene.state == "Choose attack":
                             scene.state = "Choose target"
                         elif scene.state == "Choose target":
-                            scene.active_beast.clearflag(1)
+                            scene.active_slot.beast.clearflag("choose_attack")
                             scene.state = "Idle"
                             scene.active_flag = None
                         elif scene.state == "Execute attack":
                             scene.attackresult = []
-                            scene.active_beast.clearflag(0)
+                            scene.active_slot.beast.clearflag("execute_attack")
                             scene.state = "Idle"
                             scene.active_flag = None
         else:
@@ -70,20 +70,21 @@ while (battle_active):
 
     #change gamestate according to state
     if (scene.state == "Execute attack"):
-        if (scene.active_beast.getflag(0)):
+        active_beast = scene.active_slot.beast
+        if (active_beast.getflag("execute_attack")):
             #TODO: multitarget attacks handled here?
-            scene.attackresult.append( evth.performattack(scene.active_beast,scene.beasts[scene.active_beast.selected_attack[1]]) )
+            scene.attackresult.append( evth.performattack(active_beast,active_beast.selected_attack.slot.beast) )
             if (scene.attackresult[0]["chain"]["type"] == "num_left"):
                 #chains multiple identical attack
                 scene.chainsleft = scene.attackresult[0]["chain"]["value"]
                 while (scene.chainsleft > 0):
-                    scene.attackresult.append( evth.performattack(scene.active_beast,scene.beasts[scene.active_beast.selected_attack[1]],chained = True) )
+                    scene.attackresult.append( evth.performattack(active_beast,active_beast.selected_attack.slot.beast,chained = True) )
                     scene.chainsleft = scene.chainsleft - 1
             elif (scene.attackresult[0]["chain"]["type"] == "by_id"):
                 print("yea no this doesnt work yet")
                 pass
-            scene.active_beast.clearflag(0)
-            scene.active_beast.selected_attack = [None,0]
+            active_beast.clearflag("execute_attack")
+            active_beast.selected_attack = c.SelectedAtk(None,-1)
 
     if (len(scene.raisedFlags) == 0 and scene.state == "Idle"):
         scene.tick()
@@ -95,10 +96,10 @@ while (battle_active):
         menuButtons = []
         ui.drawScene(screen,scene)
     elif (scene.state == "Choose attack"):
-        menuButtons = ui.drawMoveselect(screen,scene,scene.active_beast)
+        menuButtons = ui.drawMoveselect(screen,scene,scene.active_slot)
     elif (scene.state == "Choose target"):
         ui.drawScene(screen,scene)
-        menuButtons = ui.drawTargetSelect(screen,scene,scene.active_beast)
+        menuButtons = ui.drawTargetSelect(screen,scene,scene.active_slot)
     elif (scene.state == "Execute attack"):
         if (scene.attackresult):
             ui.drawScene(screen,scene)
@@ -110,10 +111,10 @@ while (battle_active):
     pygame.display.flip()
     
     #check if only one teams beasts are remaining (that teams wins, and the battle ends)
-    if (not (scene.beasts[1].isalive or scene.beasts[2].isalive)):
+    if (not (scene.slots[0].beast.isalive or scene.slots[1].beast.isalive)):
         battle_active = False
         winner = Team2.name
-    elif (not (scene.beasts[3].isalive or scene.beasts[4].isalive)):
+    elif (not (scene.slots[2].beast.isalive or scene.slots[3].beast.isalive)):
         battle_active = False
         winner = Team1.name
 
