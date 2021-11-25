@@ -1,5 +1,5 @@
 Format:     Doubles
-Team name:  Dessert people
+Team name:  Kitchen Princesses
 
 Species:    Lizion
 Name:       Micheala

@@ -1,13 +1,14 @@
 import pygame
 from pygame.locals import *
 import scenemanager
-import classes as c
+import classes
 from math import floor,ceil
 from fnmatch import fnmatch
 from eventhandlers import continueaction
 from globalconstants import *
 from uiElements import *
 from tuplemath import addtuple,multtuple
+from classes import *
 
 pygame.init()
 
@@ -20,7 +21,7 @@ buttonheight = 1/numbutspercol-interbox_margin_y
 buttonfont = pygame.font.SysFont(None,int(200*buttonheight))
 statusfont = pygame.font.SysFont(None,int(250*buttonheight))
 
-def getStatusText(beast : c.Beast):
+def getStatusText(beast):
     statustext = [beast.nickname,""]
     #print HP total
     hptext = str(beast.HP) + "/" + str(beast.maxHP) + " HP (" + str(max(round(beast.HP/beast.maxHP*100),1)) + "%)"
@@ -44,7 +45,7 @@ def getStatusText(beast : c.Beast):
     
     return statustext
 
-def getShortStatusText(beast : c.Beast):
+def getShortStatusText(beast):
     statustext = [beast.nickname]
     #print HP total
     hptext = str(beast.HP) + "/" + str(beast.maxHP) + " HP (" + str(max(round(beast.HP/beast.maxHP*100),1)) + "%)"
@@ -58,7 +59,7 @@ def getShortStatusText(beast : c.Beast):
                 statustext.append(SLOWNAME + " (" + str(ceil(status["trackleft"]/TURNTRACKER_LENGTH)) + " turns left)")
     return statustext
 
-def getAttackTooltipText(attack: c.Attack):
+def getAttackTooltipText(attack):
     return attack.tooltip
 
 def getTargetTooltipText(target):
@@ -66,9 +67,9 @@ def getTargetTooltipText(target):
 
 def getStatusInfo(status):
     if ( fnmatch(status["name"], BURNNAME) ):
-        return c.getStaticText("Burntooltip")
+        return getStaticText("Burntooltip")
     elif ( fnmatch(status["name"], SLOWNAME) ):
-        return c.getStaticText("Slowtooltip")
+        return getStaticText("Slowtooltip")
     
     return ["Tooltip not implemented"]
 

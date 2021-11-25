@@ -7,7 +7,7 @@ from pathlib import Path
 from random import shuffle
 import pygame
 import classes as c
-from scenemanager import Scene, Team
+from scenemanager import Scene
 import eventhandlers as evth
 import ui
 import globalconstants as gconst
@@ -22,8 +22,10 @@ Team2 = timport.importteam(Path("./teams/Test_2.txt"))
 
 #Build scene
 scene = Scene()
-
-scene.addTeams([Team1,Team2])
+scene.addBeast(beast = Team1.beasts[0],slot = 1)
+scene.addBeast(beast = Team1.beasts[1],slot = 2)
+scene.addBeast(beast = Team2.beasts[0],slot = 3)
+scene.addBeast(beast = Team2.beasts[1],slot = 4)
 
 scene.setupBattle()
 
@@ -102,18 +104,18 @@ while (battle_active):
             ui.drawScene(screen,scene)
             menuButtons = ui.drawExecuteAttack(screen,scene,scene.attackresult)
     else:
-        raise Exception("Invalid scene state: " + scene.state)
+        pass #just black screen?
 
     screen.draw(windowoutput)
     pygame.display.flip()
     
     #check if only one teams beasts are remaining (that teams wins, and the battle ends)
-    liveteams = []
-    for team in scene.teams:
-        if team.isalive():
-            liveteams.append(team)
-    if (len(liveteams) == 1):
-        winner = liveteams[0]
+    if (not (scene.beasts[1].isalive or scene.beasts[2].isalive)):
+        battle_active = False
+        winner = Team2.name
+    elif (not (scene.beasts[3].isalive or scene.beasts[4].isalive)):
+        battle_active = False
+        winner = Team1.name
 
 scene.printScene()
-print("Team " + winner.name + " wins!")
+print("Team " + winner + " wins!")
