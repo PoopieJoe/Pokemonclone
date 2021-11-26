@@ -1,11 +1,11 @@
 Priority:
 - Handle attack targeting & multitargeting
+- Equipment and attacks flag functionality
 - Fill database (~20 species, ~30 equipment pieces, ~50 attacks)
 - Victory screen
 - Title screen
 
 Other:
 - Implement instant attack effects (can you even do animations?)
-- implement equipment and attacks flag functionality
 - Advanced string processing (e.g. colors, italics, bold, different fonts, etc.)
 - Make some proper goddamn comments, especially for the ui and class methods, they're a mess
