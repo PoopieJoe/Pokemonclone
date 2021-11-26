@@ -128,13 +128,18 @@ class Scene:
             #perform first attack always
             attack = active_slot.beast.selected_attack.atk
 
+            # if atk.flags
+
+            # else:
+            #     defender = active_slot.beast.selected_attack.slot.beast
+            defender = active_slot.beast.selected_attack.slot.beast
+
             numhits = 1
             for effect in attack.effects:
-                if fnmatch(effect, "Multihit_*"):
-                    underscorepos = 8
-                    numhits = int(effect[underscorepos+1:])
+                if effect["name"] == MULTIHITNAME:
+                    numhits = effect["value"]
 
-            defender = active_slot.beast.selected_attack.slot.beast
+            
             for _ in range(0,numhits): #repeat if multihit
                 #perform next attack and append to output
                 result = self.attackhit(active_slot.beast,defender,attack)
@@ -171,8 +176,7 @@ class Scene:
 
         #stuff that happens before the attack executes
         for effect in attackresult["attack"].effects:
-            if ( fnmatch(effect, "Multihit_*") ):
-                pass
+            pass
 
         #determine hit
         if ( random() >= (attackresult["attack"].accuracy) ):
@@ -251,30 +255,34 @@ class Scene:
         else:
             #Secondary effects go here
             for effect in attackresult["attack"].effects:
-                if ( fnmatch(effect, BURNNAME + "(*)") ):
-                    #fetch burn chance from string
-                    openparenpos = 4
-                    closeparenpos = len(effect)-1
-                    chance = float(effect[openparenpos+1:closeparenpos])
-                    if ( (random() < chance) and not [True for eff in attackresult["defender"].statuseffects if eff["name"] == BURNNAME]):
+                if ( effect["name"] == BURNNAME ):
+                    if ( (random() < effect["chance"]) and not [True for eff in attackresult["defender"].statuseffects if eff["name"] == BURNNAME]):
                         #apply burn
                         burndmg = attackresult["defender"].calcBurnDMG()
                         dmgpertick = burndmg[0]
                         ticksperdmg = burndmg[1]
                         
-                        attackresult["defender"].addstatuseffect({"name":BURNNAME,"ticksperdmg":ticksperdmg,"dmgpertick":dmgpertick,"counter":ticksperdmg})
+                        burnstatus = {
+                            "name":BURNNAME,
+                            "ticksperdmg":ticksperdmg,
+                            "dmgpertick":dmgpertick,
+                            "counter":ticksperdmg
+                        }
+                        attackresult["defender"].addstatuseffect(burnstatus)
                         attackresult["secondary effects applied"].append(BURNNAME)
                         print("> "+ attackresult["defender"].nickname + " was burned!")
 
-                elif ( fnmatch(effect, SLOWNAME + "_*(*)") ):
-                    #fetch slow chance and intensity from string
-                    underscorepos = effect.find('_')
-                    openparenpos = effect.find('(')
-                    closeparenpos = effect.find(')')
-                    duration = int(effect[underscorepos+1:openparenpos]) #duration in 1/6th turns
-                    chance = float(effect[openparenpos+1:closeparenpos])
-                    if ( (random() < chance) and not [True for eff in attackresult["defender"].statuseffects if (eff["name"] == SLOWNAME and eff["trackleft"] < duration*TURNTRACKER_LENGTH)]):
-                        attackresult["defender"].addstatuseffect({"name":SLOWNAME,"duration":duration*TURNTRACKER_LENGTH/6,"trackleft":duration*TURNTRACKER_LENGTH/6})
+                elif ( effect["name"] == SLOWNAME ):
+                    if ( (random() < effect["chance"]) and not [True for eff in attackresult["defender"].statuseffects if (eff["name"] == SLOWNAME and eff["trackleft"] < duration*TURNTRACKER_LENGTH)]):
+                        slowstatus = {
+                            "name":SLOWNAME,
+                            "duration":effect["value"]*TURNTRACKER_LENGTH/6,
+                            "trackleft":effect["value"]*TURNTRACKER_LENGTH/6
+                        }
+                        attackresult["defender"].addstatuseffect(slowstatus)
+                        attackresult["secondary effects applied"].append(SLOWNAME)
+                        print("> "+ attackresult["defender"].nickname + " was slowed!")
+
         return attackresult
 
     def tick(self):

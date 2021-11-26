@@ -1,6 +1,7 @@
 import csv
 from pathlib import Path
 from math import floor
+from fnmatch import fnmatch
 from globalconstants import *
 
 class Flag:
@@ -255,7 +256,33 @@ class Attack:
         self.accuracy = accuracy
         self.critRate = critRate
         self.flags = flags
-        self.effects = effects
+        self.effects = []
+        for effect in effects:
+            neweffect = {
+                "name": "",
+                "value": 0,
+                "chance": 1
+            }
+            if fnmatch(effect, "*_*(*)"):   #format: NAME_VALUE(CHANCE)
+                underscorepos = effect.index('_')
+                openparenpos = effect.index('(')
+                closeparenpos = effect.index(')')
+                neweffect["name"] = effect[:underscorepos]
+                neweffect["value"] = int(effect[underscorepos+1:openparenpos])
+                neweffect["chance"] = float(effect[openparenpos+1:closeparenpos])
+            elif fnmatch(effect, "*_*"):    #format: NAME_VALUE
+                underscorepos = effect.index('_')
+                neweffect["name"] = effect[:underscorepos]
+                neweffect["value"] = int(effect[underscorepos+1:])
+            elif fnmatch(effect, "*(*)"):   #format: NAME(CHANCE)
+                openparenpos = effect.index('(')
+                closeparenpos = effect.index(')')
+                neweffect["name"] = effect[:openparenpos]
+                neweffect["chance"] = float(effect[openparenpos+1:closeparenpos])
+            else:
+                raise Exception("Effect '" + effect + "' follows invalid format")
+            self.effects.append(neweffect)
+            
         self.tooltip = tooltip
 
 class Species:
