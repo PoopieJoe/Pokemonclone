@@ -126,19 +126,19 @@ class Scene:
 
             #TODO: multitarget attacks handled here
             #perform first attack always
-            defender = active_slot.beast.selected_attack.slot.beast
             attack = active_slot.beast.selected_attack.atk
-            result = self.attackhit(active_slot.beast,defender,attack)
-            self.attackresult.append( result ) #append to output
 
+            numhits = 1
             for effect in attack.effects:
                 if fnmatch(effect, "Multihit_*"):
                     underscorepos = 8
                     numhits = int(effect[underscorepos+1:])
-                    for _ in range(1,numhits):
-                        #perform next attack and append to output
-                        result = self.attackhit(active_slot.beast,defender,attack)
-                        self.attackresult.append( result ) #append to output
+
+            defender = active_slot.beast.selected_attack.slot.beast
+            for _ in range(0,numhits): #repeat if multihit
+                #perform next attack and append to output
+                result = self.attackhit(active_slot.beast,defender,attack)
+                self.attackresult.append( result ) #append to output
 
             #TODO: chain by ID
             # if (self.attackresult[0]["chain"]["type"] == "by_id"):
