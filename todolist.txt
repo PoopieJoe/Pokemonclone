@@ -1,5 +1,4 @@
 Priority:
-- Handle attack targeting & multitargeting
 - Make it so can no longer punch dead people
 - Chain by ID
 - Equipment and attacks flag functionality
