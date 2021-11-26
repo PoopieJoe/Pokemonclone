@@ -70,21 +70,7 @@ while (battle_active):
 
     #change gamestate according to state
     if (scene.state == "Execute attack"):
-        active_beast = scene.active_slot.beast
-        if (active_beast.getflag("execute_attack")):
-            #TODO: multitarget attacks handled here?
-            scene.attackresult.append( evth.performattack(active_beast,active_beast.selected_attack.slot.beast) )
-            if (scene.attackresult[0]["chain"]["type"] == "num_left"):
-                #chains multiple identical attack
-                scene.chainsleft = scene.attackresult[0]["chain"]["value"]
-                while (scene.chainsleft > 0):
-                    scene.attackresult.append( evth.performattack(active_beast,active_beast.selected_attack.slot.beast,chained = True) )
-                    scene.chainsleft = scene.chainsleft - 1
-            elif (scene.attackresult[0]["chain"]["type"] == "by_id"):
-                print("yea no this doesnt work yet")
-                pass
-            active_beast.clearflag("execute_attack")
-            active_beast.selected_attack = c.SelectedAtk(None,-1)
+        scene.processattack()
 
     if (len(scene.raisedFlags) == 0 and scene.state == "Idle"):
         scene.tick()

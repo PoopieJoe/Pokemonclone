@@ -83,8 +83,18 @@ class Beast:
         return
 
     def calcBurnDMG(self):
-        dmgpertick = BURNDMG*self.maxHP*100/TURNTRACKER_LENGTH*self.RES[1]
-        return (max(1,floor(dmgpertick)), max(1,floor(1/dmgpertick)))
+        dmgpertick = BURNDMG*self.maxHP*100/TURNTRACKER_LENGTH*(1-self.RES[1])
+
+        if (abs(dmgpertick) < 1): 
+            outdmgpertick = floor(dmgpertick/abs(dmgpertick)) #preserve sign and set to 1
+        else:
+            outdmgpertick = floor(dmgpertick)
+
+        if (self.RES[1] == 1): #immunity to fire
+            outticksperdmg = 1
+        else:
+            outticksperdmg = max(1,floor(1/dmgpertick))
+        return (outdmgpertick, outticksperdmg)
 
     def selectattack(self,atk_id):
         print(str(self.nickname) + " selected " + str(self.attacks[atk_id].name) + " as their attack!")
