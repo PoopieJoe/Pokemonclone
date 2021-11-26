@@ -106,10 +106,27 @@ class Beast:
             return False
     
     def selecttarget(self,scene,slot):
-        targetslot = scene.slots[slot]
-        print(str(self.nickname) + " selected " + str(targetslot.beast.nickname) + " as the target!")
+        #check current attack
+        attack = self.selected_attack.atk
+        for flag in attack.flags:
+            if (flag == TARGETOTHER):
+                targetslots = [scene.slots[slot]]
+            elif (flag == TARGETTEAM):
+                if (slot == 0 or slot == 2):
+                    otherslot = slot + 1
+                else:
+                    otherslot = slot - 1
+                targetslots = [scene.slots[slot],scene.slots[otherslot]]
+            elif (flag == TARGETALLOTHER):
+                targetslots = scene.slots
+                targetslots.pop(self) 
+            else:
+                pass
+
+        
+        print(str(self.nickname) + " selected " + " and ".join([slot.beast.nickname for slot in targetslots]) + " as the target(s)!")
         try:
-            self.selected_attack.slot = targetslot
+            self.selected_attack.slots = targetslots
             return True
         except Exception:
             return False

@@ -223,8 +223,13 @@ def drawExecuteAttack(screen,scene,attacks):
 
     buttons = []
 
+    targets = []
+    for target in attacks:
+        targets.append(target["defender"])
+    targets = list(dict.fromkeys(targets)) #remove duplicates
+
     main_attack = attacks[0] #first attack is the name of the move that was used
-    titletext = [main_attack["attacker"].nickname + " used " + main_attack["attack"].name + " on " + main_attack["defender"].nickname + "!"]
+    titletext = [main_attack["attacker"].nickname + " used " + main_attack["attack"].name + " on " + " and ".join([x.nickname for x in targets]) + "!"]
     title = TextBox(
         box=Box(Rect_f(0,0,1,0.2),parent=MAJORBOX),
         lines=titletext,

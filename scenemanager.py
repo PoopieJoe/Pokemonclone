@@ -3,7 +3,7 @@ from math import floor,ceil
 from itertools import chain
 from random import shuffle
 from fnmatch import fnmatch
-from random import random
+from random import random,shuffle
 from time import sleep
 from globalconstants import *
 import classes as c
@@ -121,29 +121,24 @@ class Scene:
     def processattack(self):
         active_slot = self.active_slot
         if (active_slot.beast.getflag("execute_attack")):
-            #TODO this is different for multitarget attack
-            print("\n> " + active_slot.beast.nickname + " used " + active_slot.beast.selected_attack.atk.name + " on " + active_slot.beast.selected_attack.slot.beast.nickname + "!")
-
-            #TODO: multitarget attacks handled here
-            #perform first attack always
             attack = active_slot.beast.selected_attack.atk
+            defenderlist = active_slot.beast.selected_attack.slots
 
-            # if atk.flags
-
-            # else:
-            #     defender = active_slot.beast.selected_attack.slot.beast
-            defender = active_slot.beast.selected_attack.slot.beast
+            #TODO this is different for multitarget attack
+            print("\n> " + active_slot.beast.nickname + " used " + attack.name + " on " + " and ".join([slot.beast.nickname for slot in active_slot.beast.selected_attack.slots]) + "!")
 
             numhits = 1
             for effect in attack.effects:
-                if effect["name"] == MULTIHITNAME:
+                if (effect["name"] == MULTIHITNAME):
                     numhits = effect["value"]
 
             
-            for _ in range(0,numhits): #repeat if multihit
-                #perform next attack and append to output
-                result = self.attackhit(active_slot.beast,defender,attack)
-                self.attackresult.append( result ) #append to output
+            shuffle(defenderlist)   #random order
+            for target in defenderlist: #repeat for every target
+                for _ in range(0,numhits): #repeat if multihit
+                    #perform next attack and append to output
+                    result = self.attackhit(active_slot.beast,target.beast,attack)
+                    self.attackresult.append( result ) #append to output
 
             #TODO: chain by ID
             # if (self.attackresult[0]["chain"]["type"] == "by_id"):
@@ -180,7 +175,7 @@ class Scene:
 
         #determine hit
         if ( random() >= (attackresult["attack"].accuracy) ):
-            print("> The attack missed!")
+            print("> The attack on " + defenderbeast.nickname + " missed!")
             return attackresult
         else:
             attackresult["hit"] = True

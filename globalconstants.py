@@ -18,9 +18,9 @@ critmulti = 1.5 #critical hit dmg multiplier
 
 # Flags
 MULTIHITNAME = "Multihit"
-TARGETOTHERSTR = "Target_other"
-TARGETTEAMSTR = "Target_team"
-TARGETTEAMSTR = "Target_all_others"
+TARGETOTHER = "Target_other"
+TARGETTEAM = "Target_team"
+TARGETALLOTHER = "Target_all_others"
 
 # Status effects
 BURNNAME = "Burn"
