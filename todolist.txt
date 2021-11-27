@@ -1,5 +1,4 @@
 Priority:
-- Make it so can no longer punch dead people
 - Chain by ID
 - Equipment and attacks flag functionality
 - Fill database (~20 species, ~30 equipment pieces, ~50 attacks)
@@ -8,5 +7,7 @@ Priority:
 
 Other:
 - Implement instant attack effects (can you even do animations?)
+- Predictive damage calc
+- Team builder
 - Advanced string processing (e.g. colors, italics, bold, different fonts, etc.)
 - Make some proper goddamn comments, especially for the ui and class methods, they're a mess

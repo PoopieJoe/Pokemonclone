@@ -71,8 +71,7 @@ while (battle_active):
     #change gamestate according to state
     if (scene.state == "Execute attack"):
         scene.processattack()
-
-    if (len(scene.raisedFlags) == 0 and scene.state == "Idle"):
+    elif (len(scene.raisedFlags) == 0 and scene.state == "Idle"):
         scene.tick()
 
     #wipe internal buffer

@@ -7,8 +7,9 @@ from fnmatch import fnmatch
 from eventhandlers import continueaction
 from globalconstants import *
 from uiElements import *
-from tuplemath import addtuple,multtuple
-from classes import *
+from tuplemath import addtuple, multtuple
+from classes import Beast, Attack
+from scenemanager import Scene, Slot
 
 pygame.init()
 
@@ -21,7 +22,7 @@ buttonheight = 1/numbutspercol-interbox_margin_y
 buttonfont = pygame.font.SysFont(None,int(200*buttonheight))
 statusfont = pygame.font.SysFont(None,int(250*buttonheight))
 
-def getStatusText(beast):
+def getStatusText(beast:Beast):
     statustext = [beast.nickname,""]
     #print HP total
     hptext = str(beast.HP) + "/" + str(beast.maxHP) + " HP (" + str(max(round(beast.HP/beast.maxHP*100),1)) + "%)"
@@ -45,7 +46,7 @@ def getStatusText(beast):
     
     return statustext
 
-def getShortStatusText(beast):
+def getShortStatusText(beast: Beast) -> str:
     statustext = [beast.nickname]
     #print HP total
     hptext = str(beast.HP) + "/" + str(beast.maxHP) + " HP (" + str(max(round(beast.HP/beast.maxHP*100),1)) + "%)"
@@ -59,13 +60,13 @@ def getShortStatusText(beast):
                 statustext.append(SLOWNAME + " (" + str(ceil(status["trackleft"]/TURNTRACKER_LENGTH)) + " turns left)")
     return statustext
 
-def getAttackTooltipText(attack):
+def getAttackTooltipText(attack: Attack) -> str:
     return attack.tooltip
 
-def getTargetTooltipText(target):
+def getTargetTooltipText(target: Beast) -> str:
     return getShortStatusText(target)
 
-def getStatusInfo(status):
+def getStatusInfo(status: Beast) -> str:
     if ( fnmatch(status["name"], BURNNAME) ):
         return getStaticText("Burntooltip")
     elif ( fnmatch(status["name"], SLOWNAME) ):
@@ -74,7 +75,7 @@ def getStatusInfo(status):
     return ["Tooltip not implemented"]
 
 
-def getTurntrackerTooltipText(scene):
+def getTurntrackerTooltipText(scene: Scene) -> str:
     text = []
     for slot in scene.slots:
         beast = slot.beast
@@ -82,7 +83,7 @@ def getTurntrackerTooltipText(scene):
         text.append(beast.nickname + ": " + str(round(trackerpercentage,1)) + "% (" + str(beast.SPE) + " SPE)")
     return text
 
-def drawTargetSelect(screen,scene,slot):
+def drawTargetSelect(screen: Screen, scene: Scene, slot: Slot):
     overlay = screen.getLayer("overlay")
     tooltips = screen.getLayer("tooltips")
 
@@ -107,6 +108,10 @@ def drawTargetSelect(screen,scene,slot):
         raise Exception("Not implemented: Target_self")
     else:   #no target (e.g. only set field conditions such as weather or terrain)
         raise Exception("Not implemented: no target")
+    
+    for x in scene.slots:
+        if (not x.beast.isalive):
+            valid_targets.remove(x.num) #remove dead things
 
     buttons = []
 
