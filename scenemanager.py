@@ -42,7 +42,7 @@ class Scene:
         newslot.num = len(self.slots)
         self.slots.append(newslot)
     
-    def removeBeast(self, slot):
+    def removeBeast(self, slot: Slot):
         self.slots.pop(slot)
     
     def setupBattle(self):
@@ -76,7 +76,7 @@ class Scene:
     # FLAG AND EVENT MANAGEMENT
     ###################################
 
-    def setstate(self,state):
+    def setstate(self,state:str):
         self.state = state
         return
 
@@ -141,20 +141,19 @@ class Scene:
                     self.attackresult.append( result ) #append to output
 
             #TODO: chain by ID
-            # if (self.attackresult[0]["chain"]["type"] == "by_id"):
-            #     print("yea no this doesnt work yet")
-            #     pass
 
             #clear flags and selected attack (is the latter even neccesary?)
             active_slot.beast.clearflag("execute_attack")
             active_slot.beast.selected_attack = c.SelectedAtk(None,-1)
+        else:
+            raise Exception(self.nickname + " has no attack selected!")
         return self.attackresult
 
-    def attackhit(self,attackerbeast,defenderbeast,atk):        
+    def attackhit(self,attackerbeast:Beast,defenderbeast:Beast,atk:Attack):        
         attackresult = {
             "attacker": attackerbeast,
             "defender": defenderbeast,
-            "attack": attackerbeast.selected_attack.atk,
+            "attack": atk,
             "success": False,
             "hit": False,
             "crit": False,
@@ -268,7 +267,7 @@ class Scene:
                         print("> "+ attackresult["defender"].nickname + " was burned!")
 
                 elif ( effect["name"] == SLOWNAME ):
-                    if ( (random() < effect["chance"]) and not [True for eff in attackresult["defender"].statuseffects if (eff["name"] == SLOWNAME and eff["trackleft"] < duration*TURNTRACKER_LENGTH)]):
+                    if ( (random() < effect["chance"]) and not [True for eff in attackresult["defender"].statuseffects if (eff["name"] == SLOWNAME and eff["trackleft"] < effect["value"]*TURNTRACKER_LENGTH)]):
                         slowstatus = {
                             "name":SLOWNAME,
                             "duration":effect["value"]*TURNTRACKER_LENGTH/6,
