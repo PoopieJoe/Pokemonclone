@@ -265,6 +265,7 @@ class Attack:
         critRate, 
         flags, 
         effects,
+        chainid,
         tooltip
     ):
         self.id = atkid
@@ -274,6 +275,7 @@ class Attack:
         self.critRate = critRate
         self.flags = flags
         self.effects = []
+        self.chainid = chainid
         for effect in effects:
             neweffect = {
                 "name": "",
@@ -410,6 +412,7 @@ def importAttacks(filepath):
                 critRate=float(row["Crit rate mod"]),
                 flags=[flag for flag in row["Flags"].split(",") if flag != ""],
                 effects=[effect for effect in row["Effects"].split(",") if effect != ""],
+                chainid= None if row["ChainID"]=="" else int(row["ChainID"]),
                 tooltip=[text for text in row["Tooltip"].split("\\") ]
                 )
             attacks.append(newattack)
