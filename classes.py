@@ -3,7 +3,6 @@ from pathlib import Path
 from math import floor
 from fnmatch import fnmatch
 from globalconstants import *
-from scenemanager import Slot,Scene
 
 class Anatomy:
     def __init__(
@@ -79,6 +78,7 @@ class Attack:
         critRate, 
         flags, 
         effects,
+        chainID,
         tooltip
     ):
         self.id = atkid
@@ -87,6 +87,7 @@ class Attack:
         self.accuracy = accuracy
         self.critRate = critRate
         self.flags = flags
+        self.chainID = chainID
         self.effects = []
         for effect in effects:
             neweffect = {
@@ -115,6 +116,7 @@ class Attack:
             self.effects.append(neweffect)
             
         self.tooltip = tooltip
+
 class Species:
     def __init__(
         self, 
@@ -227,7 +229,7 @@ class Beast:
         except Exception:
             return False
     
-    def selecttarget(self,scene:Scene,slot:Slot):
+    def selecttarget(self,scene,slot):
         #check current attack
         attack = self.selected_attack.atk
         for flag in attack.flags:
@@ -329,7 +331,7 @@ class Flag:
         return self.raised
 
 class SelectedAtk:
-    def __init__(self, attack:Attack, slot:Slot):
+    def __init__(self, attack:Attack, slot):
         self.atk = attack
         self.slot = slot
 
@@ -410,7 +412,7 @@ def importAttacks(filepath):
                 critRate=float(row["Crit rate mod"]),
                 flags=[flag for flag in row["Flags"].split(",") if flag != ""],
                 effects=[effect for effect in row["Effects"].split(",") if effect != ""],
-                chainid= None if row["ChainID"]=="" else int(row["ChainID"]),
+                chainID= -1 if row["ChainID"]=="" else int(row["ChainID"]),
                 tooltip=[text for text in row["Tooltip"].split("\\") ]
                 )
             attacks.append(newattack)

@@ -1,4 +1,4 @@
-from classes import Beast, Flag, Attack
+from classes import Beast, Flag, Attack, getAttack
 from math import floor,ceil
 from itertools import chain
 from random import shuffle
@@ -141,13 +141,25 @@ class Scene:
                     self.attackresult.append( result ) #append to output
 
             #TODO: chain by ID
+            # while self.getChainAttack(attack):
+            #     result = self.attackhit(active_slot.beast,target.beast,attack)
+            #     self.attackresult.append( result ) #append to output
+            #     attack = self.getChainAttack(attack) #get next attack in chain
+
+            
 
             #clear flags and selected attack (is the latter even neccesary?)
             active_slot.beast.clearflag("execute_attack")
             active_slot.beast.selected_attack = c.SelectedAtk(None,-1)
         else:
-            raise Exception(self.nickname + " has no attack selected!")
+            raise Exception(active_slot.beast.nickname + " has no attack selected!")
         return self.attackresult
+
+    def getChainAttack(self,attack:Attack):
+        if (attack.chainID >= 0):
+            return getAttack(attack.chainID)
+        else:
+            return None
 
     def attackhit(self,attackerbeast:Beast,defenderbeast:Beast,atk:Attack):        
         attackresult = {

@@ -1,8 +1,8 @@
 ID,Name,Part,Attacks,added maxHP,maxHP multiplier,added ATK,ATK multiplier,added armor,armor multiplier,added magATK,magATK multiplier,added heatRES,heatRES multiplier,added coldRES,coldRES multiplier,added shockRES,shockRES multiplier,added SPE,SPE multiplier,Flags,Effects
-0,Metal chestplate,Chest,"0,4",50,1,0,1,20,1,0,1,0,1,0,1,-0.3,1,0,1,Heavy,
+0,Metal chestplate,Chest,"0,4,6",50,1,0,1,20,1,0,1,0,1,0,1,-0.3,1,0,1,Heavy,
 1,Icy mask,Head,5,0,1,0,1,0,1,0,1,0,1,0.2,1,0,1,0,1,,
 2,Tail blade,Tail,1,20,1,0,1.2,-20,1,0,1,0,1,0,1,0,1,0,1.1,,
-3,Running shoes,Legs,,0,1,0,1,0,1,0,1,0,1,0,1,0,1,10,1,,
+3,Running shoes,Legs,6,0,1,0,1,0,1,0,1,0,1,0,1,0,1,10,1,,
 4,Ignition arm,Arm,2,0,1,0,1,0,1,15,1,0.15,1,0,1,0,1,0,1,,
 5,Skull shield,Arm,3,0,1.1,0,0.8,20,1,-15,1,0,0.95,0,1.05,0,1,0,1,,
 6,Straw hat,Head,,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,,
