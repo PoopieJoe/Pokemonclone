@@ -135,18 +135,16 @@ class Scene:
             
             shuffle(defenderlist)   #random order
             for target in defenderlist: #repeat for every target
-                for _ in range(0,numhits): #repeat if multihit
-                    #perform next attack and append to output
-                    result = self.attackhit(active_slot.beast,target.beast,attack)
-                    self.attackresult.append( result ) #append to output
+                #chain by ID
+                while True:
+                    for _ in range(0,numhits): #repeat if multihit
+                        #perform next attack and append to output
+                        result = self.attackhit(active_slot.beast,target.beast,attack)
+                        self.attackresult.append( result ) #append to output
 
-            #TODO: chain by ID
-            # while self.getChainAttack(attack):
-            #     result = self.attackhit(active_slot.beast,target.beast,attack)
-            #     self.attackresult.append( result ) #append to output
-            #     attack = self.getChainAttack(attack) #get next attack in chain
-
-            
+                    attack = self.getChainAttack(attack) #get next attack in chain
+                    if attack == None:
+                        break
 
             #clear flags and selected attack (is the latter even neccesary?)
             active_slot.beast.clearflag("execute_attack")

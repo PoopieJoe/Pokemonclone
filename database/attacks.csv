@@ -5,6 +5,6 @@ ID,Name,Physical power,Heat power,Cold power,Shock power,Accuracy,Crit rate mod,
 3,Frigid gaze,0,0,0.1,0,0.9,1,Target_team,,,Resting Bitch Face
 4,Blazing flurry,0.1,0.3,0,0,0.4,1,"Target_other,Contact","Multihit_5,Burn(0.2)",,Consecutive regular punches
 5,Ice lash,0,0,1,0,1,1,Target_other,,,Lash
-6,Elemental rush,0,0.3,0,0,1,1,"Target_other,Contact",Burn(0.2),8,
-7,Elemental rush 2,0,0,0.3,0,1,1,"Target_other,Contact",Slow_1(0.2),9,
+6,Elemental rush,0,0.3,0,0,1,1,"Target_other,Contact",Burn(0.2),7,
+7,Elemental rush 2,0,0,0.3,0,1,1,"Target_other,Contact",Slow_1(0.2),8,
 8,Elemental rush 3,0,0,0,0.3,1,2,"Target_other,Contact",,,

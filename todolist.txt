@@ -1,5 +1,4 @@
 Priority:
-- Chain by ID
 - Equipment and attacks flag functionality
 - Fill database (~20 species, ~30 equipment pieces, ~50 attacks)
 - Victory screen
