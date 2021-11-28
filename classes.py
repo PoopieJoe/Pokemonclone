@@ -3,193 +3,7 @@ from pathlib import Path
 from math import floor
 from fnmatch import fnmatch
 from globalconstants import *
-
-class Flag:
-    def __init__(self, type, raised):
-        self.slot = -1
-        self.type = type
-        self.raised = raised
-
-    def raisee(self):
-        self.raised = True
-
-    def clear(self):
-        self.raised = False
-
-    def israised(self):
-        return self.raised
-
-class SelectedAtk:
-    def __init__(self, attack, slot):
-        self.atk = attack
-        self.slot = slot
-
-class Beast:
-    "Describes an ingame beast, complete with stats and equipment"
-    def __init__(self, species, nickname = None, loadout = []):
-        #details
-        self.species = getSpecies(species)
-        if (nickname == None):
-            self.nickname = self.species.name
-        else:
-            self.nickname = nickname
-        self.anatomy = getAnatomy(self.species.anatomy)
-
-        #stats
-        self.maxHP = self.species.maxHP
-        self.HP = self.species.maxHP
-        self.physATK = self.species.physATK
-        self.armor = self.species.armor
-        self.magATK = self.species.magATK
-        self.SPE = self.species.SPE
-        self.heatRES = self.species.heatRES
-        self.coldRES = self.species.coldRES
-        self.shockRES = self.species.shockRES
-        self.calcRES()
-
-        #status
-        self.isalive = False
-        self.statuseffects = []
-        self.equipmentflags = []
-
-        self.attacks = []
-        self.selected_attack = SelectedAtk(None,-1)
-
-        #Equipment
-        if (loadout == []): #an empty loadout
-            for _ in self.anatomy.parts:
-                loadout.append(None)
-        else:
-            if (len(loadout) != len(self.anatomy.parts)):
-                raise Exception("number of loadout items does not match the number of limbs")
-            
-        self.equipment = []
-        for n,piece in enumerate(loadout):
-            if (piece != None):
-                piece = getEquipment(piece)
-                if (piece.part == self.anatomy.parts[n]):
-                    self.equipItem(piece)
-                else:
-                    raise Exception("Item " + piece.part + " does not match the limb part " + self.anatomy.parts[n])
-
-        #Flags
-        self.flags = [Flag("execute_attack",False),Flag("choose_attack",False)]
-    
-    def validityCheck(self):
-        #TODO: check if build is legal
-        return True
-
-    def calcRES(self):
-        self.RES = [1-(100/self.armor),self.heatRES,self.coldRES,self.shockRES]
-        return
-
-    def calcBurnDMG(self):
-        dmgpertick = BURNDMG*self.maxHP*100/TURNTRACKER_LENGTH*(1-self.RES[1])
-
-        if (abs(dmgpertick) < 1): 
-            outdmgpertick = floor(dmgpertick/abs(dmgpertick)) #preserve sign and set to 1
-        else:
-            outdmgpertick = floor(dmgpertick)
-
-        if (self.RES[1] == 1): #immunity to fire
-            outticksperdmg = 1
-        else:
-            outticksperdmg = max(1,floor(1/dmgpertick))
-        return (outdmgpertick, outticksperdmg)
-
-    def selectattack(self,atk_id):
-        print(str(self.nickname) + " selected " + str(self.attacks[atk_id].name) + " as their attack!")
-        try:
-            self.selected_attack.atk = self.attacks[atk_id]
-            return True
-        except Exception:
-            return False
-    
-    def selecttarget(self,scene,slot):
-        #check current attack
-        attack = self.selected_attack.atk
-        for flag in attack.flags:
-            if (flag == TARGETOTHER):
-                targetslots = [scene.slots[slot]]
-            elif (flag == TARGETTEAM):
-                if (slot == 0 or slot == 2):
-                    otherslot = slot + 1
-                else:
-                    otherslot = slot - 1
-                targetslots = [scene.slots[slot],scene.slots[otherslot]]
-            elif (flag == TARGETALLOTHER):
-                targetslots = scene.slots
-                targetslots.pop(self) 
-            else:
-                pass
-
-        
-        print(str(self.nickname) + " selected " + " and ".join([slot.beast.nickname for slot in targetslots]) + " as the target(s)!")
-        try:
-            self.selected_attack.slots = targetslots
-            return True
-        except Exception:
-            return False
-    
-    def setchainattack(self,atk_id):
-        self.selected_attack.atk = ATTACKS[atk_id]
-
-    def addstatuseffect(self,effect):
-        self.statuseffects.append(effect)
-
-    def death(self):
-        self.HP = 0
-        self.SPE = 0
-        self.isalive = False
-
-    def getflag(self,flagtype):
-        for flag in self.flags:
-            if flag.type == flagtype:
-                return flag.israised()
-
-    def setflag(self,flagtype):
-        for flag in self.flags:
-            if flag.type == flagtype:
-                flag.raisee()
-
-    def clearflag(self,flagtype):
-        for flag in self.flags:
-            if flag.type == flagtype:
-                flag.clear()
-
-    def clearALLflags(self):
-        for flag in self.flags:
-            flag.clear()
-
-    def equipItem(self,equipment):
-        self.equipment.append(equipment)
-
-        self.maxHP = round(self.maxHP*equipment.maxHPmult)
-        self.physATK *= equipment.physATKmult
-        self.armor *= equipment.armormult
-        self.magATK *= equipment.magATKmult
-        self.heatRES *= equipment.heatRESmult
-        self.coldRES *= equipment.coldRESmult
-        self.shockRES *= equipment.shockRESmult
-        self.SPE *= equipment.SPEmult
-
-        self.maxHP += equipment.addmaxHP
-        self.physATK += equipment.addphysATK
-        self.armor += equipment.addarmor
-        self.magATK += equipment.addmagATK
-        self.heatRES += equipment.addheatRES
-        self.coldRES += equipment.addcoldRES
-        self.shockRES += equipment.addshockRES
-        self.SPE += equipment.addSPE
-        
-        self.calcRES()
-
-        #TODO set flags and effects
-
-        for attackid in equipment.attacks:
-            attack = getAttack(attackid)
-            if (attack.name not in [x.name for x in self.attacks]):
-                self.attacks.append(attack)
+from scenemanager import Slot,Scene
 
 class Anatomy:
     def __init__(
@@ -301,7 +115,6 @@ class Attack:
             self.effects.append(neweffect)
             
         self.tooltip = tooltip
-
 class Species:
     def __init__(
         self, 
@@ -332,6 +145,193 @@ class Species:
         self.SPE = SPE
         self.ability = ability
         self.flags = flags
+
+class Beast:
+    "Describes an ingame beast, complete with stats and equipment"
+    def __init__(self, species, nickname = None, loadout = []):
+        #details
+        self.species = getSpecies(species)
+        if (nickname == None):
+            self.nickname = self.species.name
+        else:
+            self.nickname = nickname
+        self.anatomy = getAnatomy(self.species.anatomy)
+
+        #stats
+        self.maxHP = self.species.maxHP
+        self.HP = self.species.maxHP
+        self.physATK = self.species.physATK
+        self.armor = self.species.armor
+        self.magATK = self.species.magATK
+        self.SPE = self.species.SPE
+        self.heatRES = self.species.heatRES
+        self.coldRES = self.species.coldRES
+        self.shockRES = self.species.shockRES
+        self.calcRES()
+
+        #status
+        self.isalive = False
+        self.statuseffects = []
+        self.equipmentflags = []
+
+        self.attacks = []
+        self.selected_attack = SelectedAtk(None,-1)
+
+        #Equipment
+        if (loadout == []): #an empty loadout
+            for _ in self.anatomy.parts:
+                loadout.append(None)
+        else:
+            if (len(loadout) != len(self.anatomy.parts)):
+                raise Exception("number of loadout items does not match the number of limbs")
+            
+        self.equipment = []
+        for n,piece in enumerate(loadout):
+            if (piece != None):
+                piece = getEquipment(piece)
+                if (piece.part == self.anatomy.parts[n]):
+                    self.equipItem(piece)
+                else:
+                    raise Exception("Item " + piece.part + " does not match the limb part " + self.anatomy.parts[n])
+
+        #Flags
+        self.flags = [Flag("execute_attack",False),Flag("choose_attack",False)]
+    
+    def validityCheck(self):
+        #TODO: check if build is legal
+        return True
+
+    def calcRES(self):
+        self.RES = [1-(100/self.armor),self.heatRES,self.coldRES,self.shockRES]
+        return
+
+    def calcBurnDMG(self):
+        dmgpertick = BURNDMG*self.maxHP*100/TURNTRACKER_LENGTH*(1-self.RES[1])
+
+        if (abs(dmgpertick) < 1): 
+            outdmgpertick = floor(dmgpertick/abs(dmgpertick)) #preserve sign and set to 1
+        else:
+            outdmgpertick = floor(dmgpertick)
+
+        if (self.RES[1] == 1): #immunity to fire
+            outticksperdmg = 1
+        else:
+            outticksperdmg = max(1,floor(1/dmgpertick))
+        return (outdmgpertick, outticksperdmg)
+
+    def selectattack(self,atk_id:Attack):
+        print(str(self.nickname) + " selected " + str(self.attacks[atk_id].name) + " as their attack!")
+        try:
+            self.selected_attack.atk = self.attacks[atk_id]
+            return True
+        except Exception:
+            return False
+    
+    def selecttarget(self,scene:Scene,slot:Slot):
+        #check current attack
+        attack = self.selected_attack.atk
+        for flag in attack.flags:
+            if (flag == TARGETOTHER):
+                targetslots = [scene.slots[slot]]
+            elif (flag == TARGETTEAM):
+                if (slot == 0 or slot == 2):
+                    otherslot = slot + 1
+                else:
+                    otherslot = slot - 1
+                targetslots = [scene.slots[slot],scene.slots[otherslot]]
+            elif (flag == TARGETALLOTHER):
+                targetslots = scene.slots
+                targetslots.pop(self) 
+            else:
+                pass
+
+        
+        print(str(self.nickname) + " selected " + " and ".join([slot.beast.nickname for slot in targetslots]) + " as the target(s)!")
+        try:
+            self.selected_attack.slots = targetslots
+            return True
+        except Exception:
+            return False
+    
+    def setchainattack(self,atk_id:Attack):
+        self.selected_attack.atk = ATTACKS[atk_id]
+
+    def addstatuseffect(self,effect):
+        self.statuseffects.append(effect)
+
+    def death(self):
+        self.HP = 0
+        self.SPE = 0
+        self.isalive = False
+
+    def getflag(self,flagtype:str):
+        for flag in self.flags:
+            if flag.type == flagtype:
+                return flag.israised()
+
+    def setflag(self,flagtype:str):
+        for flag in self.flags:
+            if flag.type == flagtype:
+                flag.raisee()
+
+    def clearflag(self,flagtype:str):
+        for flag in self.flags:
+            if flag.type == flagtype:
+                flag.clear()
+
+    def clearALLflags(self):
+        for flag in self.flags:
+            flag.clear()
+
+    def equipItem(self,equipment:Equipment):
+        self.equipment.append(equipment)
+
+        self.maxHP = round(self.maxHP*equipment.maxHPmult)
+        self.physATK *= equipment.physATKmult
+        self.armor *= equipment.armormult
+        self.magATK *= equipment.magATKmult
+        self.heatRES *= equipment.heatRESmult
+        self.coldRES *= equipment.coldRESmult
+        self.shockRES *= equipment.shockRESmult
+        self.SPE *= equipment.SPEmult
+
+        self.maxHP += equipment.addmaxHP
+        self.physATK += equipment.addphysATK
+        self.armor += equipment.addarmor
+        self.magATK += equipment.addmagATK
+        self.heatRES += equipment.addheatRES
+        self.coldRES += equipment.addcoldRES
+        self.shockRES += equipment.addshockRES
+        self.SPE += equipment.addSPE
+        
+        self.calcRES()
+
+        #TODO set flags and effects
+
+        for attackid in equipment.attacks:
+            attack = getAttack(attackid)
+            if (attack.name not in [x.name for x in self.attacks]):
+                self.attacks.append(attack)
+
+class Flag:
+    def __init__(self, type:str, raised:bool):
+        self.slot = -1
+        self.type = type
+        self.raised = raised
+
+    def raisee(self):
+        self.raised = True
+
+    def clear(self):
+        self.raised = False
+
+    def israised(self):
+        return self.raised
+
+class SelectedAtk:
+    def __init__(self, attack:Attack, slot:Slot):
+        self.atk = attack
+        self.slot = slot
 
 class StaticText:
     def __init__(
