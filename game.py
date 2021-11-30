@@ -3,6 +3,7 @@ here's ur damn docstring
 """
 
 import sys
+from time import sleep
 from pathlib import Path
 from random import shuffle
 import pygame
@@ -74,6 +75,8 @@ while (battle_active):
             scene.processattack()
     elif (len(scene.raisedFlags) == 0 and scene.state == "Idle"):
         scene.tick()
+
+    sleep(1/30) #worlds shittiestly programmed framerate
 
     #wipe internal buffer
     screen.clear()

@@ -4,7 +4,6 @@ from itertools import chain
 from random import shuffle
 from fnmatch import fnmatch
 from random import random,shuffle
-from time import sleep
 from globalconstants import *
 import classes as c
 
@@ -306,7 +305,6 @@ class Scene:
         #game can only tick if no events need to be processed
         if (len(self.raisedFlags) > 0 or self.state != "Idle"):
             return False
-        sleep(1/30) #worlds shittiestly programmed framerate
 
         #check relevant status flags
         for slot in self.slots:
