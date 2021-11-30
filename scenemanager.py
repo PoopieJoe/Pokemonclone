@@ -124,7 +124,6 @@ class Scene:
             attack = active_slot.beast.selected_attack.atk
             defenderlist = active_slot.beast.selected_attack.slots
 
-            #TODO this is different for multitarget attack
             print("\n> " + active_slot.beast.nickname + " used " + attack.name + " on " + " and ".join([slot.beast.nickname for slot in active_slot.beast.selected_attack.slots]) + "!")
 
             numhits = 1
@@ -136,14 +135,15 @@ class Scene:
             shuffle(defenderlist)   #random order
             for target in defenderlist: #repeat for every target
                 #chain by ID
+                curattack = attack
                 while True:
                     for _ in range(0,numhits): #repeat if multihit
                         #perform next attack and append to output
-                        result = self.attackhit(active_slot.beast,target.beast,attack)
+                        result = self.attackhit(active_slot.beast,target.beast,curattack)
                         self.attackresult.append( result ) #append to output
 
-                    attack = self.getChainAttack(attack) #get next attack in chain
-                    if attack == None:
+                    curattack = self.getChainAttack(curattack) #get next attack in chain
+                    if curattack == None:
                         break
 
             #clear flags and selected attack (is the latter even neccesary?)
@@ -168,7 +168,7 @@ class Scene:
             "hit": False,
             "crit": False,
             "damage total": 0,
-            "damage by element": [0,0,0,0],
+            "damage by element": [],
             "secondary effects applied": []
         }          
         
@@ -253,6 +253,19 @@ class Scene:
             print("Critical hit! ")
         else:
             print("")
+
+        dmgbreakdownstr = []
+        for element in range(len(attackresult["damage by element"])):
+            dmgnumber = str(attackresult["damage by element"][element])
+            if element == 0:
+                dmgbreakdownstr.append("Phys: " + dmgnumber)
+            elif element == 1:
+                dmgbreakdownstr.append("Heat: " + dmgnumber)
+            elif element == 2:
+                dmgbreakdownstr.append("Cold: " + dmgnumber)
+            elif element == 3:
+                dmgbreakdownstr.append("Shock: " + dmgnumber)
+        print("Damage breakdown: " + ", ".join(dmgbreakdownstr))
 
         if (attackresult["defender"].HP <= 0): #if the beast dies, attack ends immediately, so no secondary effects occur (only effects that take place after the attack)
             attackresult["defender"].death()
