@@ -9,7 +9,6 @@ from random import shuffle
 import pygame
 import classes as c
 from scenemanager import Scene
-import eventhandlers as evth
 import ui
 import globalconstants as gconst
 import teamimport as timport

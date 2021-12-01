@@ -1,6 +1,5 @@
 from classes import Beast, Flag, Attack, getAttack
 from math import floor,ceil
-from itertools import chain
 from random import shuffle
 from fnmatch import fnmatch
 from random import random,shuffle

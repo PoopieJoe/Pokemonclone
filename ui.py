@@ -1,14 +1,12 @@
 import pygame
 from pygame.locals import *
-import scenemanager
-import classes
 from math import floor,ceil
 from fnmatch import fnmatch
 from eventhandlers import continueaction
 from globalconstants import *
 from uiElements import *
 from tuplemath import addtuple, multtuple
-from classes import Beast, Attack
+from classes import Beast, Attack, getStaticText
 from scenemanager import Scene, Slot
 
 pygame.init()
