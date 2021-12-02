@@ -258,10 +258,10 @@ def drawExecuteAttack(screen,scene,attacks):
                 else:
                     detailstext.append(attack["defender"].nickname + " took " + str(attack["damage total"]) + " (<1%) dmg!")
                 
-                
-                if attack["secondary effects applied"]:
-                    for status in attack["secondary effects applied"]:
-                        detailstext.append("Status applied: " + status + "!")
+                if attack["secondary effects"]:
+                    for status in attack["secondary effects"]:
+                        
+                        detailstext.append("Status applied: " + status["name"] + "!")
             else:
                 detailstext.append("The attack missed!")
         else:

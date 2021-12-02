@@ -63,7 +63,32 @@ class Equipment:
         self.addSPE = addSPE
         self.SPEmult = SPEmult
         self.flags = flags
-        self.effects = effects
+        self.effects = []
+        for effect in effects:
+            neweffect = {
+                "name": "",
+                "value": 0,
+                "chance": 1
+            }
+            if fnmatch(effect, "*_*(*)"):   #format: NAME_VALUE(CHANCE)
+                underscorepos = effect.index('_')
+                openparenpos = effect.index('(')
+                closeparenpos = effect.index(')')
+                neweffect["name"] = effect[:underscorepos]
+                neweffect["value"] = int(effect[underscorepos+1:openparenpos])
+                neweffect["chance"] = float(effect[openparenpos+1:closeparenpos])
+            elif fnmatch(effect, "*_*"):    #format: NAME_VALUE
+                underscorepos = effect.index('_')
+                neweffect["name"] = effect[:underscorepos]
+                neweffect["value"] = int(effect[underscorepos+1:])
+            elif fnmatch(effect, "*(*)"):   #format: NAME(CHANCE)
+                openparenpos = effect.index('(')
+                closeparenpos = effect.index(')')
+                neweffect["name"] = effect[:openparenpos]
+                neweffect["chance"] = float(effect[openparenpos+1:closeparenpos])
+            else:
+                raise Exception("Effect '" + effect + "' follows invalid format")
+            self.effects.append(neweffect)
 
 class Attack:
     def __init__(
@@ -175,6 +200,7 @@ class Beast:
         self.isalive = False
         self.statuseffects = []
         self.equipmentflags = []
+        self.equipmenteffects = []
 
         self.attacks = []
         self.selected_attack = SelectedAtk(None,-1)
@@ -308,7 +334,12 @@ class Beast:
         
         self.calcRES()
 
-        #TODO set flags and effects
+    	#directly inheric all effects (duplicates allowed) and flags  (no duplicates) from equipment 
+        if len(equipment.flags) > 0:
+            self.equipmentflags += equipment.flags
+        if len(equipment.effects) > 0: 
+            self.equipmenteffects += equipment.effects
+
 
         for attackid in equipment.attacks:
             attack = getAttack(attackid)

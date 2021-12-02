@@ -5,6 +5,7 @@ from fnmatch import fnmatch
 from random import random,shuffle
 from globalconstants import *
 import classes as c
+import eventhandlers as evth
 
 class Team:
     def __init__(self):
@@ -107,7 +108,6 @@ class Scene:
             if (flag_name == "choose_attack"):
                 self.state = "Choose attack"
             elif (flag_name == "execute_attack"):
-                attackresult = []
                 self.state = "Execute attack"
             else:
                 self.state = "Idle"
@@ -144,7 +144,8 @@ class Scene:
                     if curattack == None:
                         break
 
-            #clear flags and selected attack (is the latter even neccesary?)
+            # clear flags and selected attack (is the latter even neccesary?)
+            # (yes it is used to check if we're moving to attack, since track position is used to check if we shoud set the flag)
             active_slot.beast.clearflag("execute_attack")
             active_slot.beast.selected_attack = c.SelectedAtk(None,-1)
         else:
@@ -166,7 +167,12 @@ class Scene:
             "hit": False,
             "crit": False,
             "damage total": 0,
-            "damage by element": [],
+            "damage by element": {
+                PHYSNAME: 0,
+                HEATNAME: 0,
+                COLDNAME: 0,
+                SHOCKNAME: 0
+            },
             "secondary effects applied": []
         }          
         
@@ -230,17 +236,14 @@ class Scene:
         #use appropriate resistance
         for element in range(len(ELEMENTS)):
             d = floor(out_dmg[element] * (1 - attackresult["defender"].RES[element]))
-            attackresult["damage by element"].append(d)
+            attackresult["damage by element"][ELEMENTS[element]] = d
 
         #sum up damage
-        attackresult["damage total"] =  sum(attackresult["damage by element"])
-        if (attackresult["damage total"] > 0): #if any damage was dealt, min is 1
-            attackresult["damage total"] =  max(1,attackresult["damage total"])
-            attackresult["damage total"] = min( attackresult["damage total"], attackresult["defender"].HP ) #total damage is hidden if target dies
-        elif (attackresult["damage total"] < 0): #if any health was healed, min is 1
-            attackresult["damage total"] =  min(-1,attackresult["damage total"])
-        else:
-            pass #don't do anything if total is exactly 0
+        for element in ELEMENTS:
+            attackresult["damage total"] += attackresult["damage by element"][element]
+        attackresult["damage total"] = evth.rounddmg(attackresult["damage total"])
+
+        attackresult["damage total"] = min( attackresult["damage total"], attackresult["defender"].HP ) #total damage is hidden if target dies or is healed to full
 
         #resolve attack
         attackresult["defender"].HP -= attackresult["damage total"]
@@ -254,49 +257,66 @@ class Scene:
 
         dmgbreakdownstr = []
         for element in range(len(attackresult["damage by element"])):
-            dmgnumber = str(attackresult["damage by element"][element])
-            if element == 0:
-                dmgbreakdownstr.append("Phys: " + dmgnumber)
-            elif element == 1:
-                dmgbreakdownstr.append("Heat: " + dmgnumber)
-            elif element == 2:
-                dmgbreakdownstr.append("Cold: " + dmgnumber)
-            elif element == 3:
-                dmgbreakdownstr.append("Shock: " + dmgnumber)
+            dmgnumber = str(attackresult["damage by element"][ELEMENTS[element]])
+            dmgbreakdownstr.append(ELEMENTS[element] + ": " + dmgnumber)
         print("Damage breakdown: " + ", ".join(dmgbreakdownstr))
 
         if (attackresult["defender"].HP <= 0): #if the beast dies, attack ends immediately, so no secondary effects occur (only effects that take place after the attack)
             attackresult["defender"].death()
         else:
             #Secondary effects go here
-            for effect in attackresult["attack"].effects:
-                if ( effect["name"] == BURNNAME ):
-                    if ( (random() < effect["chance"]) and not [True for eff in attackresult["defender"].statuseffects if eff["name"] == BURNNAME]):
-                        #apply burn
-                        burndmg = attackresult["defender"].calcBurnDMG()
-                        dmgpertick = burndmg[0]
-                        ticksperdmg = burndmg[1]
-                        
-                        burnstatus = {
-                            "name":BURNNAME,
-                            "ticksperdmg":ticksperdmg,
-                            "dmgpertick":dmgpertick,
-                            "counter":ticksperdmg
-                        }
-                        attackresult["defender"].addstatuseffect(burnstatus)
-                        attackresult["secondary effects applied"].append(BURNNAME)
-                        print("> "+ attackresult["defender"].nickname + " was burned!")
 
-                elif ( effect["name"] == SLOWNAME ):
-                    if ( (random() < effect["chance"]) and not [True for eff in attackresult["defender"].statuseffects if (eff["name"] == SLOWNAME and eff["trackleft"] < effect["value"]*TURNTRACKER_LENGTH)]):
-                        slowstatus = {
-                            "name":SLOWNAME,
-                            "duration":effect["value"]*TURNTRACKER_LENGTH/6,
-                            "trackleft":effect["value"]*TURNTRACKER_LENGTH/6
-                        }
-                        attackresult["defender"].addstatuseffect(slowstatus)
-                        attackresult["secondary effects applied"].append(SLOWNAME)
-                        print("> "+ attackresult["defender"].nickname + " was slowed!")
+            #first effects from the attack
+            for effect in attackresult["attack"].effects:
+                if random() < effect["chance"]:
+                    if ( effect["name"] == BURNNAME ):
+                        if ( not [True for eff in attackresult["defender"].statuseffects if eff["name"] == BURNNAME] ):
+                            #apply burn
+                            burndmg = attackresult["defender"].calcBurnDMG()
+                            dmgpertick = burndmg[0]
+                            ticksperdmg = burndmg[1]
+                            
+                            burnstatus = {
+                                "name":BURNNAME,
+                                "ticksperdmg":ticksperdmg,
+                                "dmgpertick":dmgpertick,
+                                "counter":ticksperdmg
+                            }
+                            attackresult["defender"].addstatuseffect(burnstatus)
+                            attackresult["secondary effects"].append(burnstatus)
+                            print("> "+ attackresult["defender"].nickname + " was burned!")
+
+                    elif ( effect["name"] == SLOWNAME ):
+                        if ( not [True for eff in attackresult["defender"].statuseffects if (eff["name"] == SLOWNAME and eff["trackleft"] < effect["value"]*TURNTRACKER_LENGTH)]):
+                            slowstatus = {
+                                "name":SLOWNAME,
+                                "duration":effect["value"]*TURNTRACKER_LENGTH/6,
+                                "trackleft":effect["value"]*TURNTRACKER_LENGTH/6
+                            }
+                            attackresult["defender"].addstatuseffect(slowstatus)
+                            attackresult["secondary effects"].append(slowstatus)
+                            print("> "+ attackresult["defender"].nickname + " was slowed!")
+            
+            #second effects from contact moves
+            for effect in attackresult["defender"].equipmenteffects:
+                if (random() < effect["chance"]):
+                    if (effect["name"] == "Reflect"):
+                        #attacker takes fraction of dealt damage (of the same type as taken)
+                        totalreflected = attackresult["damage total"]*effect["value"]
+                        attackresult["attacker"].HP -= totalreflected
+
+                        attackresult["secondary effects"].append(
+                            {   "name":REFLECTNAME,
+                                "damage by element": {
+                                    PHYSNAME: attackresult["damage by element"][PHYSNAME],
+                                    HEATNAME: attackresult["damage by element"][HEATNAME],
+                                    COLDNAME: attackresult["damage by element"][COLDNAME],
+                                    SHOCKNAME: attackresult["damage by element"][SHOCKNAME]
+                                },
+                                "damage total": totalreflected
+                            }
+                        )
+
 
         return attackresult
 
@@ -351,13 +371,12 @@ class Scene:
                 else:
                     slot.turntracker = slot.turntracker + beast.SPE
 
-        #set flags TODO fix
+        #set flags
         for slot in self.slots:
             beast = slot.beast
             if (beast.isalive):
-                #check if tt exceeds threshold
                 if (beast.selected_attack.atk != None): #has any move selected (moving to attack)
-                    if (slot.turntracker >= self.turnTrackerLength/2):
+                    if (slot.turntracker >= self.turnTrackerLength/2): #check if tt exceeds threshold
                         beast.setflag("execute_attack")
                 else: #no move selected (moving from attack)
                     if (slot.turntracker >= self.turnTrackerLength): #exceeded turn tracker length

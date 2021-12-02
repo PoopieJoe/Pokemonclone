@@ -19,13 +19,13 @@ pygame.init()
 #Import teams from file:
 Team1 = timport.importteam(Path("./teams/Test_1.txt"))
 Team2 = timport.importteam(Path("./teams/Test_2.txt"))
+teams = [Team1,Team2]
 
 #Build scene
 scene = Scene()
-scene.addBeast(beast = Team1.beasts[0],team = 0)
-scene.addBeast(beast = Team1.beasts[1],team = 0)
-scene.addBeast(beast = Team2.beasts[0],team = 1)
-scene.addBeast(beast = Team2.beasts[1],team = 1)
+for teamn,team in enumerate(teams):
+    for beast in team.beasts:
+        scene.addBeast(beast,team = teamn)
 
 scene.setupBattle()
 

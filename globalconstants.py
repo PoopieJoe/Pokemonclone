@@ -6,7 +6,11 @@ pygame.init()
 BEASTSPERTEAM = 2
 
 # Elements
-ELEMENTS = ["physical","heat","cold","shock"]
+PHYSNAME = "Physical"
+HEATNAME = "Heat"
+COLDNAME = "Cold"
+SHOCKNAME = "Shock"
+ELEMENTS = [PHYSNAME,HEATNAME,COLDNAME,SHOCKNAME]
 
 # Under the hood constants
 TURNTRACKER_LENGTH = 20000 #time unit for 1 full turn (between move selections). Since monsters move their speed every tick, at average speed of 100, it takes 100 ticks from move selection to attack, and 100 ticks from attack back to move selection
@@ -21,6 +25,9 @@ MULTIHITNAME = "Multihit"
 TARGETOTHER = "Target_other"
 TARGETTEAM = "Target_team"
 TARGETALLOTHER = "Target_all_others"
+
+# Equipment effects
+REFLECTNAME = "Reflect"
 
 # Status effects
 BURNNAME = "Burn"
