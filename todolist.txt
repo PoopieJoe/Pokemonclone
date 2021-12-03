@@ -1,6 +1,6 @@
 Priority:
-- Equipment and attacks flag functionality
 - Fill database (~20 species, ~30 equipment pieces, ~50 attacks)
+- Implement missing effects and flags
 - Victory screen
 - Title screen
 
