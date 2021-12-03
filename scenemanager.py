@@ -173,7 +173,7 @@ class Scene:
                 COLDNAME: 0,
                 SHOCKNAME: 0
             },
-            "secondary effects applied": []
+            "secondary effects": []
         }          
         
         if (attackresult["defender"].isalive == False):
@@ -255,11 +255,7 @@ class Scene:
         else:
             print("")
 
-        dmgbreakdownstr = []
-        for element in range(len(attackresult["damage by element"])):
-            dmgnumber = str(attackresult["damage by element"][ELEMENTS[element]])
-            dmgbreakdownstr.append(ELEMENTS[element] + ": " + dmgnumber)
-        print("Damage breakdown: " + ", ".join(dmgbreakdownstr))
+        print(">> Damage breakdown: " + evth.getdmgbreakdownstring(attackresult["damage by element"]))
 
         if (attackresult["defender"].HP <= 0): #if the beast dies, attack ends immediately, so no secondary effects occur (only effects that take place after the attack)
             attackresult["defender"].death()
@@ -290,8 +286,8 @@ class Scene:
                         if ( not [True for eff in attackresult["defender"].statuseffects if (eff["name"] == SLOWNAME and eff["trackleft"] < effect["value"]*TURNTRACKER_LENGTH)]):
                             slowstatus = {
                                 "name":SLOWNAME,
-                                "duration":effect["value"]*TURNTRACKER_LENGTH/6,
-                                "trackleft":effect["value"]*TURNTRACKER_LENGTH/6
+                                "duration":effect["value"]*TURNTRACKER_LENGTH*SLOWBASEDURATION,
+                                "trackleft":effect["value"]*TURNTRACKER_LENGTH*SLOWBASEDURATION
                             }
                             attackresult["defender"].addstatuseffect(slowstatus)
                             attackresult["secondary effects"].append(slowstatus)
@@ -301,21 +297,27 @@ class Scene:
             for effect in attackresult["defender"].equipmenteffects:
                 if (random() < effect["chance"]):
                     if (effect["name"] == "Reflect"):
-                        #attacker takes fraction of dealt damage (of the same type as taken)
-                        totalreflected = attackresult["damage total"]*effect["value"]
-                        attackresult["attacker"].HP -= totalreflected
+                        #attacker takes fraction of dealt damage (of the same type as taken by the defender)
+                        reflectresult = {   
+                            "name":REFLECTNAME,
+                            "damage by element": {
+                                PHYSNAME: 0,
+                                HEATNAME: 0,
+                                COLDNAME: 0,
+                                SHOCKNAME: 0
+                            },
+                            "damage total": 0
+                        }
 
-                        attackresult["secondary effects"].append(
-                            {   "name":REFLECTNAME,
-                                "damage by element": {
-                                    PHYSNAME: attackresult["damage by element"][PHYSNAME],
-                                    HEATNAME: attackresult["damage by element"][HEATNAME],
-                                    COLDNAME: attackresult["damage by element"][COLDNAME],
-                                    SHOCKNAME: attackresult["damage by element"][SHOCKNAME]
-                                },
-                                "damage total": totalreflected
-                            }
-                        )
+                        for element in ELEMENTS:
+                            reflectresult["damage by element"][element] = evth.rounddmg(attackresult["damage by element"][element]*effect["value"]*REFLECTBASEVAL)
+                            reflectresult["damage total"] += reflectresult["damage by element"][element]
+
+                        attackresult["attacker"].HP -= reflectresult["damage total"]
+
+                        attackresult["secondary effects"].append(reflectresult)
+                        print("> " + attackresult["defender"].nickname + " reflected " + str(reflectresult["damage total"])  + " (" + str(round(reflectresult["damage total"]/attackresult["attacker"].maxHP*100)) + "%) dmg back to " + attackresult["attacker"].nickname)
+                        print(">> Damage breakdown: " + evth.getdmgbreakdownstring(reflectresult["damage by element"]))
 
 
         return attackresult

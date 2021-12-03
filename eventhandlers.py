@@ -11,6 +11,13 @@ def rounddmg(dmg:float) -> int:
 
     return int(dmg)
 
+def getdmgbreakdownstring(dmgbyelement:dict) -> list:
+    stringlist = []
+    for element in ELEMENTS:
+        if (dmgbyelement[element] > 0):
+            stringlist.append(element + ": " + str(dmgbyelement[element]))
+    return ", ".join(stringlist)
+
 def continueaction():
     try:
         #this lterally does nothing why did I type this

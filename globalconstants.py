@@ -28,6 +28,7 @@ TARGETALLOTHER = "Target_all_others"
 
 # Equipment effects
 REFLECTNAME = "Reflect"
+REFLECTBASEVAL = 0.1 #reflects 10% of dmg taken per level
 
 # Status effects
 BURNNAME = "Burn"
@@ -36,6 +37,7 @@ BURNTOOLTIP = "Take continuous damage over time"
 
 SLOWNAME = "Slow"
 SLOWMOD = 0.5 #speed multiplier during slow
+SLOWBASEDURATION = 1/6 #slows for 1/6th of a turn per level
 SLOWTOOLTIP = "Reduced speed"
 
 # UI colors and fonts

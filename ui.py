@@ -260,8 +260,14 @@ def drawExecuteAttack(screen,scene,attacks):
                 
                 if attack["secondary effects"]:
                     for status in attack["secondary effects"]:
-                        
-                        detailstext.append("Status applied: " + status["name"] + "!")
+                        if status["name"] in [BURNNAME,SLOWNAME]:
+                            detailstext.append("    Status applied: " + status["name"] + "!") #TODO include severity (if applicable)
+                        elif status["name"] == REFLECTNAME:
+                            refldmgperc = status["damage total"]/attack["attacker"].maxHP*100
+                            if (dmgperc >= 1):
+                                detailstext.append("    " + attack["defender"].nickname + " reflected " + str(status["damage total"])  + " (" + str(round(refldmgperc)) + "%) dmg back to " + attack["attacker"].nickname)
+                            else:
+                                detailstext.append("    " + attack["defender"].nickname + " reflected " + str(status["damage total"])  + " (<1%) dmg back to " + attack["attacker"].nickname)
             else:
                 detailstext.append("The attack missed!")
         else:
