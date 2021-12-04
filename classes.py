@@ -506,7 +506,7 @@ def importSpecies(filepath):
             newspecies = Species(
                 monid=int(row["ID"]), 
                 name=row["Name"], 
-                anatomy=int(row["Anatomy"]),
+                anatomy=row["Anatomy"],
                 maxHP=int(row["maxHP"]),
                 physATK=int(row["physATK"]), 
                 armor=int(row["armor"]), 

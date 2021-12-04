@@ -1,10 +1,14 @@
 ID,Name,Physical power,Heat power,Cold power,Shock power,Accuracy,Crit rate mod,Flags,Effects,ChainID,Tooltip
-0,Heavy slam,1.2,0,0,0,0.8,1,"Target_other,Contact",,,Hit thing hard
-1,Tail swipe,0.6,0,0,0,1,1,"Target_other,Contact",Slow_1(1),,Sweep legs make slow
-2,Ignition,0,0.1,0,0,1,1,"Target_other,Contact",Burn(1),,Burn
-3,Frigid gaze,0,0,0.1,0,0.9,1,Target_team,,,Resting Bitch Face
-4,Blazing flurry,0.1,0.3,0,0,0.4,1,"Target_other,Contact","Multihit_5,Burn(0.2)",,Consecutive regular punches
-5,Ice lash,0,0,1,0,1,1,Target_other,,,Lash
-6,Elemental rush,0,0.3,0,0,1,1,"Target_other,Contact",Burn(0.2),7,
-7,Elemental rush 2,0,0,0.3,0,1,1,"Target_other,Contact",Slow_1(0.2),8,
-8,Elemental rush 3,0,0,0,0.3,1,2,"Target_other,Contact",,,
+0,Physical Reference,1,0,0,0,1,1,,,,Reference attack for physical attacks
+1,Heat Reference,0,1,0,0,1,1,,,,Reference attack for heat attacks
+2,Cold Reference,0,0,1,0,1,1,,,,Reference attack for cold attacks
+3,Shock Reference,0,0,0,1,1,1,,,,Reference attack for shock attacks
+4,Heavy slam,1.2,0,0,0,0.8,1,"Target_other,Contact",,,Hit thing hard
+5,Tail swipe,0.6,0,0,0,1,1,"Target_other,Contact",Slow_1(1),,Sweep legs make slow
+6,Ignition,0,0.1,0,0,1,1,"Target_other,Contact",Burn(1),,Burn
+7,Frigid gaze,0,0,0.1,0,0.9,1,Target_team,,,Resting Bitch Face
+8,Blazing flurry,0.1,0.3,0,0,0.4,1,"Target_other,Contact","Multihit_5,Burn(0.2)",,Consecutive regular punches
+9,Ice lash,0,0,1,0,1,1,Target_other,,,Lash
+10,Elemental rush,0,0.3,0,0,1,1,"Target_other,Contact",Burn(0.2),11,
+11,Elemental rush 2,0,0,0.3,0,1,1,"Target_other,Contact",Slow_1(0.2),12,
+12,Elemental rush 3,0,0,0,0.3,1,2,"Target_other,Contact",,,

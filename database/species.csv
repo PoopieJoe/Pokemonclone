@@ -1,5 +1,6 @@
 ID,Name,Anatomy,maxHP,physATK,armor,magATK,heatRES,coldRES,shockRES,SPE,Ability,Flags
-0,Lurker,0,348,60,115,80,0.3,-0.2,0,80,,
-1,Viper,1,173,150,83,50,0,0,0,128,,
-2,Lizion,2,192,123,101,70,0.1,-0.1,0.2,113,,
-3,Halfling,0,170,40,80,110,0.4,0.4,0.4,97,,
+0,Reference,Humanoid,200,100,100,100,0,0,0,100,,
+1,Lurker,Humanoid,238,60,115,80,0.3,-0.2,0,80,,
+2,Viper,Snakelike,173,130,83,80,0,0,0,128,,
+3,Lizion,Chimera,192,115,101,75,0.1,-0.1,0.2,113,,
+4,Halfling,Humanoid,170,40,80,110,0.3,0.3,0.3,97,,

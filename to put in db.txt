@@ -1,0 +1,4 @@
+Anatomies:
+Elemental -> Head,Chest,Arm,Arm
+Fire,Ice,Storm -> 150 HP, 90 attack
+
