@@ -1,8 +1,8 @@
 ID,Name,Physical power,Heat power,Cold power,Shock power,Accuracy,Crit rate mod,Flags,Effects,ChainID,Tooltip
-0,Physical Reference,1,0,0,0,1,1,,,,Reference attack for physical attacks
-1,Heat Reference,0,1,0,0,1,1,,,,Reference attack for heat attacks
-2,Cold Reference,0,0,1,0,1,1,,,,Reference attack for cold attacks
-3,Shock Reference,0,0,0,1,1,1,,,,Reference attack for shock attacks
+0,Physical Reference,1,0,0,0,1,1,Target_any,,,Reference attack for\physical attacks
+1,Heat Reference,0,1,0,0,1,1,Target_any,,,Reference attack for heat attacks
+2,Cold Reference,0,0,1,0,1,1,Target_any,,,Reference attack for cold attacks
+3,Shock Reference,0,0,0,1,1,1,Target_any,,,Reference attack for shock attacks
 4,Heavy slam,1.2,0,0,0,0.8,1,"Target_other,Contact",,,Hit thing hard
 5,Tail swipe,0.6,0,0,0,1,1,"Target_other,Contact",Slow_1(1),,Sweep legs make slow
 6,Ignition,0,0.1,0,0,1,1,"Target_other,Contact",Burn(1),,Burn

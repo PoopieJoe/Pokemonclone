@@ -444,7 +444,7 @@ def importAttacks(filepath):
                 flags=[flag for flag in row["Flags"].split(",") if flag != ""],
                 effects=[effect for effect in row["Effects"].split(",") if effect != ""],
                 chainID= -1 if row["ChainID"]=="" else int(row["ChainID"]),
-                tooltip=[text for text in row["Tooltip"].split("\\") ]
+                tooltip=[str(text) for text in row["Tooltip"].split("\\") ]
                 )
             attacks.append(newattack)
     return attacks

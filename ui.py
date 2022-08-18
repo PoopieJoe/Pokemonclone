@@ -59,7 +59,12 @@ def getShortStatusText(beast: Beast) -> str:
     return statustext
 
 def getAttackTooltipText(attack: Attack) -> str:
-    return attack.tooltip
+    statustext = attack.tooltip.copy()
+    for n,power in enumerate(attack.power):
+        if power>0:
+            statustext.append(ELEMENTS[n] + " power: " + str(int(power*100)) + "%")
+
+    return statustext
 
 def getTargetTooltipText(target: Beast) -> str:
     return getShortStatusText(target)
@@ -92,20 +97,24 @@ def drawTargetSelect(screen: Screen, scene: Scene, slot: Slot):
     beastslot = slot.num
 
     valid_targets = [0,1,2,3]
-    if "Target_other" in attackflags: #effect on 1 other (friendly or enemy)
+    if TARGETOTHER in attackflags: #effect on 1 other (friendly or enemy)
         valid_targets.remove(beastslot)
-    elif "Target_team" in attackflags: #effect on team (friendly or enemy)
+    elif TARGETTEAM in attackflags: #effect on team (friendly or enemy)
         valid_targets.remove(beastslot)
         if beastslot == 0 or beastslot == 2:
             valid_targets.remove(beastslot + 1)
         else:
             valid_targets.remove(beastslot - 1)
-    elif "Target_all_others" in attackflags: #effect on all others
-        raise Exception("Not implemented: Target_all_others")
-    elif "Target_self" in attackflags: #effect on self
-        raise Exception("Not implemented: Target_self")
-    else:   #no target (e.g. only set field conditions such as weather or terrain)
-        raise Exception("Not implemented: no target")
+    elif TARGETALLOTHER in attackflags: #effect on all others
+        raise Exception("Not implemented: " + TARGETALLOTHER)
+    elif TARGETSELF in attackflags: #effect on self
+        raise Exception("Not implemented: " + TARGETSELF)
+    elif TARGETANY in attackflags: #effect on any one character (including self)
+        pass
+    elif TARGETNONE in attackflags: #no target (e.g. only set field conditions such as weather or terrain)
+        raise Exception("Not implemented: " + TARGETNONE)
+    else:   
+        raise Exception("Lmao u forgor")
     
     for x in scene.slots:
         if (not x.beast.isalive):

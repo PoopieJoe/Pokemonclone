@@ -25,6 +25,9 @@ MULTIHITNAME = "Multihit"
 TARGETOTHER = "Target_other"
 TARGETTEAM = "Target_team"
 TARGETALLOTHER = "Target_all_others"
+TARGETSELF = "Target_self"
+TARGETANY = "Target_any"
+TARGETNONE = "Target_none"
 
 # Equipment effects
 REFLECTNAME = "Reflect"

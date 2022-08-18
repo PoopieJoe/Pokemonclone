@@ -75,7 +75,7 @@ while (battle_active):
     elif (len(scene.raisedFlags) == 0 and scene.state == "Idle"):
         scene.tick()
 
-    sleep(1/30) #worlds shittiestly programmed framerate
+    sleep(1/60) #worlds shittiestly programmed framerate
 
     #wipe internal buffer
     screen.clear()
