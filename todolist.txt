@@ -1,12 +1,10 @@
 Priority:
-- Make reference calc for balance
-- Fill database (~20 species, ~30 equipment pieces, ~50 attacks)
-- Implement missing effects and flags
+- Team viewer/picker
 - Victory screen
 - Title screen
 
 Other:
-- Implement instant attack effects (can you even do animations?)
+- Implement instant attack effects (can I even do animations?)
 - Predictive damage calc
 - Team builder
 - Advanced string processing (e.g. colors, italics, bold, different fonts, etc.)

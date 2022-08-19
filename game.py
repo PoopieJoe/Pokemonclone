@@ -17,7 +17,7 @@ import teamimport as timport
 pygame.init()
 
 #Import teams from file:
-Team1 = timport.importteam(Path("./teams/Test_1.txt"))
+Team1 = timport.importteam(Path("./teams/Test_3.txt"))
 Team2 = timport.importteam(Path("./teams/Test_2.txt"))
 teams = [Team1,Team2]
 

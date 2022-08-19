@@ -6,7 +6,7 @@ from eventhandlers import continueaction
 from globalconstants import *
 from uiElements import *
 from tuplemath import addtuple, multtuple
-from classes import Beast, Attack, getStaticText
+from classes import Beast, Attack, getAttack, getStaticText
 from scenemanager import Scene, Slot
 
 pygame.init()
@@ -35,12 +35,12 @@ def getStatusText(beast:Beast):
     else:
         statustext.append("Healthy")
     statustext.append("")
-    statustext.append("physATK: " + str(round(beast.physATK,2)))
-    statustext.append("magATK: " + str(round(beast.magATK,2)))
-    statustext.append("physRES: " + str(round(beast.RES[0],2)))
-    statustext.append("heatRES: " + str(round(beast.RES[1],2)))
-    statustext.append("coldRES: " + str(round(beast.RES[2],2)))
-    statustext.append("shockRES: " + str(round(beast.RES[3],2)))
+    statustext.append("physATK: " + str(int(beast.physATK)))
+    statustext.append("magATK: " + str(int(beast.magATK)))
+    statustext.append("physRES: " + str(int(beast.RES[0]*100)) + "%")
+    statustext.append("heatRES: " + str(int(beast.RES[1]*100)) + "%")
+    statustext.append("coldRES: " + str(int(beast.RES[2]*100)) + "%")
+    statustext.append("shockRES: " + str(int(beast.RES[3]*100)) + "%")
     
     return statustext
 
@@ -60,16 +60,56 @@ def getShortStatusText(beast: Beast) -> str:
 
 def getAttackTooltipText(attack: Attack) -> str:
     statustext = attack.tooltip.copy()
+
     #Flags
-    if attack.flags.count(CONTACTFLAG):
-        statustext.append("Contact")
+    for flag in attack.flags:
+        if flag["name"] == CONTACTFLAG:
+            statustext.append("Contact")
+        elif flag["name"] == MULTIHITNAME:
+            statustext.append("Hits " + str(flag["value"]) + " times")
+        elif flag["name"] == TARGETOTHER:
+            statustext.append("Target: Any Other")
+        elif flag["name"] == TARGETTEAM:
+            statustext.append("Target: Team")
+        elif flag["name"] == TARGETALLOTHER:
+            statustext.append("Target: All Others")
+        elif flag["name"] == TARGETSELF:
+            statustext.append("Target: Self")
+        elif flag["name"] == TARGETANY:
+            statustext.append("Target: Any")
+        elif flag["name"] == TARGETNONE:
+            statustext.append("Target: None")
+        else:
+            statustext.append("UNHANDLED FLAG tooltip: " + flag["name"])
+
+    #Chains
+    if attack.chainID != NOCHAINID:
+        nextatk = getAttack(attack.chainID)
+        chainatks = [nextatk]
+        while nextatk.chainID != NOCHAINID:
+            nextatk = getAttack(nextatk.chainID)
+            chainatks.append(nextatk)
+            
+        statustext.append("Chains into:")
+        for atk in chainatks:
+            statustext.append(atk.name)
+        
+
     #Damage
     for n,power in enumerate(attack.power):
         if power>0:
             statustext.append(ELEMENTS[n] + " power: " + str(int(power*100)) + "%")
     #Secondary effects
     for effect in attack.effects:
-        statustext.append(str(int(effect["chance"]*100)) + "% Chance to apply " + effect["name"] + " " + str(effect["value"]))
+        if effect["value"]==VALUENONE:
+            #effects with no value
+            statustext.append(str(int(effect["chance"]*100)) + "% Chance to apply " + effect["name"])
+        elif effect["chance"]==CHANCENONE:
+            #effect which always applies
+            statustext.append("Applies " + effect["name"] + " " + str(effect["value"]))
+        else:
+            #generic status
+            statustext.append(str(int(effect["chance"]*100)) + "% Chance to apply " + effect["name"] + " " + str(effect["value"]))
     return statustext
 
 def getTargetTooltipText(target: Beast) -> str:
@@ -82,7 +122,6 @@ def getStatusInfo(status: Beast) -> str:
         return getStaticText("Slowtooltip")
     
     return ["Tooltip not implemented"]
-
 
 def getTurntrackerTooltipText(scene: Scene) -> str:
     text = []
@@ -103,24 +142,24 @@ def drawTargetSelect(screen: Screen, scene: Scene, slot: Slot):
     beastslot = slot.num
 
     valid_targets = [0,1,2,3]
-    if TARGETOTHER in attackflags: #effect on 1 other (friendly or enemy)
-        valid_targets.remove(beastslot)
-    elif TARGETTEAM in attackflags: #effect on team (friendly or enemy)
-        valid_targets.remove(beastslot)
-        if beastslot == 0 or beastslot == 2:
-            valid_targets.remove(beastslot + 1)
-        else:
-            valid_targets.remove(beastslot - 1)
-    elif TARGETALLOTHER in attackflags: #effect on all others
-        raise Exception("Not implemented: " + TARGETALLOTHER)
-    elif TARGETSELF in attackflags: #effect on self
-        raise Exception("Not implemented: " + TARGETSELF)
-    elif TARGETANY in attackflags: #effect on any one character (including self)
-        pass
-    elif TARGETNONE in attackflags: #no target (e.g. only set field conditions such as weather or terrain)
-        raise Exception("Not implemented: " + TARGETNONE)
-    else:   
-        raise Exception("Lmao u forgor")
+    for flagname in [flag["name"] for flag in attackflags]:
+        if flagname == TARGETOTHER: #effect on 1 other (friendly or enemy)
+            valid_targets.remove(beastslot)
+        elif flagname == TARGETTEAM: #effect on team (friendly or enemy)
+            #valid_targets.remove(beastslot)
+            # if beastslot == 0 or beastslot == 2:
+            #     valid_targets.remove(beastslot + 1)
+            # else:
+            #     valid_targets.remove(beastslot - 1)
+            pass
+        elif flagname == TARGETALLOTHER: #effect on all others
+            raise Exception("Not implemented: " + TARGETALLOTHER)
+        elif flagname == TARGETSELF: #effect on self
+            raise Exception("Not implemented: " + TARGETSELF)
+        elif flagname == TARGETANY: #effect on any one character (including self)
+            pass
+        elif flagname == TARGETNONE: #no target (e.g. only set field conditions such as weather or terrain)
+            raise Exception("Not implemented: " + TARGETNONE)
     
     for x in scene.slots:
         if (not x.beast.isalive):

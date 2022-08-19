@@ -20,6 +20,9 @@ attackroll_randmod = 0.1 #attacks deal randomly between 90% and 110% dmg
 critchance = 0.05 #5% critchance
 critmulti = 1.5 #critical hit dmg multiplier
 
+# Chain
+NOCHAINID = -1
+
 # Flags
 MULTIHITNAME = "Multihit"
 TARGETOTHER = "Target_other"
@@ -35,6 +38,12 @@ REFLECTNAME = "Reflect"
 REFLECTBASEVAL = 0.1 #reflects 10% of dmg taken per level
 
 # Status effects
+
+VALUENONE = -1 #default values for secondary effect value and chance
+CHANCENONE = -1
+
+MULTIHITNAME = "Multihit"
+
 BURNNAME = "Burn"
 BURNDMG = 1/8 #dmg per 100 ticks
 BURNTOOLTIP = "Take continuous damage over time"

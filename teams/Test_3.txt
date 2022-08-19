@@ -1,0 +1,16 @@
+Format:     Doubles
+Team name:  Blizzard
+
+Species:    Storm Elemental
+Name:       Volt
+@Head:      Icy mask
+@Chest:     Metal chestplate
+@Arm:       Skull shield
+@Arm:       Skull shield
+
+Species:    Ice Elemental
+Name:       Kelvin
+@Head:      Icy mask
+@Chest:     Cloth wrap
+@Arm:       Ignition arm
+@Arm:       Ignition arm

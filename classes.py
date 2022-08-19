@@ -111,14 +111,29 @@ class Attack:
         self.power = [physPower,heatPower,coldPower,shockPower]
         self.accuracy = accuracy
         self.critRate = critRate
-        self.flags = flags
         self.chainID = chainID
+        self.flags = []
+        for flag in flags:
+            newflag = {
+                "name": "",
+                "value": VALUENONE
+            }
+            if fnmatch(flag, "*_*"):    #format: NAME_VALUE
+                underscorepos = flag.index('_')
+                newflag["name"] = flag[:underscorepos]
+                try:
+                    newflag["value"] = int(flag[underscorepos+1:])
+                except Exception:
+                    newflag["name"] = flag
+            else:
+                newflag["name"] = flag
+            self.flags.append(newflag)
         self.effects = []
         for effect in effects:
             neweffect = {
                 "name": "",
-                "value": 0,
-                "chance": 1
+                "value": VALUENONE,
+                "chance": CHANCENONE
             }
             if fnmatch(effect, "*_*(*)"):   #format: NAME_VALUE(CHANCE)
                 underscorepos = effect.index('_')
@@ -140,7 +155,10 @@ class Attack:
                 raise Exception("Effect '" + effect + "' follows invalid format")
             self.effects.append(neweffect)
             
-        self.tooltip = tooltip
+        if tooltip == ['']:
+            self.tooltip = []
+        else:
+            self.tooltip = tooltip
 
 class Species:
     def __init__(
@@ -259,22 +277,29 @@ class Beast:
         #check current attack
         attack = self.selected_attack.atk
         for flag in attack.flags:
-            if (flag == TARGETOTHER):
+            if (flag["name"] == TARGETOTHER):
                 targetslots = [scene.slots[slot]]
-            elif (flag == TARGETTEAM):
+            elif (flag["name"] == TARGETTEAM):
                 if (slot == 0 or slot == 2):
                     otherslot = slot + 1
                 else:
                     otherslot = slot - 1
                 targetslots = [scene.slots[slot],scene.slots[otherslot]]
-            elif (flag == TARGETALLOTHER):
+            elif (flag["name"] == TARGETALLOTHER):
                 targetslots = scene.slots
                 targetslots.pop(self) 
+            elif (flag["name"] == TARGETSELF):
+                targetslots = [self]
+            elif (flag["name"] == TARGETANY):
+                targetslots = [scene.slots[slot]]
+            elif (flag["name"] == TARGETNONE):
+                targetslots = None
             else:
                 pass
 
-        
-        print(str(self.nickname) + " selected " + " and ".join([slot.beast.nickname for slot in targetslots]) + " as the target(s)!")
+        if targetslots != None:
+            print(str(self.nickname) + " selected " + " and ".join([slot.beast.nickname for slot in targetslots]) + " as the target(s)!")
+
         try:
             self.selected_attack.slots = targetslots
             return True
@@ -444,7 +469,7 @@ def importAttacks(filepath):
                 flags=[flag for flag in row["Flags"].split(",") if flag != ""],
                 effects=[effect for effect in row["Effects"].split(",") if effect != ""],
                 chainID= -1 if row["ChainID"]=="" else int(row["ChainID"]),
-                tooltip=[str(text) for text in row["Tooltip"].split("\\") ]
+                tooltip=[str(text) for text in row["Tooltip"].split("\\n") ]
                 )
             attacks.append(newattack)
     return attacks

@@ -125,12 +125,12 @@ class Scene:
             print("\n> " + active_slot.beast.nickname + " used " + attack.name + " on " + " and ".join([slot.beast.nickname for slot in active_slot.beast.selected_attack.slots]) + "!")
 
             numhits = 1
-            for effect in attack.effects:
-                if (effect["name"] == MULTIHITNAME):
-                    numhits = effect["value"]
+            for flag in attack.flags:
+                if (flag["name"] == MULTIHITNAME):
+                    numhits = flag["value"]
 
             
-            shuffle(defenderlist)   #random order
+            shuffle(defenderlist)   #random order #TODO (should we sort this by speed?)
             for target in defenderlist: #repeat for every target
                 #chain by ID
                 curattack = attack
