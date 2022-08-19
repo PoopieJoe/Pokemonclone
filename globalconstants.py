@@ -28,6 +28,7 @@ TARGETALLOTHER = "Target_all_others"
 TARGETSELF = "Target_self"
 TARGETANY = "Target_any"
 TARGETNONE = "Target_none"
+CONTACTFLAG = "Contact"
 
 # Equipment effects
 REFLECTNAME = "Reflect"

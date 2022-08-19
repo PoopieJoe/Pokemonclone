@@ -36,7 +36,7 @@ class Box:
             self.parent = None
         else:
             self.setparent(parent)
-        self.children = children #type: [Box()]
+        self.children = children #type. [Box()]
         self.margin = margin #type: Margin() 
         self.absrect = self.calcabsrect()
 

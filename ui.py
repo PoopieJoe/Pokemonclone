@@ -60,10 +60,16 @@ def getShortStatusText(beast: Beast) -> str:
 
 def getAttackTooltipText(attack: Attack) -> str:
     statustext = attack.tooltip.copy()
+    #Flags
+    if attack.flags.count(CONTACTFLAG):
+        statustext.append("Contact")
+    #Damage
     for n,power in enumerate(attack.power):
         if power>0:
             statustext.append(ELEMENTS[n] + " power: " + str(int(power*100)) + "%")
-
+    #Secondary effects
+    for effect in attack.effects:
+        statustext.append(str(int(effect["chance"]*100)) + "% Chance to apply " + effect["name"] + " " + str(effect["value"]))
     return statustext
 
 def getTargetTooltipText(target: Beast) -> str:
