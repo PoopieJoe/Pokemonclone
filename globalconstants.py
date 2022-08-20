@@ -67,6 +67,14 @@ STATE_CHOOSETARGET = "Choose target"
 STATE_EXECUTEATTACK = "Execute attack"
 STATE_IDLE = "Idle"
 
+# Files
+DBPATH = "./database/"
+ATTACKSDB = "attacks.csv"
+EQUIPMENTDB = "equipment.csv"
+ANATOMIESDB = "anatomies.csv"
+SPECIESDB = "species.csv"
+STATICTEXTDB = "statictext.csv"
+
 # UI colors and fonts
 screenDims = (1280,720)
 

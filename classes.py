@@ -561,9 +561,8 @@ def importStatictext(filepath):
 
     return statictext
 
-dbpath = "./database/"
-ATTACKS = importAttacks(Path(dbpath+"attacks.csv"))
-EQUIPMENT = importEquipment(Path(dbpath+"equipment.csv"))
-ANATOMIES = importAnatomies(Path(dbpath+"anatomies.csv"))
-SPECIES = importSpecies(Path(dbpath+"species.csv"))
-STATICTEXT = importStatictext(Path(dbpath+"statictext.csv"))
+ATTACKS = importAttacks(Path(DBPATH+ATTACKSDB))
+EQUIPMENT = importEquipment(Path(DBPATH+EQUIPMENTDB))
+ANATOMIES = importAnatomies(Path(DBPATH+ANATOMIESDB))
+SPECIES = importSpecies(Path(DBPATH+SPECIESDB))
+STATICTEXT = importStatictext(Path(DBPATH+STATICTEXTDB))
