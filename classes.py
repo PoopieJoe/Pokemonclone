@@ -241,7 +241,7 @@ class Beast:
                     raise Exception("Item " + piece.part + " does not match the limb part " + self.anatomy.parts[n])
 
         #Flags
-        self.flags = [Flag("execute_attack",False),Flag("choose_attack",False)]
+        self.flags = [Flag(FLAG_EXECUTEATTACK,False),Flag(FLAG_CHOOSEATTACK,False)]
     
     def validityCheck(self):
         #TODO: check if build is legal

@@ -50,7 +50,7 @@ class Scene:
                 slot.beast.clearALLflags()
                 slot.beast.isalive = True
                 slot.beast.HP = slot.beast.maxHP
-                slot.beast.setflag("choose_attack")
+                slot.beast.setflag(FLAG_CHOOSEATTACK)
             slot.turntracker = 0
 
     def printScene(self):
@@ -83,7 +83,7 @@ class Scene:
         #check for raised event flags and sort flags
         #rules: from first resolved to last resolved: choose move, attacks
         #       multiple flags of the same type are resolved in random order
-        priority_order = ["choose_attack","execute_attack"]
+        priority_order = [FLAG_CHOOSEATTACK,FLAG_EXECUTEATTACK]
         segmented_flaglist = [[] for _ in priority_order]
         for slot in self.slots:
             for flag in slot.beast.flags:
@@ -105,9 +105,9 @@ class Scene:
             self.active_flag = self.raisedFlags.pop(0)
             flag_name = self.active_flag.flag.type
             self.active_slot = self.active_flag.slot
-            if (flag_name == "choose_attack"):
+            if (flag_name == FLAG_CHOOSEATTACK):
                 self.state = "Choose attack"
-            elif (flag_name == "execute_attack"):
+            elif (flag_name == FLAG_EXECUTEATTACK):
                 self.state = "Execute attack"
             else:
                 self.state = "Idle"
@@ -118,7 +118,7 @@ class Scene:
 
     def processattack(self):
         active_slot = self.active_slot
-        if (active_slot.beast.getflag("execute_attack")):
+        if (active_slot.beast.getflag(FLAG_EXECUTEATTACK)):
             attack = active_slot.beast.selected_attack.atk
             defenderlist = active_slot.beast.selected_attack.slots
 
@@ -146,7 +146,7 @@ class Scene:
 
             # clear flags and selected attack (is the latter even neccesary?)
             # (yes it is used to check if we're moving to attack, since track position is used to check if we shoud set the flag)
-            active_slot.beast.clearflag("execute_attack")
+            active_slot.beast.clearflag(FLAG_EXECUTEATTACK)
             active_slot.beast.selected_attack = c.SelectedAtk(None,-1)
         else:
             raise Exception(active_slot.beast.nickname + " has no attack selected!")
@@ -379,10 +379,10 @@ class Scene:
             if (beast.isalive):
                 if (beast.selected_attack.atk != None): #has any move selected (moving to attack)
                     if (slot.turntracker >= self.turnTrackerLength/2): #check if tt exceeds threshold
-                        beast.setflag("execute_attack")
+                        beast.setflag(FLAG_EXECUTEATTACK)
                 else: #no move selected (moving from attack)
                     if (slot.turntracker >= self.turnTrackerLength): #exceeded turn tracker length
-                        beast.setflag("choose_attack")
+                        beast.setflag(FLAG_CHOOSEATTACK)
                         slot.turntracker = 0
         
         return True

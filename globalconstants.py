@@ -53,6 +53,20 @@ SLOWMOD = 0.5 #speed multiplier during slow
 SLOWBASEDURATION = 1/6 #slows for 1/6th of a turn per level
 SLOWTOOLTIP = "Reduced speed"
 
+# State flags
+FLAG_CHOOSEATTACK = "FLAG_CHOOSEATTACK"
+FLAG_EXECUTEATTACK = "FLAG_EXECUTEATTACK"
+
+# Game states
+STATE_START = "Start"
+STATE_MAINMENU = "Main menu"
+STATE_VIEWTEAMS = "View teams"
+STATE_EDITTEAM = "Edit team"
+STATE_CHOOSEATTACK = "Choose attack"
+STATE_CHOOSETARGET = "Choose target"
+STATE_EXECUTEATTACK = "Execute attack"
+STATE_IDLE = "Idle"
+
 # UI colors and fonts
 screenDims = (1280,720)
 

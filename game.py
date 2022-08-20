@@ -5,12 +5,12 @@ here's ur damn docstring
 import sys
 from time import sleep
 from pathlib import Path
-from random import shuffle
 import pygame
+import thorpy
 import classes as c
 from scenemanager import Scene
 import ui
-import globalconstants as gconst
+from globalconstants import *
 import teamimport as timport
 #from pygame.locals import *
 
@@ -34,8 +34,10 @@ windowoutput = pygame.display.set_mode(ui.screenDims)
 screen = ui.Screen([    "tooltips",
                         "overlay",
                         "background"])
+
+
 ui.drawScene(screen,scene)
-windowoutput.fill(gconst.BACKGROUNDCOLOR)
+windowoutput.fill(BACKGROUNDCOLOR)
 screen.draw(windowoutput)
 pygame.display.flip()
 
@@ -49,16 +51,16 @@ while (battle_active):
                 if button.collidemouse():
                     success = button.action(*(button.actionargs))
                     if success:
-                        if scene.state == "Choose attack":
-                            scene.state = "Choose target"
-                        elif scene.state == "Choose target":
-                            scene.active_slot.beast.clearflag("choose_attack")
-                            scene.state = "Idle"
+                        if scene.state == STATE_CHOOSEATTACK:
+                            scene.state = STATE_CHOOSETARGET
+                        elif scene.state == STATE_CHOOSETARGET:
+                            scene.active_slot.beast.clearflag(FLAG_CHOOSEATTACK)
+                            scene.state = STATE_IDLE
                             scene.active_flag = None
-                        elif scene.state == "Execute attack":
+                        elif scene.state == STATE_EXECUTEATTACK:
                             scene.attackresult = []
-                            scene.active_slot.beast.clearflag("execute_attack")
-                            scene.state = "Idle"
+                            scene.active_slot.beast.clearflag(FLAG_EXECUTEATTACK)
+                            scene.state = STATE_IDLE
                             scene.active_flag = None
         else:
             pass
@@ -69,10 +71,10 @@ while (battle_active):
     scene.popflag()
 
     #change gamestate according to state
-    if (scene.state == "Execute attack"):
+    if (scene.state == STATE_EXECUTEATTACK):
         if (scene.active_slot.beast.selected_attack.atk != None):
             scene.processattack()
-    elif (len(scene.raisedFlags) == 0 and scene.state == "Idle"):
+    elif (len(scene.raisedFlags) == 0 and scene.state == STATE_IDLE):
         scene.tick()
 
     sleep(1/60) #worlds shittiestly programmed framerate
@@ -80,15 +82,15 @@ while (battle_active):
     #wipe internal buffer
     screen.clear()
     #update ui according to state
-    if (scene.state == "Idle"):
+    if (scene.state == STATE_IDLE):
         menuButtons = []
         ui.drawScene(screen,scene)
-    elif (scene.state == "Choose attack"):
+    elif (scene.state == STATE_CHOOSEATTACK):
         menuButtons = ui.drawMoveselect(screen,scene,scene.active_slot)
-    elif (scene.state == "Choose target"):
+    elif (scene.state == STATE_CHOOSETARGET):
         ui.drawScene(screen,scene)
         menuButtons = ui.drawTargetSelect(screen,scene,scene.active_slot)
-    elif (scene.state == "Execute attack"):
+    elif (scene.state == STATE_EXECUTEATTACK):
         if (scene.attackresult):
             ui.drawScene(screen,scene)
             menuButtons = ui.drawExecuteAttack(screen,scene,scene.attackresult)
