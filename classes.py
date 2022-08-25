@@ -264,10 +264,10 @@ class Beast:
             outticksperdmg = max(1,floor(1/dmgpertick))
         return (outdmgpertick, outticksperdmg)
 
-    def selectattack(self,atk_id:Attack):
-        print(str(self.nickname) + " selected " + str(self.attacks[atk_id].name) + " as their attack!")
+    def selectattack(self,atk:Attack):
+        print(str(self.nickname) + " selected " + str(atk.name) + " as their attack!")
         try:
-            self.selected_attack.atk = self.attacks[atk_id]
+            self.selected_attack.atk = atk
             return True
         except Exception:
             return False

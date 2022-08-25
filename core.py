@@ -32,40 +32,45 @@ class CoreGame:
         self.startbutton.set_painter(ui.generic_menubutton_painter)
         self.startbutton.finish()
 
+        self.teamsbutton = thorpy.make_button("Teams")
+        self.teamsbutton.set_painter(ui.generic_menubutton_painter)
+        self.teamsbutton.set_pressed_state()
+        self.teamsbutton.finish()
+
         self.quitbutton = thorpy.make_button("Quit",func=thorpy.functions.quit_func)
         self.quitbutton.set_painter(ui.generic_menubutton_painter)
         self.quitbutton.finish()
 
+        self.mainmenubar = thorpy.Ghost([self.startbutton,self.teamsbutton,self.quitbutton])
+        thorpy.store(self.mainmenubar,mode="v")
+        self.mainmenubar.set_center((SCREENW/6,SCREENH*8/16))
+
         # Other buttons
         thorpy.style.FONT_SIZE = 18
 
-        self.gui = thorpy.Background(elements=[self.startbutton,self.quitbutton],
+        self.gui = thorpy.Background(elements=[self.mainmenubar],
                                             image=pygame.image.load(SCENEBG))
 
-        # Positioning
-        self.startbutton.set_center((SCREENW/6,SCREENH*7/16))
-        self.quitbutton.set_center((SCREENW/6,SCREENH*9/16))
 
-        self.reac_time = thorpy.ConstantReaction(thorpy.constants.THORPY_EVENT, self.tick_game,
-                            {"id":thorpy.constants.EVENT_TIME})
-        self.gui.add_reaction(self.reac_time)
+
+        # self.reac_time = thorpy.ConstantReaction(thorpy.constants.THORPY_EVENT, self.tick_game,
+        #                     {"id":thorpy.constants.EVENT_TIME})
+        # self.gui.add_reaction(self.reac_time)
 
 
     def startScene(self,beasts,setactive = True):
-        try:
-            newscene = smanage.Scene()
-            for n,beast in enumerate(beasts):
-                if n >= len(beasts): team = 1
-                else: team = 0
-                newscene.addBeast(beast,team)
-            newscene.setupBattle()
-            self.scenes.append(newscene)
-            if setactive:
-                self.activescene = self.scenes[-1]
-                self.state = GAME_SCENE
-        except Exception:
-            return False
-        return len(self.scenes)
+        newscene = smanage.Scene()
+        for n,beast in enumerate(beasts):
+            if n >= len(beasts): team = 1
+            else: team = 0
+            newscene.addBeast(beast,team)
+        newscene.setupBattle()
+        self.scenes.append(newscene)
+        if setactive:
+            self.activescene = self.scenes[-1]
+            self.state = GAME_SCENE
+        self.tick_scenes([self.activescene]) #tick scene to proc ui
+        return
 
     def tick_game(self):
         self.ms = pygame.time.get_ticks()
@@ -96,21 +101,25 @@ class CoreGame:
 
         # build active scene ui depending on state
         if self.activescene:
-            self.gui.unblit()
-            self.gui.update()
-            self.gui = thorpy.Background(elements=[self.quitbutton],
-                                                image=pygame.image.load(SCENEBG))
-
-            # Positioning
-            self.quitbutton.set_center((SCREENW/6,SCREENH*9/16))
-
-            menu = thorpy.Menu(self.gui,fps=FPS)
-            menu.play()
-
             if (self.activescene.state == SCENE_IDLE):
                 pass
             elif (self.activescene.state == SCENE_CHOOSEATTACK):
-                pass
+                # fetch active beast from the active scene
+                activebeast = self.activescene.active_slot.beast
+
+                # Textbox with beast stats/state
+                beasttitle = thorpy.make_text(activebeast.nickname)
+                beasttitle.set_center((SCREENW/2,SCREENH*5/8))
+
+                # generate movebuttons
+                movebuttons = [thorpy.make_button(atk.name,activebeast.selectattack,params={"atk":atk}) for atk in activebeast.attacks]
+                movebuttonbox = thorpy.Box(movebuttons)
+                movebuttonbox.set_center((SCREENW/2,SCREENH*3/4))
+                self.gui = thorpy.Background(elements=[beasttitle,movebuttonbox],
+                                                    image=pygame.image.load(SCENEBG))
+
+                menu = thorpy.Menu(self.gui,fps=FPS)
+                menu.play()
             elif (self.activescene.state == SCENE_CHOOSETARGET):
                 pass
             elif (self.activescene.state == SCENE_EXECUTEATTACK):

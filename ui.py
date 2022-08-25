@@ -294,7 +294,7 @@ def drawMoveselect(screen,scene,slot):
                                 backgroundcolor=MOVESELECTFOREGROUNDCOLOR,
                                 hovercolor=BUTTONHOVERCOLOR,
                                 action=beast.selectattack,
-                                actionargs=[atk_id]
+                                actionargs=[atk]
                                 )
         attackbutton.draw(overlay)
         buttons.append(attackbutton)

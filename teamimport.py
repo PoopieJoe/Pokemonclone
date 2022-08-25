@@ -13,13 +13,13 @@ def importteam(file):
     """
 
     #errormessages:
-    ex_missingcolon = "Line has no property or is missing a colon."
-    ex_missingspecies = "Beast has no species."
-    ex_invalid_property = "Invalid property."
-    ex_invalid_equipment = "Invalid equipment given."
-    ex_invalid_species = "Invalid species given."
-    ex_missing_format = "No battle format given."
-    ex_invalid_format = "Invalid format given."
+    EX_MISSINGCOLON = "Line has no property or is missing a colon."
+    EX_MISSINGSPECIES = "Beast has no species."
+    EX_INVALID_PROPERTY = "Invalid property."
+    EX_INVALID_EQUIPMENT = "Invalid equipment given."
+    EX_INVALID_SPECIES = "Invalid species given."
+    EX_MISSING_FORMAT = "No battle format given."
+    EX_INVALID_FORMAT = "Invalid format given."
 
     teamreader = open( file , "rt" )
 
@@ -32,7 +32,7 @@ def importteam(file):
             if (len(line) > 1):
                 colonpos = line.find(':')
                 if colonpos < 0:
-                    raise Exception("[Line " + str(linenum) + "] " + ex_missingcolon + " (" + line + ")")
+                    raise Exception("[Line " + str(linenum) + "] " + EX_MISSINGCOLON + " (" + line + ")")
                 prop = line[0:colonpos]
                 detail = line[colonpos+1:len(line)].replace('\n','').strip()
                 
@@ -42,7 +42,7 @@ def importteam(file):
                     if (detail in ["Doubles"]):
                         battleformat = detail
                     else:
-                        raise Exception("[Line " + str(linenum) + "] " + ex_invalid_format)
+                        raise Exception("[Line " + str(linenum) + "] " + EX_INVALID_FORMAT)
                 elif (prop == "Species"):
                     try:
                         beastnum += 1
@@ -50,19 +50,19 @@ def importteam(file):
                         newbeast = c.Beast(detail,None,[])
                         team.beasts.append(newbeast)
                     except Exception:
-                        raise Exception("[Line " + str(linenum) + "] " + ex_invalid_species)
+                        raise Exception("[Line " + str(linenum) + "] " + EX_INVALID_SPECIES)
                 elif (prop == "Name"):
                     if (beastnum >= 0):
                         team.beasts[beastnum].nickname = detail
                     else:
-                        raise Exception("[Line " + str(linenum) + "] " + ex_missingspecies)
+                        raise Exception("[Line " + str(linenum) + "] " + EX_MISSINGSPECIES)
                 elif (prop in ["@Head","@Chest","@Arm","@Legs","@Tail"]):
                     if (beastnum >= 0):
                         if ( detail != "" ):
                             try:
                                 piece = c.getEquipment(detail)
                             except Exception:
-                                raise Exception("[Line " + str(linenum) + "] " + ex_invalid_equipment + " (" + piece.name + ")")
+                                raise Exception("[Line " + str(linenum) + "] " + EX_INVALID_EQUIPMENT + " (" + piece.name + ")")
                                 
                             if (piece.part == team.beasts[beastnum].anatomy.parts[equipmentcntr]):
                                 team.beasts[beastnum].equipItem(piece)
@@ -70,13 +70,13 @@ def importteam(file):
                                 raise Exception("[Line " + str(linenum) + "] Item '" + piece.name + "' does not match the limb '" +  team.beasts[beastnum].anatomy.parts[equipmentcntr] + "'")
                         equipmentcntr += 1
                     else:
-                        raise Exception("[Line " + str(linenum) + "] " + ex_missingspecies)
+                        raise Exception("[Line " + str(linenum) + "] " + EX_MISSINGSPECIES)
                 else:
-                        raise Exception("[Line " + str(linenum) + "] " + ex_invalid_property + " (" + line + ")")
+                        raise Exception("[Line " + str(linenum) + "] " + EX_INVALID_PROPERTY + " (" + line + ")")
 
     #Check validity and move beasts to subs where necessary based on format
     if (battleformat == ""):
-        raise Exception(ex_missing_format)
+        raise Exception(EX_MISSING_FORMAT)
     elif (battleformat == "Doubles"):
         teamlim = 2
         if (len(team.beasts) > teamlim):
