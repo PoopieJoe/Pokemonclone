@@ -7,9 +7,9 @@ from globalconstants import *
 
 pygame.init()
 
-DEFAULTFONTSIZE = int(screenDims[1]/7.2)
+DEFAULTFONTSIZE = int(SCREENH/7.2)
 DEFAULTFONT = pygame.font.SysFont(None,DEFAULTFONTSIZE)
-NAMEFONTSIZE = int(screenDims[1]*1/25)
+NAMEFONTSIZE = int(SCREENH*1/25)
 NAMEFONT = pygame.font.SysFont(None,NAMEFONTSIZE)
 
 class Rect_f:
@@ -186,10 +186,10 @@ class Tooltip:
 
             (absx,absy) = pygame.mouse.get_pos()
 
-            ttbox = Box(Rect_f( absx/screenDims[0],
-                                absy/screenDims[1],
-                                boxwidth/screenDims[0]*(1+self.margin.left+self.margin.right),
-                                boxheight/screenDims[1]*(1+self.margin.top+self.margin.bottom)),
+            ttbox = Box(Rect_f( absx/SCREENW,
+                                absy/SCREENH,
+                                boxwidth/SCREENW*(1+self.margin.left+self.margin.right),
+                                boxheight/SCREENH*(1+self.margin.top+self.margin.bottom)),
                         BASEBOX,
                         color=self.bgcolor,
                         border_radius=self.border_radius)
@@ -255,7 +255,7 @@ class Screen:
 class Layer:
     def __init__(self,name):
         self.name = name
-        self.surface = pygame.Surface(screenDims)
+        self.surface = pygame.Surface((SCREENW,SCREENH))
         return        
 
 def renderTextAtPos(surface,text,pos,alignment="topLeft",font=DEFAULTFONT,color=pygame.Color("white"),backgroundcolor=BACKGROUNDCOLOR):
@@ -286,7 +286,7 @@ BASEBOX = Box(
     relrect = Rect_f(0,0,1,1),
     parent = None
 )
-BASEBOX.absrect = Rect(0,0,screenDims[0],screenDims[1])
+BASEBOX.absrect = Rect(0,0,SCREENW,SCREENH)
 
 MAJORBOX = Box(
     relrect = Rect_f(0.02,0.55,0.96,0.43),

@@ -1,3 +1,4 @@
+from pathlib import Path
 import pygame
 from pygame.locals import *
 pygame.init()
@@ -16,9 +17,9 @@ ELEMENTS = [PHYSNAME,HEATNAME,COLDNAME,SHOCKNAME]
 TURNTRACKER_LENGTH = 20000 #time unit for 1 full turn (between move selections). Since monsters move their speed every tick, at average speed of 100, it takes 100 ticks from move selection to attack, and 100 ticks from attack back to move selection
 
 # Randomness
-attackroll_randmod = 0.1 #attacks deal randomly between 90% and 110% dmg
-critchance = 0.05 #5% critchance
-critmulti = 1.5 #critical hit dmg multiplier
+ATTACKROLL_RANDMOD = 0.1 #attacks deal randomly between 90% and 110% dmg
+CRITCHANCE = 0.05 #5% critchance
+CRITMULTI = 1.5 #critical hit dmg multiplier
 
 # Chain
 NOCHAINID = -1
@@ -58,29 +59,39 @@ FLAG_CHOOSEATTACK = "FLAG_CHOOSEATTACK"
 FLAG_EXECUTEATTACK = "FLAG_EXECUTEATTACK"
 
 # Game states
-STATE_START = "Start"
-STATE_MAINMENU = "Main menu"
-STATE_VIEWTEAMS = "View teams"
-STATE_EDITTEAM = "Edit team"
-STATE_CHOOSEATTACK = "Choose attack"
-STATE_CHOOSETARGET = "Choose target"
-STATE_EXECUTEATTACK = "Execute attack"
-STATE_IDLE = "Idle"
+GAME_START = "Start"
+GAME_MAINMENU = "Main menu"
+GAME_VIEWTEAMS = "View teams"
+GAME_EDITTEAM = "Edit team"
+GAME_SCENE = "Scene active"
+
+# Scene states
+SCENE_CHOOSEATTACK = "Choose attack"
+SCENE_CHOOSETARGET = "Choose target"
+SCENE_EXECUTEATTACK = "Execute attack"
+SCENE_IDLE = "Idle"
 
 # Files
-DBPATH = "./database/"
-ATTACKSDB = "attacks.csv"
-EQUIPMENTDB = "equipment.csv"
-ANATOMIESDB = "anatomies.csv"
-SPECIESDB = "species.csv"
-STATICTEXTDB = "statictext.csv"
+IMAGESFOLDER = "./images/"
+BASETEAMS = "./teams/"  
+DBFOLDER = "./database/"
+
+
+SCENEBG = Path(IMAGESFOLDER+"scene.png")
+ATTACKSDB = Path(DBFOLDER+"attacks.csv")
+EQUIPMENTDB = Path(DBFOLDER+"equipment.csv")
+ANATOMIESDB = Path(DBFOLDER+"anatomies.csv")
+SPECIESDB = Path(DBFOLDER+"species.csv")
+STATICTEXTDB = Path(DBFOLDER+"statictext.csv")
 
 # UI colors and fonts
-screenDims = (1280,720)
+FPS = 60
+SCREENH = 720
+SCREENW = 1280
 
 ALPHACOLOR = pygame.Color(0,1,255)
 BACKGROUNDCOLOR = pygame.Color(80,158,40)
-BACKGROUND = pygame.surface.Surface(screenDims).fill(BACKGROUNDCOLOR)
+BACKGROUND = pygame.surface.Surface((SCREENW,SCREENH)).fill(BACKGROUNDCOLOR)
 HPBACKGROUNDCOLOR = pygame.Color(180,180,180)
 HPFOREGROUNDCOLOR = pygame.Color(180,0,0)
 MOVESELECTBACKGROUNDCOLOR = pygame.Color(200,200,200)

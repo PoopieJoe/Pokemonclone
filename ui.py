@@ -1,4 +1,5 @@
 import pygame
+import thorpy
 from pygame.locals import *
 from math import floor,ceil
 from fnmatch import fnmatch
@@ -8,9 +9,50 @@ from uiElements import *
 from tuplemath import addtuple, multtuple
 from classes import Beast, Attack, getAttack, getStaticText
 from scenemanager import Scene, Slot
+import teamimport as timport
 
 pygame.init()
 
+# Thorpy styling
+
+class MenuButtonPainter(thorpy.painters.painter.Painter):
+    def __init__(self,rectcolor=(100,100,100),presscolor=(0,0,0),size=None,clip=None,pressed=False,hovered=False):
+        super(MenuButtonPainter, self).__init__(size,clip,pressed,hovered)
+        self.rectcolor = rectcolor
+        self.presscolor = presscolor
+
+    def get_surface(self):
+        surface = pygame.Surface(self.size, flags=pygame.SRCALPHA).convert_alpha()
+        rect_body = surface.get_rect()
+        # Parallelogram at 60 degrees, 50px wide if unhovered
+        sqrt3 = 1.732 # good enough approximation of sqrt(3)
+        if self.hovered:
+            shapewidth = rect_body.width- rect_body.height/sqrt3
+        else: 
+            shapewidth = 50
+        
+        if self.pressed:
+            fillcolor = self.presscolor
+        else:
+            fillcolor = self.rectcolor
+            
+        topleft = rect_body.topleft
+        topright = (topleft[0]+shapewidth,topleft[1])
+        bottomleft = (rect_body.bottomleft[0]+rect_body.height/sqrt3,rect_body.bottomleft[1])
+        bottomright = (bottomleft[0]+shapewidth,bottomleft[1])
+
+        shapepoints = [topleft,topright,bottomright,bottomleft] #in drawing order
+        pygame.draw.polygon(surface,fillcolor,shapepoints)
+        surface.set_clip(self.clip) #don't forget to set clip
+        return surface
+
+# generic button
+generic_menubutton_painter = MenuButtonPainter( size=(400,80),
+                                                rectcolor=(55,255,55),
+                                                presscolor=(20,180,20))
+
+
+# UI constants
 interbox_margin_y = 0.04
 interbox_margin_x = 0.01
 numcolumns = 4
@@ -432,8 +474,8 @@ def drawHealthbars(screen,scene):
         (0.05,0.22)
     ]
 
-    Hpbarwidth = int(screenDims[0]*(0.33))
-    Hpbarheight = int(screenDims[1]*(0.01))
+    Hpbarwidth = int((SCREENW,SCREENH)[0]*(0.33))
+    Hpbarheight = int((SCREENW,SCREENH)[1]*(0.01))
 
     for slot in scene.slots:
         beast = slot.beast
@@ -441,7 +483,7 @@ def drawHealthbars(screen,scene):
             #HP bar
             healthfrac = beast.HP/beast.maxHP
             slottext = beast.nickname + " " + str(beast.HP) + "/" + str(beast.maxHP) + " HP (" + str(max(round(healthfrac*100),1)) + "%)"
-            textpos = multtuple(slotreltextpos[slot.num],screenDims)
+            textpos = multtuple(slotreltextpos[slot.num],(SCREENW,SCREENH))
             HPbaroffset = (0,int(NAMEFONTSIZE)/2)
             HPbarposition = addtuple(textpos,HPbaroffset)
 
@@ -469,7 +511,7 @@ def drawHealthbars(screen,scene):
             textsize = NAMEFONT.size(slottext)
             healthbartooltip = Tooltip( getShortStatusText,
                                         [slot.beast],
-                                        region=Box(Rect_f(slotreltextpos[slot.num][0],slotreltextpos[slot.num][1]-textsize[1]/(2*screenDims[1]),textsize[0]/screenDims[0],textsize[1]/screenDims[1]),BASEBOX))
+                                        region=Box(Rect_f(slotreltextpos[slot.num][0],slotreltextpos[slot.num][1]-textsize[1]/(2*SCREENH),textsize[0]/SCREENW,textsize[1]/SCREENH),BASEBOX))
             healthbartooltip.draw(tooltips)
 
             #(De-)Buff icons
@@ -489,10 +531,10 @@ def drawHealthbars(screen,scene):
                 #tooltip
                 bufftooltip = Tooltip(  getStatusInfo,
                                         [effect],
-                                        region = Box(   Rect_f( (iconx-2*radius)/screenDims[0],
-                                                                (icony)/screenDims[1],
-                                                                (2*radius)/screenDims[0],
-                                                                (2*radius)/screenDims[1]),
+                                        region = Box(   Rect_f( (iconx-2*radius)/SCREENW,
+                                                                (icony)/SCREENH,
+                                                                (2*radius)/SCREENW,
+                                                                (2*radius)/SCREENH),
                                                         BASEBOX))
                 bufftooltip.draw(tooltips)
 

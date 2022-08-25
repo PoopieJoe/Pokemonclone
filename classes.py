@@ -1,5 +1,4 @@
 import csv
-from pathlib import Path
 from math import floor
 from fnmatch import fnmatch
 from globalconstants import *
@@ -561,8 +560,8 @@ def importStatictext(filepath):
 
     return statictext
 
-ATTACKS = importAttacks(Path(DBPATH+ATTACKSDB))
-EQUIPMENT = importEquipment(Path(DBPATH+EQUIPMENTDB))
-ANATOMIES = importAnatomies(Path(DBPATH+ANATOMIESDB))
-SPECIES = importSpecies(Path(DBPATH+SPECIESDB))
-STATICTEXT = importStatictext(Path(DBPATH+STATICTEXTDB))
+ATTACKS = importAttacks(ATTACKSDB)
+EQUIPMENT = importEquipment(EQUIPMENTDB)
+ANATOMIES = importAnatomies(ANATOMIESDB)
+SPECIES = importSpecies(SPECIESDB)
+STATICTEXT = importStatictext(STATICTEXTDB)

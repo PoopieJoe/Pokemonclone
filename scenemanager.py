@@ -202,19 +202,19 @@ class Scene:
 
         #get modifiers
         elementalmodifiers = [
-            {"added": [], "added total": 0, "multi": [], "multi total" : 1},
-            {"added": [], "added total": 0, "multi": [], "multi total" : 1},
-            {"added": [], "added total": 0, "multi": [], "multi total" : 1},
-            {"added": [], "added total": 0, "multi": [], "multi total" : 1}
+            {"added": [], "added total": 0, "multi": [], "multi total" : 1}, # PHYS modifiers
+            {"added": [], "added total": 0, "multi": [], "multi total" : 1}, # HEAT modifiers
+            {"added": [], "added total": 0, "multi": [], "multi total" : 1}, # COLD modifiers
+            {"added": [], "added total": 0, "multi": [], "multi total" : 1}  # SHOCK modifiers
         ]
-        globalmulti = {"multi": [], "multi total": 1}
+        globalmulti = {"multi": [], "multi total": 1} # global modifiers
 
-        randmod = 1 + attackroll_randmod*(random()*2 - 1) #random roll
+        randmod = 1 + ATTACKROLL_RANDMOD*(random()*2 - 1) #random roll
         globalmulti["multi"].append(randmod)
 
-        if ( random() < critchance ):
+        if ( random() < CRITCHANCE ):
             attackresult["crit"] = True
-            globalmulti["multi"].append(critmulti)
+            globalmulti["multi"].append(CRITMULTI)
         else:
             attackresult["crit"] = False
 
