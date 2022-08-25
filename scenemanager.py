@@ -113,7 +113,7 @@ class Scene:
                 self.state = "Idle"
 
     ###################################
-    # COMBAT AND TICKS
+    # COMBAT
     ###################################
 
     def processattack(self):
@@ -143,14 +143,18 @@ class Scene:
                     curattack = self.getChainAttack(curattack) #get next attack in chain
                     if curattack == None:
                         break
+                    
+            self.attackDone()
 
-            # clear flags and selected attack (is the latter even neccesary?)
-            # (yes it is used to check if we're moving to attack, since track position is used to check if we shoud set the flag)
-            active_slot.beast.clearflag(FLAG_EXECUTEATTACK)
-            active_slot.beast.selected_attack = c.SelectedAtk(None,-1)
         else:
             raise Exception(active_slot.beast.nickname + " has no attack selected!")
         return self.attackresult
+
+    def attackDone(self):
+            # clear flags and selected attack (is the latter even neccesary?)
+            # (yes it is used to check if we're moving to attack, since track position is used to check if we shoud set the flag)
+            self.active_slot.beast.clearflag(FLAG_EXECUTEATTACK)
+            self.active_slot.beast.selected_attack = c.SelectedAtk(None,-1)
 
     def getChainAttack(self,attack:Attack):
         if (attack.chainID >= 0):
@@ -321,6 +325,10 @@ class Scene:
 
 
         return attackresult
+
+    ###################################
+    # STATE UPDATE
+    ###################################
 
     def tick(self):
         #game can only tick if no events need to be processed
