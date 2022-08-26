@@ -112,11 +112,13 @@ class CoreGame:
                 beasttitle.set_center((SCREENW/2,SCREENH*5/8))
 
                 # generate movebuttons
-                movebuttons = [thorpy.make_button(atk.name,activebeast.selectattack,params={"atk":atk}) for atk in activebeast.attacks]
-                movebuttonbox = thorpy.Box(movebuttons)
+                self.movebuttons = [thorpy.make_button(atk.name,activebeast.selectattack,params={"atk":atk}) for atk in activebeast.attacks]
+                [but.set_painter(ui.movebutton_painter) for but in self.movebuttons]
+                [but.finish() for but in self.movebuttons]
+                movebuttonbox = thorpy.Box(self.movebuttons)
                 movebuttonbox.set_center((SCREENW/2,SCREENH*3/4))
-                self.gui = thorpy.Background(elements=[beasttitle,movebuttonbox],
-                                                    image=pygame.image.load(SCENEBG))
+                self.gui = thorpy.Background(   elements=[beasttitle,movebuttonbox],
+                                                image=pygame.image.load(SCENEBG))
 
                 menu = thorpy.Menu(self.gui,fps=FPS)
                 menu.play()

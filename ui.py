@@ -50,6 +50,9 @@ class MenuButtonPainter(thorpy.painters.painter.Painter):
 generic_menubutton_painter = MenuButtonPainter( size=(400,80),
                                                 rectcolor=(55,255,55),
                                                 presscolor=(20,180,20))
+movebutton_painter = MenuButtonPainter( size=(200,40),
+                                        rectcolor=(200,200,200),
+                                        presscolor=(100,100,100))
 
 
 # UI constants
