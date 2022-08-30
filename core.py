@@ -1,6 +1,7 @@
 
 from time import sleep
 from pathlib import Path
+import math
 import pygame
 import thorpy
 import classes as c
@@ -29,16 +30,16 @@ class CoreGame:
         Team2 = timport.importteam(Path("./teams/Test_1.txt"))
         tmpbeasts = Team1.beasts + Team2.beasts
         self.startbutton = thorpy.make_button("Battle",func=self.startScene,params={"beasts":tmpbeasts})
-        self.startbutton.set_painter(ui.generic_menubutton_painter)
+        self.startbutton.set_painter(ui.menubutton_painter)
         self.startbutton.finish()
 
         self.teamsbutton = thorpy.make_button("Teams")
-        self.teamsbutton.set_painter(ui.generic_menubutton_painter)
+        self.teamsbutton.set_painter(ui.menubutton_painter)
         self.teamsbutton.set_pressed_state()
         self.teamsbutton.finish()
 
         self.quitbutton = thorpy.make_button("Quit",func=thorpy.functions.quit_func)
-        self.quitbutton.set_painter(ui.generic_menubutton_painter)
+        self.quitbutton.set_painter(ui.menubutton_painter)
         self.quitbutton.finish()
 
         self.mainmenubar = thorpy.Ghost([self.startbutton,self.teamsbutton,self.quitbutton])
@@ -108,16 +109,37 @@ class CoreGame:
                 activebeast = self.activescene.active_slot.beast
 
                 # Textbox with beast stats/state
-                beasttitle = thorpy.make_text(activebeast.nickname)
-                beasttitle.set_center((SCREENW/2,SCREENH*5/8))
+                self.beasttitle = thorpy.make_text(activebeast.nickname)
+                self.beasttitle.set_center((SCREENW*0.5,SCREENH-ui.CHOICEBUTTONBOXH-self.beasttitle.get_rect().h/2))
 
                 # generate movebuttons
                 self.movebuttons = [thorpy.make_button(atk.name,activebeast.selectattack,params={"atk":atk}) for atk in activebeast.attacks]
-                [but.set_painter(ui.movebutton_painter) for but in self.movebuttons]
+                [but.set_painter(ui.choicebutton_painter) for but in self.movebuttons]
                 [but.finish() for but in self.movebuttons]
-                movebuttonbox = thorpy.Box(self.movebuttons)
-                movebuttonbox.set_center((SCREENW/2,SCREENH*3/4))
-                self.gui = thorpy.Background(   elements=[beasttitle,movebuttonbox],
+                self.movebutcols = [thorpy.make_group(self.movebuttons[col*ui.CHOICEBUTTONSPERCOL:(col+1)*ui.CHOICEBUTTONSPERCOL-1],mode="v") for col in range(math.ceil(len(self.movebuttons)/ui.CHOICEBUTTONSPERCOL))]
+                self.movebutsgroup = thorpy.make_group(self.movebutcols,mode="h")
+                self.movebuttonbox = thorpy.Box([self.movebutsgroup],size=(ui.CHOICEBUTTONBOXW,ui.CHOICEBUTTONBOXH))
+                self.movebuttonbox.set_painter(ui.big_textbox_painter)
+                self.movebuttonbox.finish()
+                # thorpy.store(self.movebuttonbox,mode="v",margin=0,align="right")
+
+                # statuspanel
+                self.statustext = thorpy.make_text(text=ui.getStatusText(activebeast),font_size=40,font_color=(0,0,0))
+                self.statuspanel = thorpy.Box(elements=[self.statustext],size=(ui.STATUSPANELW,ui.STATUSPANELH))
+                self.statuspanel.set_painter(ui.big_textbox_painter)
+                self.statuspanel.finish()
+
+                # complete bottompanel
+                self.bottompanel = thorpy.Box(elements=[self.movebuttonbox,self.statuspanel],size=(ui.BOTTOMPANELW,ui.BOTTOMPANELH))
+                self.bottompanel.set_painter(ui.big_textbox_painter)
+                self.bottompanel.finish()
+
+                thorpy.store(self.bottompanel,mode="h")
+                
+                self.bottompanel.set_center((SCREENW*0.5,SCREENH-ui.CHOICEBUTTONBOXH/2))
+                self.statuspanel.set_topleft((0,0))
+
+                self.gui = thorpy.Background(   elements=[self.beasttitle,self.bottompanel],
                                                 image=pygame.image.load(SCENEBG))
 
                 menu = thorpy.Menu(self.gui,fps=FPS)

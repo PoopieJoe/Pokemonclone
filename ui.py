@@ -46,13 +46,45 @@ class MenuButtonPainter(thorpy.painters.painter.Painter):
         surface.set_clip(self.clip) #don't forget to set clip
         return surface
 
-# generic button
-generic_menubutton_painter = MenuButtonPainter( size=(400,80),
+class TextBoxPainter(thorpy.painters.painter.Painter):
+    def __init__(self,rectcolor=(100,100,100),bordercolor=(0,0,0),borderwidth=3,size=None,clip=None,pressed=False,hovered=False):
+        super(TextBoxPainter, self).__init__(size,clip,pressed,hovered)
+        self.rectcolor = rectcolor
+        self.bordercolor = bordercolor
+        self.borderwidth = borderwidth
+
+    def get_surface(self):
+        surface = pygame.Surface(self.size, flags=pygame.SRCALPHA).convert_alpha()
+        rect_body = surface.get_rect()
+        borderrect = rect_body.inflate(-self.borderwidth,-self.borderwidth)
+        borderrect.move(-self.borderwidth,-self.borderwidth)
+        pygame.draw.rect(surface,self.rectcolor,borderrect)
+
+        pygame.draw.line(surface,self.bordercolor,borderrect.topleft,borderrect.topright,self.borderwidth)
+        pygame.draw.line(surface,self.bordercolor,borderrect.topright,borderrect.bottomright,self.borderwidth)
+        pygame.draw.line(surface,self.bordercolor,borderrect.bottomright,borderrect.bottomleft,self.borderwidth)
+        pygame.draw.line(surface,self.bordercolor,borderrect.bottomleft,borderrect.topleft,self.borderwidth)
+        return surface
+
+BOTTOMPANELW = SCREENW*0.8
+BOTTOMPANELH = SCREENH*0.33
+STATUSPANELW = BOTTOMPANELW*0.4
+STATUSPANELH = BOTTOMPANELH
+CHOICEBUTTONBOXW = BOTTOMPANELW-STATUSPANELW
+CHOICEBUTTONBOXH = BOTTOMPANELH
+CHOICEBUTTONW = 200
+CHOICEBUTTONH = 40
+CHOICEBUTTONSPERCOL = int(CHOICEBUTTONBOXH/CHOICEBUTTONH)
+CHOICEBUTTONSPERROW = int(CHOICEBUTTONBOXW/CHOICEBUTTONW)
+
+menubutton_painter = MenuButtonPainter( size=(400,80),
                                                 rectcolor=(55,255,55),
                                                 presscolor=(20,180,20))
-movebutton_painter = MenuButtonPainter( size=(200,40),
-                                        rectcolor=(200,200,200),
-                                        presscolor=(100,100,100))
+choicebutton_painter = MenuButtonPainter( size=(CHOICEBUTTONW,CHOICEBUTTONH),
+                                        rectcolor=(200,200,100),
+                                        presscolor=(100,100,80))
+big_textbox_painter = TextBoxPainter(   rectcolor=(200,200,200),
+                                        bordercolor=(50,50,50))
 
 
 # UI constants
@@ -87,7 +119,7 @@ def getStatusText(beast:Beast):
     statustext.append("coldRES: " + str(int(beast.RES[2]*100)) + "%")
     statustext.append("shockRES: " + str(int(beast.RES[3]*100)) + "%")
     
-    return statustext
+    return '\n'.join(statustext)
 
 def getShortStatusText(beast: Beast) -> str:
     statustext = [beast.nickname]
