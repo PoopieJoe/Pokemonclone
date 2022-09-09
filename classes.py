@@ -266,11 +266,7 @@ class Beast:
 
     def selectattack(self,atk:Attack):
         print(str(self.nickname) + " selected " + str(atk.name) + " as their attack!")
-        try:
-            self.selected_attack.atk = atk
-            return True
-        except Exception:
-            return False
+        self.selected_attack.atk = atk
     
     def selecttarget(self,scene,slot):
         #check current attack
@@ -315,6 +311,12 @@ class Beast:
         self.HP = 0
         self.SPE = 0
         self.isalive = False
+
+    def getselectedattack(self) -> Attack:
+        return self.selected_attack.atk
+
+    def getselectedtargets(self):
+        return self.selected_attack.slots
 
     def getflag(self,flagtype:str):
         for flag in self.flags:

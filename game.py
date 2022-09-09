@@ -24,10 +24,7 @@ application = thorpy.Application((SCREENW,SCREENH), "Pokemonclone")
 
 game = core.CoreGame()
 
-menu = thorpy.Menu(game.gui,fps=FPS)
-
-menu.play()
-
+game.launch()
 
 application.quit()
 pygame.quit()

@@ -5,11 +5,12 @@ import math
 import pygame
 import thorpy
 import classes as c
+import scenecontrol as scontrol
 import scenemanager as smanage
 import ui
 from globalconstants import *
 import teamimport as timport
-thorpy.VarSet
+
 class CoreGame:
     def __init__(
         self
@@ -19,8 +20,15 @@ class CoreGame:
         self.state = GAME_START
         self.scenes = []
         self.activescene = None
-        self.startMenu()
 
+    def launch(self):
+        self.gui = ui.GameGui()
+        self.scenecontrol = scontrol.SceneController()
+        self.launchmenu(self.gui.mainmenu)
+
+    def launchmenu(self,menu:ui.MenuContainer):
+        self.menu = thorpy.Menu(menu.background,fps=FPS)
+        self.menu.play()
 
     def startMenu(self):
         # Start menu
@@ -49,7 +57,7 @@ class CoreGame:
         # Other buttons
         thorpy.style.FONT_SIZE = 18
 
-        self.gui = thorpy.Background(elements=[self.mainmenubar],
+        self.mainmenu = thorpy.Background(elements=[self.mainmenubar],
                                             image=pygame.image.load(SCENEBG))
 
 
@@ -108,10 +116,6 @@ class CoreGame:
                 # fetch active beast from the active scene
                 activebeast = self.activescene.active_slot.beast
 
-                # Textbox with beast stats/state
-                self.beasttitle = thorpy.make_text(activebeast.nickname)
-                self.beasttitle.set_center((SCREENW*0.5,SCREENH-ui.CHOICEBUTTONBOXH-self.beasttitle.get_rect().h/2))
-
                 # generate movebuttons
                 self.movebuttons = [thorpy.make_button(atk.name,activebeast.selectattack,params={"atk":atk}) for atk in activebeast.attacks]
                 [but.set_painter(ui.choicebutton_painter) for but in self.movebuttons]
@@ -121,34 +125,71 @@ class CoreGame:
                 self.movebuttonbox = thorpy.Box([self.movebutsgroup],size=(ui.CHOICEBUTTONBOXW,ui.CHOICEBUTTONBOXH))
                 self.movebuttonbox.set_painter(ui.big_textbox_painter)
                 self.movebuttonbox.finish()
-                # thorpy.store(self.movebuttonbox,mode="v",margin=0,align="right")
 
-                # statuspanel
-                self.statustext = thorpy.make_text(text=ui.getStatusText(activebeast),font_size=40,font_color=(0,0,0))
-                self.statuspanel = thorpy.Box(elements=[self.statustext],size=(ui.STATUSPANELW,ui.STATUSPANELH))
-                self.statuspanel.set_painter(ui.big_textbox_painter)
-                self.statuspanel.finish()
 
-                # complete bottompanel
-                self.bottompanel = thorpy.Box(elements=[self.movebuttonbox,self.statuspanel],size=(ui.BOTTOMPANELW,ui.BOTTOMPANELH))
-                self.bottompanel.set_painter(ui.big_textbox_painter)
-                self.bottompanel.finish()
-
-                thorpy.store(self.bottompanel,mode="h")
-                
-                self.bottompanel.set_center((SCREENW*0.5,SCREENH-ui.CHOICEBUTTONBOXH/2))
-                self.statuspanel.set_topleft((0,0))
-
-                self.gui = thorpy.Background(   elements=[self.beasttitle,self.bottompanel],
-                                                image=pygame.image.load(SCENEBG))
-
-                menu = thorpy.Menu(self.gui,fps=FPS)
-                menu.play()
             elif (self.activescene.state == SCENE_CHOOSETARGET):
-                pass
+                # fetch active beast from the active scene
+                activeslot = self.activescene.active_slot
+                activebeast = activeslot.beast
+
+                # Textbox with beast stats/state
+                self.beasttitle = thorpy.make_text(activebeast.nickname)
+                self.beasttitle.set_center((SCREENW*0.5,SCREENH-ui.CHOICEBUTTONBOXH-self.beasttitle.get_rect().h/2))
+
+                # generate targetbuttons
+                validtargets = self.activescene.slots.copy()
+                for flagname in [flag["name"] for flag in activebeast.getselectedattack().flags]:
+                    if flagname == TARGETOTHER: #effect on 1 other (friendly or enemy)
+                        validtargets.remove(activeslot)
+                    elif flagname == TARGETTEAM: #effect on team (friendly or enemy)
+                        #valid_targets.remove(beastslot)
+                        # if beastslot == 0 or beastslot == 2:
+                        #     valid_targets.remove(beastslot + 1)
+                        # else:
+                        #     valid_targets.remove(beastslot - 1)
+                        pass
+                    elif flagname == TARGETALLOTHER: #effect on all others
+                        raise Exception("Not implemented: " + TARGETALLOTHER)
+                    elif flagname == TARGETSELF: #effect on self
+                        raise Exception("Not implemented: " + TARGETSELF)
+                    elif flagname == TARGETANY: #effect on any one character (including self)
+                        pass
+                    elif flagname == TARGETNONE: #no target (e.g. only set field conditions such as weather or terrain)
+                        raise Exception("Not implemented: " + TARGETNONE)
+                
+                for slot in self.activescene.slots:
+                    if (not slot.beast.isalive):
+                        validtargets.remove(slot) #remove dead things
+
+                self.targetbuttons = [thorpy.make_button(target.name,activebeast.selecttarget,params={"scene":self.activescene,"slot":target}) for target in validtargets]
+                [but.set_painter(ui.choicebutton_painter) for but in self.targetbuttons]
+                [but.finish() for but in self.targetbuttons]
+                self.targetbutcols = [thorpy.make_group(self.targetbuttons[col*ui.CHOICEBUTTONSPERCOL:(col+1)*ui.CHOICEBUTTONSPERCOL-1],mode="v") for col in range(math.ceil(len(self.targetbuttons)/ui.CHOICEBUTTONSPERCOL))]
+                self.targetbutsgroup = thorpy.make_group(self.targetbutcols,mode="h")
+                self.targetbuttonbox = thorpy.Box([self.targetbutsgroup],size=(ui.CHOICEBUTTONBOXW,ui.CHOICEBUTTONBOXH))
+                self.targetbuttonbox.set_painter(ui.big_textbox_painter)
+                self.targetbuttonbox.finish()
+
             elif (self.activescene.state == SCENE_EXECUTEATTACK):
                 pass
                 if (self.activescene.attackresult):
                     pass
             else:
                 pass #just black screen?
+            
+            # statuspanel
+            self.statuspanel = ui.getstatuspanel(activebeast)
+            self.statuspanel.finish()
+
+            # complete bottompanel
+            self.bottompanel = thorpy.Ghost(elements=[self.movebuttonbox,self.statuspanel])
+            thorpy.store(self.bottompanel,mode="h",margin=0)
+            self.bottompanel.fit_children()
+            
+            self.bottompanel.set_center((SCREENW*0.5,SCREENH-ui.CHOICEBUTTONBOXH/2))
+
+            self.gui = thorpy.Background(   elements=[self.bottompanel],
+                                            image=pygame.image.load(SCENEBG))
+
+            menu = thorpy.Menu(self.gui,fps=FPS)
+            menu.play()

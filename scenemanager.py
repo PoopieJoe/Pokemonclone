@@ -97,6 +97,9 @@ class Scene:
             self.raisedFlags.extend(segment)
         return
 
+    def noactiveflag(self):
+        return (self.active_flag == None)
+
     def noflags(self):
         return ((self.active_flag == None) and (len(self.raisedFlags) == 0))
 
@@ -111,6 +114,16 @@ class Scene:
                 self.state = "Execute attack"
             else:
                 self.state = "Idle"
+
+    def selectattack(self,atk:Attack,beast:Beast=None):
+        if beast == None:
+            beast = self.active_slot.beast
+        beast.selected_attack.atk = atk
+    
+    def selecttargets(self,slots:list,beast:Beast=None):
+        if beast == None:
+            beast = self.active_slot.beast
+        beast.selected_attack.slots = slots
 
     ###################################
     # COMBAT
@@ -329,6 +342,22 @@ class Scene:
     ###################################
     # STATE UPDATE
     ###################################
+
+    def run(self):
+        if (self.noflags()):
+            self.fetchFlags()
+        
+        if self.noactiveflag():
+            self.popflag()
+
+        #change gamestate according to state
+        if (self.state == SCENE_EXECUTEATTACK):
+            if (self.active_slot.beast.selected_attack.atk != None):
+                self.processattack()
+            else:
+                self.attackDone()
+        elif (len(self.raisedFlags) == 0 and self.state == SCENE_IDLE):
+            self.tick()
 
     def tick(self):
         #game can only tick if no events need to be processed
