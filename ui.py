@@ -1,18 +1,12 @@
-from email.mime import image
-from genericpath import exists
 import pygame
 import thorpy
 from pygame.locals import *
 from math import floor,ceil
-from fnmatch import fnmatch
 from globalconstants import *
 from uiElements import *
-from tuplemath import addtuple, multtuple
 import classes as c
 import scenemanager as sm
-import scenecontrol as sc
 import gamecontrol as gc
-import teamimport as timport
 
 pygame.init()
 
@@ -295,7 +289,28 @@ def movebutton_click(scene:sm.Scene,atk:c.Attack):
     scene.state = SCENE_CHOOSETARGET
     return
 
-
+def getStatusText(beast:c.Beast):
+    statustext = [beast.nickname,""]
+    #print HP total
+    hptext = str(beast.HP) + "/" + str(beast.maxHP) + " HP (" + str(max(round(beast.HP/beast.maxHP*100),1)) + "%)"
+    statustext.append(hptext)
+    if (beast.statuseffects):
+        for status in beast.statuseffects:
+            #different statuses need other things printed
+            if (status["name"] == BURNNAME):
+                statustext.append(BURNNAME)
+            elif (status["name"] == SLOWNAME):
+                statustext.append(SLOWNAME + " (" + str(ceil(status["trackleft"]/TURNTRACKER_LENGTH)) + " turns left)")
+    else:
+        statustext.append("Healthy")
+    statustext.append("")
+    statustext.append("physATK: " + str(int(beast.physATK)))
+    statustext.append("magATK: " + str(int(beast.magATK)))
+    statustext.append("physRES: " + str(int(beast.RES[0]*100)) + "%")
+    statustext.append("heatRES: " + str(int(beast.RES[1]*100)) + "%")
+    statustext.append("coldRES: " + str(int(beast.RES[2]*100)) + "%")
+    statustext.append("shockRES: " + str(int(beast.RES[3]*100)) + "%")
+    return '\n'.join(statustext)
 
 
 
@@ -323,29 +338,6 @@ def movebutton_click(scene:sm.Scene,atk:c.Attack):
 # buttonfont = pygame.font.SysFont(None,int(200*buttonheight))
 # statusfont = pygame.font.SysFont(None,int(250*buttonheight))
 
-# def getStatusText(beast:c.Beast):
-#     statustext = [beast.nickname,""]
-#     #print HP total
-#     hptext = str(beast.HP) + "/" + str(beast.maxHP) + " HP (" + str(max(round(beast.HP/beast.maxHP*100),1)) + "%)"
-#     statustext.append(hptext)
-#     if (beast.statuseffects):
-#         for status in beast.statuseffects:
-#             #different statuses need other things printed
-#             if (status["name"] == BURNNAME):
-#                 statustext.append(BURNNAME)
-#             elif (status["name"] == SLOWNAME):
-#                 statustext.append(SLOWNAME + " (" + str(ceil(status["trackleft"]/TURNTRACKER_LENGTH)) + " turns left)")
-#     else:
-#         statustext.append("Healthy")
-#     statustext.append("")
-#     statustext.append("physATK: " + str(int(beast.physATK)))
-#     statustext.append("magATK: " + str(int(beast.magATK)))
-#     statustext.append("physRES: " + str(int(beast.RES[0]*100)) + "%")
-#     statustext.append("heatRES: " + str(int(beast.RES[1]*100)) + "%")
-#     statustext.append("coldRES: " + str(int(beast.RES[2]*100)) + "%")
-#     statustext.append("shockRES: " + str(int(beast.RES[3]*100)) + "%")
-    
-#     return '\n'.join(statustext)
 
 # def getShortStatusText(beast: c.Beast) -> str:
 #     statustext = [beast.nickname]

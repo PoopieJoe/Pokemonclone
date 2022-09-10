@@ -1,12 +1,8 @@
 from pathlib import Path
-import math
 import pygame
-import thorpy
 import gamecontrol as gc
-import scenemanager as smanage
 import ui
 from globalconstants import *
-import teamimport as timport
 
 class CoreGame:
     def __init__(
