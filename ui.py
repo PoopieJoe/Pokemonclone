@@ -88,7 +88,7 @@ class MenuContainer:
     def __init__(self,elements:dict={},reactions:dict={},build=False,**kwargs):
         self.elements = elements
         self.reactions = reactions
-        self.background = reactions
+        self.background = None
         if build:
             self.build(**kwargs)
         return
@@ -96,8 +96,14 @@ class MenuContainer:
     def addelements(self,elements:dict):
         self.elements.update(elements)
 
-    def addreaction(self,reactions:dict):
+    def delelements(self,elements:dict):
+        self.elements.pop(elements)
+
+    def addreactions(self,reactions:dict):
         self.reactions.update(reactions)
+
+    def delreactions(self,reactions:dict):
+        self.reactions.pop(reactions)
 
     def build(self,**kwargs):
         if self.elements:
@@ -106,8 +112,22 @@ class MenuContainer:
             elementlist = None
         self.background = thorpy.Background(elements=elementlist,**kwargs)
         if self.reactions:
-            for reaction in self.reactions:
-                self.background.add_reaction(self.reactions[reaction])
+            for key in self.reactions:
+                self.background.add_reaction(self.reactions[key])
+
+    def updateelements(self,elements:dict={}):
+        for key in elements:
+            if key in self.elements:
+                self.background.remove_elements([self.elements[key]])
+            self.elements.update(elements)
+            self.background.add_element(elements[key])
+        thorpy.functions.refresh_current_menu()
+
+    def reblit(self):
+        self.background.unblit_and_reblit()
+
+        
+        
         
 
 class GameGui:
@@ -151,8 +171,13 @@ class GameGui:
         reac_time = thorpy.ConstantReaction(thorpy.constants.THORPY_EVENT, self.evthandler.updatescene,
                             {"id":thorpy.constants.EVENT_TIME},
                             params={"scene":scene})
-        self.sceneview.addreaction({"reac_time":reac_time})
+        self.sceneview.addreactions({"reac_time":reac_time})
 
+        
+        self.sceneview.build(image=pygame.image.load(SCENEBG))
+        return
+
+    def updatesceneview(self,scene:sm.Scene):
         if scene.active_slot:
             activeslot = scene.active_slot
             activebeast = activeslot.beast
@@ -160,7 +185,7 @@ class GameGui:
             # statuspanel
             statuspanel = getstatuspanel(activebeast)
             statuspanel.finish()
-            self.sceneview.addelements({"statuspanel":statuspanel})
+            self.sceneview.updateelements({"statuspanel":statuspanel})
 
             if scene.state == SCENE_CHOOSEATTACK:
                 # generate movebuttons
@@ -172,7 +197,7 @@ class GameGui:
                 movebuttonbox = thorpy.Box([movebutsgroup],size=(CHOICEBUTTONBOXW,CHOICEBUTTONBOXH))
                 movebuttonbox.set_painter(big_textbox_painter)
                 movebuttonbox.finish()
-                self.sceneview.addelements({"buttonbox":movebuttonbox})
+                self.sceneview.updateelements({"buttonbox":movebuttonbox})
 
             elif scene.state == SCENE_CHOOSETARGET:
 
@@ -208,10 +233,10 @@ class GameGui:
                 targetbuttonbox = thorpy.Box([targetbutsgroup],size=(CHOICEBUTTONBOXW,CHOICEBUTTONBOXH))
                 targetbuttonbox.set_painter(big_textbox_painter)
                 targetbuttonbox.finish()
-                self.sceneview.addelements({"buttonbox":targetbuttonbox})
+                self.sceneview.updateelements({"buttonbox":targetbuttonbox})
 
             else:
-                self.sceneview.addelements({"buttonbox":None})
+                self.sceneview.updateelements({"buttonbox":None})
 
             # bottompanel
             bottompanel = thorpy.Ghost(elements=[self.sceneview.elements["buttonbox"],self.sceneview.elements["statuspanel"]])
@@ -220,14 +245,15 @@ class GameGui:
             
             bottompanel.set_center((SCREENW*0.5,SCREENH-CHOICEBUTTONBOXH/2))
 
-
-            self.sceneview.addelements({"bottompanel":bottompanel})
+            self.sceneview.updateelements({"bottompanel":bottompanel})
 
         else:
             #if no active beast, bottom part is missing
             pass
 
-        self.sceneview.build(image=pygame.image.load(SCENEBG))
+        self.sceneview.reblit()
+        return
+
 
 class UIHandler:
     def __init__(self,gui:GameGui,gcontrol:gc.GameController) -> None:
@@ -244,8 +270,10 @@ class UIHandler:
 
     def updatescene(self,scene:sm.Scene):
         scene.run()
-        self.gui.gensceneview(scene)
-        self.gui.sceneview.background.unblit_and_reblit()
+        if scene.statechanged():
+            self.gui.updatesceneview(scene)
+            thorpy.functions.refresh_current_menu()
+        
 
 def getstatuspanel(beast:c.Beast,painter=big_textbox_painter) -> thorpy.Box:
     statustext = thorpy.make_text(text=getStatusText(beast),font_size=STATUSPANELFONTSIZE,font_color=(0,0,0))

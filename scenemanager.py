@@ -2,6 +2,7 @@ from math import floor,ceil
 from random import shuffle
 from fnmatch import fnmatch
 from random import random,shuffle
+from xmlrpc.client import Boolean
 from globalconstants import *
 import classes as c
 
@@ -16,7 +17,8 @@ class Scene:
         self.turnTrackerLength = TURNTRACKER_LENGTH
         self.flags = [[]]
 
-        self.state = "Idle"
+        self.setstate(SCENE_IDLE)
+        self.state_changed = False
         self.active_flag = None
         self.active_slot = None
         self.raisedFlags = []
@@ -62,8 +64,19 @@ class Scene:
     ###################################
 
     def setstate(self,state:str):
+        self.state_changed = True
         self.state = state
         return
+
+    def getstate(self):
+        return self.state
+
+    def statechanged(self) -> bool:
+        if self.state_changed:
+            self.state_changed = False
+            return True
+        else:
+            return False
 
     def fetchFlags(self):
         #check for raised event flags and sort flags
@@ -95,11 +108,12 @@ class Scene:
             flag_name = self.active_flag.flag.type
             self.active_slot = self.active_flag.slot
             if (flag_name == FLAG_CHOOSEATTACK):
-                self.state = "Choose attack"
+                self.setstate(SCENE_CHOOSEATTACK)
             elif (flag_name == FLAG_EXECUTEATTACK):
-                self.state = "Execute attack"
+                self.setstate(SCENE_EXECUTEATTACK)
             else:
-                self.state = "Idle"
+                self.setstate(SCENE_IDLE)
+
 
     def selectattack(self,atk:c.Attack,beast:c.Beast=None):
         if beast == None:
@@ -337,17 +351,17 @@ class Scene:
             self.popflag()
 
         #change gamestate according to state
-        if (self.state == SCENE_EXECUTEATTACK):
+        if (self.getstate() == SCENE_EXECUTEATTACK):
             if (self.active_slot.beast.selected_attack.atk != None):
                 self.processattack()
             else:
                 self.attackDone()
-        elif (len(self.raisedFlags) == 0 and self.state == SCENE_IDLE):
+        elif (len(self.raisedFlags) == 0 and self.getstate() == SCENE_IDLE):
             self.tick()
 
     def tick(self):
         #game can only tick if no events need to be processed
-        if (len(self.raisedFlags) > 0 or self.state != "Idle"):
+        if (len(self.raisedFlags) > 0 or self.getstate() != SCENE_IDLE):
             return False
 
         #check relevant status flags
