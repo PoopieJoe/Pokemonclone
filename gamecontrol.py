@@ -20,7 +20,10 @@ class GameController:
         else:
             raise Exception("Invalid game state")
 
-    def makeScene(self):
+    def makeScene(self,setactive:bool=True):
         Team1 = self.tcontrol.fetchteam(Path("./teams/Test_3.txt"))
         Team2 = self.tcontrol.fetchteam(Path("./teams/Test_1.txt"))
-        self.scontrol.addscene([Team1,Team2])
+        self.scontrol.addscene([Team1,Team2],setactive=setactive)
+
+    def getactivescene(self) -> sc.sm.Scene:
+        return self.scontrol.activescene

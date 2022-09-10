@@ -268,35 +268,12 @@ class Beast:
         print(str(self.nickname) + " selected " + str(atk.name) + " as their attack!")
         self.selected_attack.atk = atk
     
-    def selecttarget(self,scene,slot):
-        #check current attack
-        attack = self.selected_attack.atk
-        for flag in attack.flags:
-            if (flag["name"] == TARGETOTHER):
-                targetslots = [scene.slots[slot]]
-            elif (flag["name"] == TARGETTEAM):
-                if (slot == 0 or slot == 2):
-                    otherslot = slot + 1
-                else:
-                    otherslot = slot - 1
-                targetslots = [scene.slots[slot],scene.slots[otherslot]]
-            elif (flag["name"] == TARGETALLOTHER):
-                targetslots = scene.slots
-                targetslots.pop(self) 
-            elif (flag["name"] == TARGETSELF):
-                targetslots = [self]
-            elif (flag["name"] == TARGETANY):
-                targetslots = [scene.slots[slot]]
-            elif (flag["name"] == TARGETNONE):
-                targetslots = None
-            else:
-                pass
-
-        if targetslots != None:
-            print(str(self.nickname) + " selected " + " and ".join([slot.beast.nickname for slot in targetslots]) + " as the target(s)!")
+    def selecttargets(self,scene,slots):
+        if slots != None:
+            print(str(self.nickname) + " selected " + " and ".join([slot.beast.nickname for slot in slots]) + " as the target(s)!")
 
         try:
-            self.selected_attack.slots = targetslots
+            self.selected_attack.slots = slots
             return True
         except Exception:
             return False

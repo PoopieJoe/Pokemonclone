@@ -169,10 +169,8 @@ class GameGui:
         self.sceneview = MenuContainer()
 
         reac_time = thorpy.ConstantReaction(thorpy.constants.THORPY_EVENT, self.evthandler.updatescene,
-                            {"id":thorpy.constants.EVENT_TIME},
-                            params={"scene":scene})
+                                            {"id":thorpy.constants.EVENT_TIME})
         self.sceneview.addreactions({"reac_time":reac_time})
-
         
         self.sceneview.build(image=pygame.image.load(SCENEBG))
         return
@@ -189,7 +187,7 @@ class GameGui:
 
             if scene.state == SCENE_CHOOSEATTACK:
                 # generate movebuttons
-                movebuttons = [thorpy.make_button(atk.name,activebeast.selectattack,params={"atk":atk}) for atk in activebeast.attacks]
+                movebuttons = [thorpy.make_button(atk.name,self.evthandler.movebuttonfunc,params={"scene":scene,"atk":atk}) for atk in activebeast.attacks]
                 [but.set_painter(choicebutton_painter) for but in movebuttons]
                 [but.finish() for but in movebuttons]
                 movebutcols = [thorpy.make_group(movebuttons[col*CHOICEBUTTONSPERCOL:(col+1)*CHOICEBUTTONSPERCOL-1],mode="v") for col in range(ceil(len(movebuttons)/CHOICEBUTTONSPERCOL))]
@@ -225,7 +223,7 @@ class GameGui:
                     if (not slot.beast.isalive):
                         validtargets.remove(slot) #remove dead things
 
-                targetbuttons = [thorpy.make_button(target.name,activebeast.selecttarget,params={"scene":scene,"slot":target}) for target in validtargets]
+                targetbuttons = [thorpy.make_button(target.beast.nickname,activebeast.selecttargets,params={"scene":scene,"slots":[target]}) for target in validtargets]
                 [but.set_painter(choicebutton_painter) for but in targetbuttons]
                 [but.finish() for but in targetbuttons]
                 targetbutcols = [thorpy.make_group(targetbuttons[col*CHOICEBUTTONSPERCOL:(col+1)*CHOICEBUTTONSPERCOL-1],mode="v") for col in range(ceil(len(targetbuttons)/CHOICEBUTTONSPERCOL))]
@@ -268,10 +266,17 @@ class UIHandler:
         self.gui.launchmenu(self.gui.sceneview)
         return
 
-    def updatescene(self,scene:sm.Scene):
-        scene.run()
-        if scene.statechanged():
-            self.gui.updatesceneview(scene)
+    def movebuttonfunc(self,scene:sm.Scene,atk:c.Attack):
+        activebeast = scene.active_slot.beast
+        activebeast.selectattack(atk)
+        scene.setstate(SCENE_CHOOSETARGET)
+        return
+
+    def updatescene(self):
+        activescene = self.gcontrol.getactivescene()
+        activescene.run()
+        if activescene.statechanged():
+            self.gui.updatesceneview(activescene)
             thorpy.functions.refresh_current_menu()
         
 
