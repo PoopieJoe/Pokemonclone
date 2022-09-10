@@ -1,3 +1,4 @@
+from __future__ import annotations
 import csv
 from math import floor
 from fnmatch import fnmatch
@@ -220,7 +221,7 @@ class Beast:
         self.equipmenteffects = []
 
         self.attacks = []
-        self.selected_attack = SelectedAtk(None,-1)
+        self.selected_attack = SelectedAtk(None,None)
 
         #Equipment
         if (loadout == []): #an empty loadout
@@ -268,15 +269,11 @@ class Beast:
         print(str(self.nickname) + " selected " + str(atk.name) + " as their attack!")
         self.selected_attack.atk = atk
     
-    def selecttargets(self,scene,slots):
-        if slots != None:
-            print(str(self.nickname) + " selected " + " and ".join([slot.beast.nickname for slot in slots]) + " as the target(s)!")
+    def selecttargets(self,slots):
+        print(str(self.nickname) + " selected " + " and ".join([slot.beast.nickname for slot in slots]) + " as the target(s)!")
+        self.selected_attack.slots = slots
+        self.clearflag(FLAG_CHOOSEATTACK)
 
-        try:
-            self.selected_attack.slots = slots
-            return True
-        except Exception:
-            return False
     
     def setchainattack(self,atk_id:Attack):
         self.selected_attack.atk = ATTACKS[atk_id]
@@ -288,6 +285,9 @@ class Beast:
         self.HP = 0
         self.SPE = 0
         self.isalive = False
+
+    def gethealthfrac(self):
+        return self.HP/self.maxHP
 
     def getselectedattack(self) -> Attack:
         return self.selected_attack.atk
@@ -365,9 +365,15 @@ class Flag:
         return self.raised
 
 class SelectedAtk:
-    def __init__(self, attack:Attack, slot):
+    def __init__(self, attack:Attack=None, slots:list[Slot]=None):
         self.atk = attack
-        self.slot = slot
+        self.slots = slots
+
+    def setattack(self,attack:Attack):
+        self.atk = attack
+
+    def setslots(self,slots:list[Slot]):
+        self.slots = slots
 
 class StaticText:
     def __init__(
@@ -547,7 +553,6 @@ class Team:
 
 class Slot:
     def __init__(self, beast:Beast, team:int):
-        self.num = -1
         self.beast = beast
         self.team = team
         self.turntracker = 0

@@ -1,3 +1,4 @@
+from __future__ import annotations
 from math import floor,ceil
 from random import shuffle
 from fnmatch import fnmatch
@@ -12,6 +13,13 @@ class FlagListItem:
         self.slot = slot
 
 class Scene:
+    slots: list[c.Slot]
+    raisedFlags: list[FlagListItem]
+    flags: list[list[FlagListItem]]
+    attackresult: list[dict]
+    active_flag: FlagListItem
+    active_slot: c.Slot
+
     def __init__(self):
         self.slots = []
         self.turnTrackerLength = TURNTRACKER_LENGTH
@@ -24,7 +32,7 @@ class Scene:
         self.raisedFlags = []
         self.attackresult = []
 
-    def addBeast(self, beast, team):
+    def addBeast(self, beast:c.Beast, team:c.Team):
         newslot = c.Slot(beast,team)
         newslot.num = len(self.slots)
         self.slots.append(newslot)
@@ -102,6 +110,9 @@ class Scene:
     def noflags(self):
         return ((self.active_flag == None) and (len(self.raisedFlags) == 0))
 
+    def clearactiveflag(self):
+        self.active_flag = None
+
     def popflag(self):
         if ((self.active_flag == None) and (len(self.raisedFlags) > 0)):
             self.active_flag = self.raisedFlags.pop(0)
@@ -118,12 +129,12 @@ class Scene:
     def selectattack(self,atk:c.Attack,beast:c.Beast=None):
         if beast == None:
             beast = self.active_slot.beast
-        beast.selected_attack.atk = atk
+        beast.selected_attack.setattack(atk)
     
-    def selecttargets(self,slots:list,beast:c.Beast=None):
+    def selecttargets(self,slots:list[c.Slot],beast:c.Beast=None):
         if beast == None:
             beast = self.active_slot.beast
-        beast.selected_attack.slots = slots
+        beast.selected_attack.setslots(slots)
 
     ###################################
     # COMBAT
@@ -346,7 +357,7 @@ class Scene:
     def run(self):
         if (self.noflags()):
             self.fetchFlags()
-        
+
         if self.noactiveflag():
             self.popflag()
 

@@ -12,6 +12,18 @@ pygame.init()
 
 # Thorpy styling
 
+BOTTOMPANELW = SCREENW*0.8
+BOTTOMPANELH = SCREENH*0.33
+STATUSPANELW = BOTTOMPANELW*0.4
+STATUSPANELH = BOTTOMPANELH
+CHOICEBUTTONBOXW = BOTTOMPANELW-STATUSPANELW
+CHOICEBUTTONBOXH = BOTTOMPANELH
+CHOICEBUTTONW = 200
+CHOICEBUTTONH = 40
+CHOICEBUTTONSPERCOL = int(CHOICEBUTTONBOXH/CHOICEBUTTONH)
+CHOICEBUTTONSPERROW = int(CHOICEBUTTONBOXW/CHOICEBUTTONW)
+STATUSPANELFONTSIZE = 12
+
 class MenuButtonPainter(thorpy.painters.painter.Painter):
     def __init__(self,rectcolor=(100,100,100),presscolor=(0,0,0),size=None,clip=None,pressed=False,hovered=False):
         super(MenuButtonPainter, self).__init__(size,clip,pressed,hovered)
@@ -63,24 +75,12 @@ class TextBoxPainter(thorpy.painters.painter.Painter):
         pygame.draw.line(surface,self.bordercolor,borderrect.bottomleft,borderrect.topleft,self.borderwidth)
         return surface
 
-BOTTOMPANELW = SCREENW*0.8
-BOTTOMPANELH = SCREENH*0.33
-STATUSPANELW = BOTTOMPANELW*0.4
-STATUSPANELH = BOTTOMPANELH
-CHOICEBUTTONBOXW = BOTTOMPANELW-STATUSPANELW
-CHOICEBUTTONBOXH = BOTTOMPANELH
-CHOICEBUTTONW = 200
-CHOICEBUTTONH = 40
-CHOICEBUTTONSPERCOL = int(CHOICEBUTTONBOXH/CHOICEBUTTONH)
-CHOICEBUTTONSPERROW = int(CHOICEBUTTONBOXW/CHOICEBUTTONW)
-STATUSPANELFONTSIZE = 12
-
 menubutton_painter = MenuButtonPainter( size=(400,80),
                                                 rectcolor=(55,255,55),
                                                 presscolor=(20,180,20))
 choicebutton_painter = MenuButtonPainter( size=(CHOICEBUTTONW,CHOICEBUTTONH),
-                                        rectcolor=(200,200,100),
-                                        presscolor=(100,100,80))
+                                        rectcolor=(230,200,100),
+                                        presscolor=(180,160,100))
 big_textbox_painter = TextBoxPainter(   rectcolor=(200,200,200),
                                         bordercolor=(50,50,50))
 
@@ -166,16 +166,21 @@ class GameGui:
         self.mainmenu = MenuContainer({"bar":mainmenubar},build=True,image=pygame.image.load(SCENEBG))
 
     def gensceneview(self,scene:sm.Scene):
-        self.sceneview = MenuContainer()
-
         reac_time = thorpy.ConstantReaction(thorpy.constants.THORPY_EVENT, self.evthandler.updatescene,
                                             {"id":thorpy.constants.EVENT_TIME})
-        self.sceneview.addreactions({"reac_time":reac_time})
-        
+
+        turntracker = getturntrackers(scene=scene)
+        turntracker.set_center((SCREENW*0.5,SCREENH*0.1))
+
+        self.sceneview = MenuContainer(elements={"turntracker":turntracker},reactions={"reac_time":reac_time})
+
         self.sceneview.build(image=pygame.image.load(SCENEBG))
         return
 
     def updatesceneview(self,scene:sm.Scene):
+        turntracker = getturntrackers(scene=scene)
+        turntracker.set_center((SCREENW*0.5,SCREENH*0.1))
+        self.sceneview.updateelements({"turntracker":turntracker})
         if scene.active_slot:
             activeslot = scene.active_slot
             activebeast = activeslot.beast
@@ -223,7 +228,7 @@ class GameGui:
                     if (not slot.beast.isalive):
                         validtargets.remove(slot) #remove dead things
 
-                targetbuttons = [thorpy.make_button(target.beast.nickname,activebeast.selecttargets,params={"scene":scene,"slots":[target]}) for target in validtargets]
+                targetbuttons = [thorpy.make_button(target.beast.nickname,self.evthandler.targetbuttonfunc,params={"scene":scene,"slots":[target]}) for target in validtargets]
                 [but.set_painter(choicebutton_painter) for but in targetbuttons]
                 [but.finish() for but in targetbuttons]
                 targetbutcols = [thorpy.make_group(targetbuttons[col*CHOICEBUTTONSPERCOL:(col+1)*CHOICEBUTTONSPERCOL-1],mode="v") for col in range(ceil(len(targetbuttons)/CHOICEBUTTONSPERCOL))]
@@ -234,7 +239,7 @@ class GameGui:
                 self.sceneview.updateelements({"buttonbox":targetbuttonbox})
 
             else:
-                self.sceneview.updateelements({"buttonbox":None})
+                pass
 
             # bottompanel
             bottompanel = thorpy.Ghost(elements=[self.sceneview.elements["buttonbox"],self.sceneview.elements["statuspanel"]])
@@ -272,10 +277,17 @@ class UIHandler:
         scene.setstate(SCENE_CHOOSETARGET)
         return
 
+    def targetbuttonfunc(self,scene:sm.Scene,slots:list):
+        activebeast = scene.active_slot.beast
+        activebeast.selecttargets(slots=slots)
+        scene.clearactiveflag()
+        scene.setstate(SCENE_IDLE)
+        return
+
     def updatescene(self):
         activescene = self.gcontrol.getactivescene()
         activescene.run()
-        if activescene.statechanged():
+        if activescene.statechanged() or activescene.getstate() == SCENE_IDLE:
             self.gui.updatesceneview(activescene)
             thorpy.functions.refresh_current_menu()
         
@@ -285,6 +297,23 @@ def getstatuspanel(beast:c.Beast,painter=big_textbox_painter) -> thorpy.Box:
     statuspanel = thorpy.Box(elements=[statustext],size=(STATUSPANELW,STATUSPANELH))
     statuspanel.set_painter(painter)
     return statuspanel
+
+def getturntrackers(scene:sm.Scene)->thorpy.Ghost:
+    bars = []
+    for slot in scene.slots:
+        bar = thorpy.LifeBar(   text=slot.beast.nickname,
+                                size=(SCREENW*0.6,SCREENH*0.02),
+                                font_size=10) 
+
+        spefrac = 1-abs(1-2*slot.turntracker/TURNTRACKER_LENGTH)
+        if slot.turntracker < TURNTRACKER_LENGTH/2:
+            bar.life_color = (0,255,0)
+        else:
+            bar.life_color = (0,100,0)
+        bar.set_life(spefrac)
+        bars.append(bar)
+    bargroup = thorpy.make_group(bars,mode="v")
+    return bargroup
 
 def movebuttonmenu(scene):
     activebeast = scene.active_slot.beast
