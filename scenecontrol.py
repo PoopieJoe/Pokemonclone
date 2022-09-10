@@ -6,7 +6,7 @@ class SceneController:
         self.scenes = []
         self.activescene = None
     
-    def addscene(self,teams):
+    def addscene(self,teams,setactive = True):
         newscene = sm.Scene()
         tmpbeasts = []
         for team in teams:
@@ -17,6 +17,8 @@ class SceneController:
             newscene.addBeast(beast=beast,team=n)
         newscene.setupBattle()
         self.scenes.append(newscene)
+        if setactive:
+            self.activescene = self.scenes[-1]
 
     def removescene(self,scene):
         if type(scene) is sm.Scene:

@@ -23,7 +23,7 @@ def importteam(file):
 
     teamreader = open( file , "rt" )
 
-    team = s.Team()
+    team = c.Team()
     battleformat = ""
     beastnum = -1
     equipmentcntr = 0

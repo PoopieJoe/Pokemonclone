@@ -3,16 +3,10 @@ here's ur damn docstring
 """
 
 import sys
-from time import sleep
-from pathlib import Path
 import pygame
 import thorpy
 import core
-from scenemanager import Scene
-import classes as c
-import ui
 from globalconstants import *
-import teamimport as timport
 
 #from pygame.locals import *
 

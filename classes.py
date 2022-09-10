@@ -562,6 +562,20 @@ def importStatictext(filepath):
 
     return statictext
 
+class Team:
+    def __init__(self):
+        self.beasts = []
+        self.subs = []
+        self.name = ""
+
+class Slot:
+    def __init__(self, beast:Beast, team:int):
+        self.num = -1
+        self.beast = beast
+        self.team = team
+        self.turntracker = 0
+
+# TODO maybe move this somewhere else
 ATTACKS = importAttacks(ATTACKSDB)
 EQUIPMENT = importEquipment(EQUIPMENTDB)
 ANATOMIES = importAnatomies(ANATOMIESDB)

@@ -1,27 +1,12 @@
-from classes import Beast, Flag, Attack, getAttack
 from math import floor,ceil
 from random import shuffle
 from fnmatch import fnmatch
 from random import random,shuffle
 from globalconstants import *
 import classes as c
-import eventhandlers as evth
-
-class Team:
-    def __init__(self):
-        self.beasts = []
-        self.subs = []
-        self.name = ""
-
-class Slot:
-    def __init__(self, beast:Beast, team:int):
-        self.num = -1
-        self.beast = beast
-        self.team = team
-        self.turntracker = 0
 
 class FlagListItem:
-    def __init__(self, flag:Flag, slot:Slot):
+    def __init__(self, flag:c.Flag, slot:c.Slot):
         self.flag = flag
         self.slot = slot
 
@@ -33,15 +18,16 @@ class Scene:
 
         self.state = "Idle"
         self.active_flag = None
+        self.active_slot = None
         self.raisedFlags = []
         self.attackresult = []
 
     def addBeast(self, beast, team):
-        newslot = Slot(beast,team)
+        newslot = c.Slot(beast,team)
         newslot.num = len(self.slots)
         self.slots.append(newslot)
     
-    def removeBeast(self, slot: Slot):
+    def removeBeast(self, slot: c.Slot):
         self.slots.pop(slot)
     
     def setupBattle(self):
@@ -115,12 +101,12 @@ class Scene:
             else:
                 self.state = "Idle"
 
-    def selectattack(self,atk:Attack,beast:Beast=None):
+    def selectattack(self,atk:c.Attack,beast:c.Beast=None):
         if beast == None:
             beast = self.active_slot.beast
         beast.selected_attack.atk = atk
     
-    def selecttargets(self,slots:list,beast:Beast=None):
+    def selecttargets(self,slots:list,beast:c.Beast=None):
         if beast == None:
             beast = self.active_slot.beast
         beast.selected_attack.slots = slots
@@ -169,13 +155,13 @@ class Scene:
             self.active_slot.beast.clearflag(FLAG_EXECUTEATTACK)
             self.active_slot.beast.selected_attack = c.SelectedAtk(None,-1)
 
-    def getChainAttack(self,attack:Attack):
+    def getChainAttack(self,attack:c.Attack):
         if (attack.chainID >= 0):
-            return getAttack(attack.chainID)
+            return c.getAttack(attack.chainID)
         else:
             return None
 
-    def attackhit(self,attackerbeast:Beast,defenderbeast:Beast,atk:Attack):        
+    def attackhit(self,attackerbeast:c.Beast,defenderbeast:c.Beast,atk:c.Attack):        
         attackresult = {
             "attacker": attackerbeast,
             "defender": defenderbeast,
@@ -258,7 +244,7 @@ class Scene:
         #sum up damage
         for element in ELEMENTS:
             attackresult["damage total"] += attackresult["damage by element"][element]
-        attackresult["damage total"] = evth.rounddmg(attackresult["damage total"])
+        attackresult["damage total"] = rounddmg(attackresult["damage total"])
 
         attackresult["damage total"] = min( attackresult["damage total"], attackresult["defender"].HP ) #total damage is hidden if target dies or is healed to full
 
@@ -272,7 +258,7 @@ class Scene:
         else:
             print("")
 
-        print(">> Damage breakdown: " + evth.getdmgbreakdownstring(attackresult["damage by element"]))
+        print(">> Damage breakdown: " + getdmgbreakdownstring(attackresult["damage by element"]))
 
         if (attackresult["defender"].HP <= 0): #if the beast dies, attack ends immediately, so no secondary effects occur (only effects that take place after the attack)
             attackresult["defender"].death()
@@ -327,14 +313,14 @@ class Scene:
                         }
 
                         for element in ELEMENTS:
-                            reflectresult["damage by element"][element] = evth.rounddmg(attackresult["damage by element"][element]*effect["value"]*REFLECTBASEVAL)
+                            reflectresult["damage by element"][element] = rounddmg(attackresult["damage by element"][element]*effect["value"]*REFLECTBASEVAL)
                             reflectresult["damage total"] += reflectresult["damage by element"][element]
 
                         attackresult["attacker"].HP -= reflectresult["damage total"]
 
                         attackresult["secondary effects"].append(reflectresult)
                         print("> " + attackresult["defender"].nickname + " reflected " + str(reflectresult["damage total"])  + " (" + str(round(reflectresult["damage total"]/attackresult["attacker"].maxHP*100)) + "%) dmg back to " + attackresult["attacker"].nickname)
-                        print(">> Damage breakdown: " + evth.getdmgbreakdownstring(reflectresult["damage by element"]))
+                        print(">> Damage breakdown: " + getdmgbreakdownstring(reflectresult["damage by element"]))
 
 
         return attackresult
@@ -423,3 +409,28 @@ class Scene:
                         slot.turntracker = 0
         
         return True
+
+
+def rounddmg(dmg:float) -> int:
+    if (dmg > 0): #if any damage was dealt, min is 1
+        dmg =  max(1,dmg)
+    elif (dmg < 0): #if any health was healed, min is 1
+        dmg =  min(-1,dmg)
+    else:
+        pass #don't do anything if total is exactly 0
+
+    return int(dmg)
+
+def getdmgbreakdownstring(dmgbyelement:dict) -> list:
+    stringlist = []
+    for element in ELEMENTS:
+        if (dmgbyelement[element] > 0):
+            stringlist.append(element + ": " + str(dmgbyelement[element]))
+    return ", ".join(stringlist)
+
+def continueaction():
+    try:
+        #this lterally does nothing why did I type this
+        return True
+    except Exception:
+        return False
