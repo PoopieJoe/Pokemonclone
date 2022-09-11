@@ -10,7 +10,6 @@ class CoreGame:
     ):
         self.clock = pygame.time.Clock()
         self.ms = pygame.time.get_ticks()
-        self.state = GAME_START
         self.scenes = []
         self.activescene = None
 

@@ -285,8 +285,9 @@ class Beast:
         self.HP = 0
         self.SPE = 0
         self.isalive = False
+        print("> " + self.nickname + " died!")
 
-    def gethealthfrac(self):
+    def gethealthfrac(self)->float:
         return self.HP/self.maxHP
 
     def getselectedattack(self) -> Attack:

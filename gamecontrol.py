@@ -11,19 +11,20 @@ class GameController:
         #create teamcontroller
         self.tcontrol = tc.TeamController()
 
-        self.state = GAME_MAINMENU
+        self.setstate(GAMESTATES.START)
         return
 
     def setstate(self,state:str):
-        if state in GAME_STATES:
+        if GAMESTATES.contains(state):
             self.state = state
+            return True
         else:
-            raise Exception("Invalid game state")
+            return False
 
     def makeScene(self,setactive:bool=True):
         Team1 = self.tcontrol.fetchteam(Path("./teams/Test_3.txt"))
         Team2 = self.tcontrol.fetchteam(Path("./teams/Test_1.txt"))
-        self.scontrol.addscene([Team1,Team2],setactive=setactive)
+        self.scontrol.addscene([Team1,Team2],format=BATTLEFORMATS.FREEFORALL,setactive=setactive)
 
     def getactivescene(self) -> sc.sm.Scene:
         return self.scontrol.activescene

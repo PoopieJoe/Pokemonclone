@@ -2,6 +2,16 @@ from pathlib import Path
 import pygame
 from pygame.locals import *
 pygame.init()
+
+class CONSTOBJ:
+    def contains(self,*args):
+        for arg in args:
+            if arg not in self.__dict__.values():
+                return False
+        return True
+
+
+
 #### Gameplay-related constants
 
 BEASTSPERTEAM = 2
@@ -59,20 +69,34 @@ FLAG_CHOOSEATTACK = "FLAG_CHOOSEATTACK"
 FLAG_EXECUTEATTACK = "FLAG_EXECUTEATTACK"
 
 # Game states
-GAME_START = "Start",
-GAME_MAINMENU = "Main menu"
-GAME_VIEWTEAMS = "View teams"
-GAME_EDITTEAM = "Edit team"
-GAME_SCENE = "Scene active"
-GAME_STATES = [GAME_START,GAME_MAINMENU,GAME_VIEWTEAMS,GAME_EDITTEAM,GAME_SCENE]
-
+class GAME_STATES(CONSTOBJ):
+    def __init__(self) -> None:
+        super().__init__()
+        self.START = "Start"
+        self.MAINMENU = "Main menu"
+        self.VIEWTEAMS = "View teams"
+        self.EDITTEAM = "Edit team"
+        self.SCENE = "Scene active"
+GAMESTATES = GAME_STATES()
 
 # Scene states
-SCENE_CHOOSEATTACK = "Choose attack"
-SCENE_CHOOSETARGET = "Choose target"
-SCENE_EXECUTEATTACK = "Execute attack"
-SCENE_IDLE = "Idle"
-SCENE_STATES = [SCENE_CHOOSEATTACK,SCENE_CHOOSETARGET,SCENE_EXECUTEATTACK,SCENE_IDLE]
+class SCENE_STATES(CONSTOBJ):
+    def __init__(self) -> None:
+        super().__init__()
+        self.CHOOSEATTACK = "Choose attack"
+        self.CHOOSETARGET = "Choose target"
+        self.EXECUTEATTACK = "Execute attack"
+        self.IDLE = "Idle"
+        self.DONE = "Done"
+SCENESTATES = SCENE_STATES()
+
+class BATTLE_FORMATS(CONSTOBJ):
+    def __init__(self) -> None:
+        super().__init__()
+        self.FREEFORALL = "Free for all"
+        self.TWOVTWO = "2v2"
+        self.THREEVTHREE = "3v3"
+BATTLEFORMATS = BATTLE_FORMATS()
 
 # Files
 IMAGESFOLDER = "./images/"

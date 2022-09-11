@@ -6,8 +6,8 @@ class SceneController:
         self.scenes = []
         self.activescene = None
     
-    def addscene(self,teams,setactive = True):
-        newscene = sm.Scene()
+    def addscene(self,teams,format:str,setactive = True):
+        newscene = sm.Scene(format)
         tmpbeasts = []
         for team in teams:
             for beast in team.beasts:
@@ -15,6 +15,8 @@ class SceneController:
 
         for n,beast in enumerate(tmpbeasts):
             newscene.addBeast(beast=beast,team=n)
+
+        newscene.setformat(format=format)
         newscene.setupBattle()
         self.scenes.append(newscene)
         if setactive:

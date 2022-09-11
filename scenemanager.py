@@ -20,17 +20,31 @@ class Scene:
     active_flag: FlagListItem
     active_slot: c.Slot
 
-    def __init__(self):
+    def __init__(self,format:str):
         self.slots = []
         self.turnTrackerLength = TURNTRACKER_LENGTH
         self.flags = [[]]
 
-        self.setstate(SCENE_IDLE)
+
+        self.state = SCENESTATES.IDLE
         self.state_changed = False
+
+        self.setformat(format)
+
         self.active_flag = None
         self.active_slot = None
         self.raisedFlags = []
         self.attackresult = []
+        
+    def setformat(self,format:str):
+        if BATTLEFORMATS.contains(format):
+            self.battleformat = format
+            return True
+        else:
+            return False
+
+    def getformat(self) -> str:
+        return self.battleformat
 
     def addBeast(self, beast:c.Beast, team:c.Team):
         newslot = c.Slot(beast,team)
@@ -45,38 +59,21 @@ class Scene:
             if (slot.beast != None):
                 slot.beast.clearALLflags()
                 slot.beast.isalive = True
-                slot.beast.HP = slot.beast.maxHP
+                slot.beast.HP = 1#slot.beast.maxHP
                 slot.beast.setflag(FLAG_CHOOSEATTACK)
             slot.turntracker = 0
-
-    def printScene(self):
-        #TODO remake this
-        # print("\n###########################################")
-        # if (self.beasts[1].isalive or self.beasts[2].isalive):
-        #     print("Team A: ")
-        #     if (self.beasts[1].isalive):
-        #         print("  Slot 1: " + self.beasts[1].nickname.ljust(16," ") + str(self.beasts[1].HP).ljust(3," ") + "/" + str(self.beasts[1].maxHP).ljust(3," ") + " HP (" + str(round(self.beasts[1].HP/self.beasts[1].maxHP*100)).ljust(3," ") + "%)")
-        #     if (self.beasts[2].isalive):
-        #         print("  Slot 2: " + self.beasts[2].nickname.ljust(16," ") + str(self.beasts[2].HP).ljust(3," ") + "/" + str(self.beasts[2].maxHP).ljust(3," ") + " HP (" + str(round(self.beasts[2].HP/self.beasts[2].maxHP*100)).ljust(3," ") + "%)")
-        # if (self.beasts[3].isalive or self.beasts[4].isalive):
-        #     print("Team B: ")
-        #     if (self.beasts[3].isalive):
-        #         print("  Slot 3: " + self.beasts[3].nickname.ljust(16," ") + str(self.beasts[3].HP).ljust(3," ") + "/" + str(self.beasts[3].maxHP).ljust(3," ") + " HP (" + str(round(self.beasts[3].HP/self.beasts[3].maxHP*100)).ljust(3," ") + "%)")
-        #     if (self.beasts[4].isalive):
-        #         print("  Slot 4: " + self.beasts[4].nickname.ljust(16," ") + str(self.beasts[4].HP).ljust(3," ") + "/" + str(self.beasts[4].maxHP).ljust(3," ") + " HP (" + str(round(self.beasts[4].HP/self.beasts[4].maxHP*100)).ljust(3," ") + "%)")
-        # print("###########################################")
-        return
 
     ###################################
     # FLAG AND EVENT MANAGEMENT
     ###################################
 
     def setstate(self,state:str):
-        self.state_changed = True
-        self.state = state
+        if not state == self.state:
+            self.state_changed = True
+            self.state = state
         return
 
-    def getstate(self):
+    def getstate(self) -> str:
         return self.state
 
     def statechanged(self) -> bool:
@@ -86,7 +83,7 @@ class Scene:
         else:
             return False
 
-    def fetchFlags(self):
+    def fetchFlags(self): 
         #check for raised event flags and sort flags
         #rules: from first resolved to last resolved: choose move, attacks
         #       multiple flags of the same type are resolved in random order
@@ -119,11 +116,11 @@ class Scene:
             flag_name = self.active_flag.flag.type
             self.active_slot = self.active_flag.slot
             if (flag_name == FLAG_CHOOSEATTACK):
-                self.setstate(SCENE_CHOOSEATTACK)
+                self.setstate(SCENESTATES.CHOOSEATTACK)
             elif (flag_name == FLAG_EXECUTEATTACK):
-                self.setstate(SCENE_EXECUTEATTACK)
+                self.setstate(SCENESTATES.EXECUTEATTACK)
             else:
-                self.setstate(SCENE_IDLE)
+                self.setstate(SCENESTATES.IDLE)
 
 
     def selectattack(self,atk:c.Attack,beast:c.Beast=None):
@@ -141,6 +138,7 @@ class Scene:
     ###################################
 
     def processattack(self):
+        self.attackresult = [] # clear previous results
         active_slot = self.active_slot
         if (active_slot.beast.getflag(FLAG_EXECUTEATTACK)):
             attack = active_slot.beast.selected_attack.atk
@@ -178,7 +176,7 @@ class Scene:
             # clear flags and selected attack (is the latter even neccesary?)
             # (yes it is used to check if we're moving to attack, since track position is used to check if we shoud set the flag)
             self.active_slot.beast.clearflag(FLAG_EXECUTEATTACK)
-            self.active_slot.beast.selected_attack = c.SelectedAtk(None,-1)
+            self.active_slot.beast.selected_attack = c.SelectedAtk(None,None)
 
     def getChainAttack(self,attack:c.Attack):
         if (attack.chainID >= 0):
@@ -362,17 +360,27 @@ class Scene:
             self.popflag()
 
         #change gamestate according to state
-        if (self.getstate() == SCENE_EXECUTEATTACK):
+        if (self.getstate() == SCENESTATES.EXECUTEATTACK):
             if (self.active_slot.beast.selected_attack.atk != None):
                 self.processattack()
             else:
                 self.attackDone()
-        elif (len(self.raisedFlags) == 0 and self.getstate() == SCENE_IDLE):
+        elif (len(self.raisedFlags) == 0 and self.getstate() == SCENESTATES.IDLE):
             self.tick()
+
+        #check win/lose condition
+        if self.getformat() == BATTLEFORMATS.FREEFORALL:
+            # Last man standing
+            livingbeasts = [slot.beast for slot in self.slots if slot.beast.isalive]
+            deadbeasts = [slot.beast for slot in self.slots if not slot.beast.isalive]
+            if len(livingbeasts) == 1:
+                self.rankings = {"winners":livingbeasts,"losers":deadbeasts}
+                self.setstate(SCENESTATES.DONE)
+
 
     def tick(self):
         #game can only tick if no events need to be processed
-        if (len(self.raisedFlags) > 0 or self.getstate() != SCENE_IDLE):
+        if (len(self.raisedFlags) > 0 or self.getstate() != SCENESTATES.IDLE):
             return False
 
         #check relevant status flags
@@ -405,12 +413,11 @@ class Scene:
                 for index in status_ended:
                     beast.statuseffects.pop(index) #remove status
 
-        #check if anyone died last tick
+        #check if anyone indirectly died last tick (so not through attackhit())
         for slot in self.slots:
             beast = slot.beast
             if (beast.HP <= 0 and beast.isalive):
                 beast.death()
-                print("> " + slot.beast.nickname + " died!")
 
         #increment turn tracker
         for slot in self.slots:
