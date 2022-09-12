@@ -1,12 +1,18 @@
+from __future__ import annotations
 from globalconstants import *
 import scenemanager as sm
 
 class SceneController:
+    "High level controller that can create, destroy and run scenes"
     def __init__(self):
         self.scenes = []
         self.activescene = None
     
-    def addscene(self,teams,format:str,setactive = True):
+    def addscene(self,teams,format:str,setactive:bool = True):
+        """ Creates a new Scene object and adds it to the scene list \n
+            teams:list[Team]        : SHOULD be a list of teams that are initiated in the scene. Number of teams depends on "format" \n
+            format:str              : battle format \n
+            setactive:bool = True   : Immediately set the created scene as the active scene \n"""
         newscene = sm.Scene(format)
         tmpbeasts = []
         for team in teams:
@@ -20,22 +26,35 @@ class SceneController:
         newscene.setupBattle()
         self.scenes.append(newscene)
         if setactive:
-            self.activescene = self.scenes[-1]
+            self.setactivescene(self.scenes[-1])
 
-    def removescene(self,scene):
-        if type(scene) is sm.Scene:
-            self.scenes.remove(scene)
-        elif type(scene) is int:
-            self.scenes.pop(scene)
-        else:
-            raise TypeError(type(scene) + " is not a valid type")
+    def endactivescene(self):
+        self.endscene(self.activescene)
 
-    def runscenes(self,scenes=None):
+    def endscene(self,scene:sm.Scene):
+        """ Removes the scene from the list. If selected scene is the active scene, active scene will be cleared\n
+            scene:sm.Scene  : Scene to be removed
+        """
+        if scene == self.activescene:
+            self.setactivescene(None)
+        self.scenes.remove(scene)
+
+
+    def runscenes(self,scenes:list[sm.Scene]=None):
+        """ Runs all scenes in the list one cycle. If None, all scenes will run\n
+            scenes:list[sm.Scene]=None  : Scenes to be run
+        """
         if scenes == None:
             scenes = self.scenes
 
         for scene in scenes:
             scene.run()
+
+    def setactivescene(self,scene:sm.Scene):
+        self.activescene = scene
+
+    def getactivescene(self):
+        return self.activescene
 
     def runactivescene(self):
         self.runscenes([self.activescene])

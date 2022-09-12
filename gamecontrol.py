@@ -4,6 +4,7 @@ import scenecontrol as sc
 import teamcontrol as tc
 
 class GameController:
+    "Object that manages the game state"
     def __init__(self) -> None:
         #create scenecontroller
         self.scontrol = sc.SceneController()
@@ -22,6 +23,8 @@ class GameController:
             return False
 
     def makeScene(self,setactive:bool=True):
+        # TODO SHOULD JUST BE A WRAPPER FOR SCONTROL.ADDSCENE
+        # TODO NEEDS SUBMENU FOR OVERVIEW OF MADE SCENES
         Team1 = self.tcontrol.fetchteam(Path("./teams/Test_3.txt"))
         Team2 = self.tcontrol.fetchteam(Path("./teams/Test_1.txt"))
         self.scontrol.addscene([Team1,Team2],format=BATTLEFORMATS.FREEFORALL,setactive=setactive)

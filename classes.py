@@ -3,6 +3,7 @@ import csv
 from math import floor
 from fnmatch import fnmatch
 from globalconstants import *
+# from dbimport import *
 
 class Anatomy:
     def __init__(
@@ -275,8 +276,8 @@ class Beast:
         self.clearflag(FLAG_CHOOSEATTACK)
 
     
-    def setchainattack(self,atk_id:Attack):
-        self.selected_attack.atk = ATTACKS[atk_id]
+    def setchainattack(self,atk:Attack):
+        self.selected_attack.atk = atk
 
     def addstatuseffect(self,effect):
         self.statuseffects.append(effect)
@@ -385,56 +386,28 @@ class StaticText:
         self.tag = tag
         self.text = text
 
-def getAttack(ID):
-    """Returns the attack object by ID or by full name string"""
-    if (isinstance(ID,int)):
-        return ATTACKS[ID]
-    elif (isinstance(ID,str)):
-        for attack in ATTACKS:
-            if (attack.name == ID):
-                return attack
-    else:
-        raise Exception("Attack " + ID + " does not exist")
+class Team:
+    def __init__(self):
+        self.beasts = []
+        self.subs = []
+        self.name = ""
 
-def getEquipment(ID):
-    """Returns the equipment object by ID or by full name string"""
-    if (isinstance(ID,int)):
-        return EQUIPMENT[ID]
-    elif (isinstance(ID,str)):
-        for equipment in EQUIPMENT:
-            if (equipment.name == ID):
-                return equipment
-    else:
-        raise Exception("Equipment " + ID + " does not exist")
+class Slot:
+    def __init__(self, beast:Beast, team:int):
+        self.beast = beast
+        self.team = team
+        self.turntracker = 0
 
-def getAnatomy(ID):
-    """Returns the anatomy object by ID or by full name string"""
-    if (isinstance(ID,int)):
-        return ANATOMIES[ID]
-    elif (isinstance(ID,str)):
-        for anatomy in ANATOMIES:
-            if (anatomy.name == ID):
-                return anatomy
-    else:
-        raise Exception("Anatomy " + ID + " does not exist")
 
-def getSpecies(ID):
-    """Returns the species object by ID or by full name string"""
-    if (isinstance(ID,int)):
-        return SPECIES[ID]
-    elif (isinstance(ID,str)):
-        for species in SPECIES:
-            if (species.name == ID):
-                return species
-    else:
-        raise Exception("Species " + ID + " does not exist")
 
-def getStaticText(tag):
-    for entry in STATICTEXT:
-        if (entry.tag == tag):
-            return entry.text
-    else:
-        raise Exception("Statictext entry" + tag + " does not exist")
+
+
+
+
+################################################
+# TODO: ABSTRACT FUNCTIONS BELOW OUT TO DBIMPORT.PY
+# REMOVE DEPENDENCY OF CLASSES.PY ON FUNCTIONS BELOW (AND THUS DBIMPORT.PY)
+################################################
 
 def importAttacks(filepath):
     attacks = []
@@ -546,17 +519,56 @@ def importStatictext(filepath):
 
     return statictext
 
-class Team:
-    def __init__(self):
-        self.beasts = []
-        self.subs = []
-        self.name = ""
+def getAttack(ID):
+    """Returns the attack object by ID or by full name string"""
+    if (isinstance(ID,int)):
+        return ATTACKS[ID]
+    elif (isinstance(ID,str)):
+        for attack in ATTACKS:
+            if (attack.name == ID):
+                return attack
+    else:
+        raise Exception("Attack " + ID + " does not exist")
 
-class Slot:
-    def __init__(self, beast:Beast, team:int):
-        self.beast = beast
-        self.team = team
-        self.turntracker = 0
+def getEquipment(ID):
+    """Returns the equipment object by ID or by full name string"""
+    if (isinstance(ID,int)):
+        return EQUIPMENT[ID]
+    elif (isinstance(ID,str)):
+        for equipment in EQUIPMENT:
+            if (equipment.name == ID):
+                return equipment
+    else:
+        raise Exception("Equipment " + ID + " does not exist")
+
+def getAnatomy(ID):
+    """Returns the anatomy object by ID or by full name string"""
+    if (isinstance(ID,int)):
+        return ANATOMIES[ID]
+    elif (isinstance(ID,str)):
+        for anatomy in ANATOMIES:
+            if (anatomy.name == ID):
+                return anatomy
+    else:
+        raise Exception("Anatomy " + ID + " does not exist")
+
+def getSpecies(ID):
+    """Returns the species object by ID or by full name string"""
+    if (isinstance(ID,int)):
+        return SPECIES[ID]
+    elif (isinstance(ID,str)):
+        for species in SPECIES:
+            if (species.name == ID):
+                return species
+    else:
+        raise Exception("Species " + ID + " does not exist")
+
+def getStaticText(tag):
+    for entry in STATICTEXT:
+        if (entry.tag == tag):
+            return entry.text
+    else:
+        raise Exception("Statictext entry" + tag + " does not exist")
 
 # TODO maybe move this somewhere else
 ATTACKS = importAttacks(ATTACKSDB)
