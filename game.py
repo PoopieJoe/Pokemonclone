@@ -1,7 +1,3 @@
-"""
-here's ur damn docstring
-"""
-
 import sys
 import pygame
 import thorpy
