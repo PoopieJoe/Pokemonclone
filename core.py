@@ -5,6 +5,7 @@ import ui
 from globalconstants import *
 
 class CoreGame:
+    """Core container for the game object"""
     def __init__(
         self
     ):
