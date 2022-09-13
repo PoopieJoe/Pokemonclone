@@ -138,3 +138,4 @@ dmypy.json
 .json
 .vscode/launch.json
 .vscode/settings.json
+.prof
