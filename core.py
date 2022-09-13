@@ -2,7 +2,6 @@ from pathlib import Path
 import pygame
 import gamecontrol as gc
 import ui
-
 from globalconstants import *
 
 class CoreGame:
@@ -13,6 +12,7 @@ class CoreGame:
         self.ms = pygame.time.get_ticks()
         self.scenes = []
         self.activescene = None
+        self.applicationargs = {"size":(SCREENW,SCREENH), "caption":WINDOWNAME}
 
     def launch(self):
         self.gamecontrol = gc.GameController()

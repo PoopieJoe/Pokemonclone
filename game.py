@@ -10,9 +10,9 @@ pygame.init()
 
 # SETUP
 
-application = thorpy.Application((SCREENW,SCREENH), "Pokemonclone")
-
 game = core.CoreGame()
+
+application = thorpy.Application(**game.applicationargs)
 
 game.launch()
 

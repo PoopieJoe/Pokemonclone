@@ -8,7 +8,7 @@ class SceneController:
         self.scenes = []
         self.activescene = None
     
-    def addscene(self,teams,format:str,setactive:bool = True):
+    def addscene(self,teams:list[sm.c.Team],format:str,setactive:bool = True):
         """ Creates a new Scene object and adds it to the scene list \n
             teams:list[Team]        : SHOULD be a list of teams that are initiated in the scene. Number of teams depends on "format" \n
             format:str              : battle format \n

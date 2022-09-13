@@ -8,20 +8,20 @@ from globalconstants import *
 import classes as c
 
 class FlagListItem:
-    def __init__(self, flag:c.Flag, slot:c.Slot):
+    def __init__(self, flag:c.Flag, beast:c.Beast):
         self.flag = flag
-        self.slot = slot
+        self.beast = beast
 
 class Scene:
-    slots: list[c.Slot]
+    beasts: list[c.Beast]
     raisedFlags: list[FlagListItem]
     flags: list[list[FlagListItem]]
     attackresult: list[dict]
     active_flag: FlagListItem
-    active_slot: c.Slot
+    active_beast: c.Beast
 
     def __init__(self,format:str):
-        self.slots = []
+        self.beasts = []
         self.turnTrackerLength = TURNTRACKER_LENGTH
         self.flags = [[]]
 
@@ -32,7 +32,7 @@ class Scene:
         self.setformat(format)
 
         self.active_flag = None
-        self.active_slot = None
+        self.active_beast = None
         self.raisedFlags = []
         self.attackresult = []
         
@@ -47,21 +47,19 @@ class Scene:
         return self.battleformat
 
     def addBeast(self, beast:c.Beast, team:c.Team):
-        newslot = c.Slot(beast,team)
-        newslot.num = len(self.slots)
-        self.slots.append(newslot)
+        self.beasts.append(beast)
     
-    def removeBeast(self, slot: c.Slot):
-        self.slots.pop(slot)
+    def removeBeast(self, beast: c.Beast):
+        self.beasts.pop(beast)
     
     def setupBattle(self):
-        for slot in self.slots:
-            if (slot.beast != None):
-                slot.beast.clearALLflags()
-                slot.beast.isalive = True
-                slot.beast.HP = 1#slot.beast.maxHP
-                slot.beast.setflag(FLAG_CHOOSEATTACK)
-            slot.turntracker = 0
+        for beast in self.beasts:
+            if (beast != None):
+                beast.clearALLflags()
+                beast.isalive = True
+                beast.HP = 1#beast.maxHP
+                beast.setflag(FLAG_CHOOSEATTACK)
+                beast.turntracker = 0
 
     ###################################
     # FLAG AND EVENT MANAGEMENT
@@ -89,11 +87,11 @@ class Scene:
         #       multiple flags of the same type are resolved in random order
         priority_order = [FLAG_CHOOSEATTACK,FLAG_EXECUTEATTACK]
         segmented_flaglist = [[] for _ in priority_order]
-        for slot in self.slots:
-            for flag in slot.beast.flags:
+        for beast in self.beasts:
+            for flag in beast.flags:
                 if (flag.israised()):
                     priority = priority_order.index(flag.type)
-                    segmented_flaglist[priority].append(FlagListItem(flag,slot))
+                    segmented_flaglist[priority].append(FlagListItem(flag,beast))
 
         #Shuffle flags with same priority and concatanate them on the total list
         for segment in segmented_flaglist:
@@ -114,7 +112,7 @@ class Scene:
         if ((self.active_flag == None) and (len(self.raisedFlags) > 0)):
             self.active_flag = self.raisedFlags.pop(0)
             flag_name = self.active_flag.flag.type
-            self.active_slot = self.active_flag.slot
+            self.active_beast = self.active_flag.beast
             if (flag_name == FLAG_CHOOSEATTACK):
                 self.setstate(SCENESTATES.CHOOSEATTACK)
             elif (flag_name == FLAG_EXECUTEATTACK):
@@ -122,16 +120,21 @@ class Scene:
             else:
                 self.setstate(SCENESTATES.IDLE)
 
+    def getactivebeast(self):
+        return self.active_beast
+    
+    def setactivebeast(self,beast:c.Beast):
+        self.active_beast = beast
 
     def selectattack(self,atk:c.Attack,beast:c.Beast=None):
         if beast == None:
-            beast = self.active_slot.beast
+            beast = self.active_beast
         beast.selected_attack.setattack(atk)
     
-    def selecttargets(self,slots:list[c.Slot],beast:c.Beast=None):
+    def selecttargets(self,targets:list[c.Beast],beast:c.Beast=None):
         if beast == None:
-            beast = self.active_slot.beast
-        beast.selected_attack.setslots(slots)
+            beast = self.active_beast
+        beast.selected_attack.settargets(targets)
 
     ###################################
     # COMBAT
@@ -139,12 +142,12 @@ class Scene:
 
     def processattack(self):
         self.attackresult = [] # clear previous results
-        active_slot = self.active_slot
-        if (active_slot.beast.getflag(FLAG_EXECUTEATTACK)):
-            attack = active_slot.beast.selected_attack.atk
-            defenderlist = active_slot.beast.selected_attack.slots
+        active_beast = self.active_beast
+        if (active_beast.getflag(FLAG_EXECUTEATTACK)):
+            attack = active_beast.selected_attack.atk
+            defenderlist = active_beast.selected_attack.gettargets()
 
-            print("\n> " + active_slot.beast.nickname + " used " + attack.name + " on " + " and ".join([slot.beast.nickname for slot in active_slot.beast.selected_attack.slots]) + "!")
+            print("\n> " + active_beast.nickname + " used " + attack.name + " on " + " and ".join([beast.nickname for beast in active_beast.selected_attack.gettargets()]) + "!")
 
             numhits = 1
             for flag in attack.flags:
@@ -159,7 +162,7 @@ class Scene:
                 while True:
                     for _ in range(0,numhits): #repeat if multihit
                         #perform next attack and append to output
-                        result = self.attackhit(active_slot.beast,target.beast,curattack)
+                        result = self.attackhit(active_beast,target,curattack)
                         self.attackresult.append( result ) #append to output
 
                     curattack = self.getChainAttack(curattack) #get next attack in chain
@@ -169,14 +172,14 @@ class Scene:
             self.attackDone()
 
         else:
-            raise Exception(active_slot.beast.nickname + " has no attack selected!")
+            raise Exception(active_beast.nickname + " has no attack selected!")
         return self.attackresult
 
     def attackDone(self):
             # clear flags and selected attack (is the latter even neccesary?)
             # (yes it is used to check if we're moving to attack, since track position is used to check if we shoud set the flag)
-            self.active_slot.beast.clearflag(FLAG_EXECUTEATTACK)
-            self.active_slot.beast.selected_attack = c.SelectedAtk(None,None)
+            self.active_beast.clearflag(FLAG_EXECUTEATTACK)
+            self.active_beast.selected_attack = c.SelectedAtk(None,None)
 
     def getChainAttack(self,attack:c.Attack):
         if (attack.chainID >= 0):
@@ -361,7 +364,7 @@ class Scene:
 
         #change gamestate according to state
         if (self.getstate() == SCENESTATES.EXECUTEATTACK):
-            if (self.active_slot.beast.selected_attack.atk != None):
+            if (self.active_beast.selected_attack.atk != None):
                 self.processattack()
             else:
                 self.attackDone()
@@ -371,8 +374,8 @@ class Scene:
         #check win/lose condition
         if self.getformat() == BATTLEFORMATS.FREEFORALL:
             # Last man standing
-            livingbeasts = [slot.beast for slot in self.slots if slot.beast.isalive]
-            deadbeasts = [slot.beast for slot in self.slots if not slot.beast.isalive]
+            livingbeasts = [beast for beast in self.beasts if beast.isalive]
+            deadbeasts = [beast for beast in self.beasts if not beast.isalive]
             if len(livingbeasts) == 1:
                 self.rankings = {"winners":livingbeasts,"losers":deadbeasts}
                 self.setstate(SCENESTATES.DONE)
@@ -384,9 +387,8 @@ class Scene:
             return False
 
         #check relevant status flags
-        for slot in self.slots:
-            if (slot.beast.isalive):
-                beast = slot.beast
+        for beast in self.beasts:
+            if (beast.isalive):
                 status_ended = []
                 for n,status in enumerate(beast.statuseffects):
                     if ( fnmatch(status["name"], BURNNAME) ):
@@ -414,31 +416,28 @@ class Scene:
                     beast.statuseffects.pop(index) #remove status
 
         #check if anyone indirectly died last tick (so not through attackhit())
-        for slot in self.slots:
-            beast = slot.beast
+        for beast in self.beasts:
             if (beast.HP <= 0 and beast.isalive):
                 beast.death()
 
         #increment turn tracker
-        for slot in self.slots:
-            beast = slot.beast
+        for beast in self.beasts:
             if (beast.isalive):
-                if ((slot.turntracker < TURNTRACKER_LENGTH/2) and (slot.turntracker + beast.SPE > TURNTRACKER_LENGTH/2)):
-                    slot.turntracker = TURNTRACKER_LENGTH/2
+                if ((beast.turntracker < TURNTRACKER_LENGTH/2) and (beast.turntracker + beast.SPE > TURNTRACKER_LENGTH/2)):
+                    beast.turntracker = TURNTRACKER_LENGTH/2
                 else:
-                    slot.turntracker = slot.turntracker + beast.SPE
+                    beast.turntracker = beast.turntracker + beast.SPE
 
         #set flags
-        for slot in self.slots:
-            beast = slot.beast
+        for beast in self.beasts:
             if (beast.isalive):
                 if (beast.selected_attack.atk != None): #has any move selected (moving to attack)
-                    if (slot.turntracker >= self.turnTrackerLength/2): #check if tt exceeds threshold
+                    if (beast.turntracker >= self.turnTrackerLength/2): #check if tt exceeds threshold
                         beast.setflag(FLAG_EXECUTEATTACK)
                 else: #no move selected (moving from attack)
-                    if (slot.turntracker >= self.turnTrackerLength): #exceeded turn tracker length
+                    if (beast.turntracker >= self.turnTrackerLength): #exceeded turn tracker length
                         beast.setflag(FLAG_CHOOSEATTACK)
-                        slot.turntracker = 0
+                        beast.turntracker = 0
         
         return True
 

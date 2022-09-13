@@ -115,6 +115,7 @@ STATICTEXTDB = Path(DBFOLDER+"statictext.csv")
 FPS = 60
 SCREENH = 720
 SCREENW = 1280
+WINDOWNAME = "Pokemonclone"
 
 ALPHACOLOR = pygame.Color(0,1,255)
 BACKGROUNDCOLOR = pygame.Color(80,158,40)

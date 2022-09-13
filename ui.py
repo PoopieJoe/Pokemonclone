@@ -218,9 +218,8 @@ class GameGui:
             bottombox.finish()
             self.sceneview.updateelements({"buttonbox":bottombox})
         
-        elif scene.active_slot:
-            activeslot = scene.active_slot
-            activebeast = activeslot.beast
+        elif scene.active_beast:
+            activebeast = scene.active_beast
 
             # statuspanel
             statuspanel = getstatuspanel(activebeast)
@@ -241,16 +240,11 @@ class GameGui:
 
             elif scene.getstate() == SCENESTATES.CHOOSETARGET:
 
-                validtargets = scene.slots.copy()
+                validtargets = scene.beasts.copy()
                 for flagname in [flag["name"] for flag in activebeast.getselectedattack().flags]:
                     if flagname == TARGETOTHER: #effect on 1 other (friendly or enemy)
-                        validtargets.remove(activeslot)
+                        validtargets.remove(activebeast)
                     elif flagname == TARGETTEAM: #effect on team (friendly or enemy)
-                        #valid_targets.remove(beastslot)
-                        # if beastslot == 0 or beastslot == 2:
-                        #     valid_targets.remove(beastslot + 1)
-                        # else:
-                        #     valid_targets.remove(beastslot - 1)
                         pass
                     elif flagname == TARGETALLOTHER: #effect on all others
                         raise Exception("Not implemented: " + TARGETALLOTHER)
@@ -261,11 +255,11 @@ class GameGui:
                     elif flagname == TARGETNONE: #no target (e.g. only set field conditions such as weather or terrain)
                         raise Exception("Not implemented: " + TARGETNONE)
                 
-                for slot in scene.slots:
-                    if (not slot.beast.isalive):
-                        validtargets.remove(slot) #remove dead things
+                for beast in scene.beasts:
+                    if (not beast.isalive):
+                        validtargets.remove(beast) #remove dead things
 
-                targetbuttons = [thorpy.make_button(target.beast.nickname,self.evthandler.targetbuttonfunc,params={"scene":scene,"slots":[target]}) for target in validtargets]
+                targetbuttons = [thorpy.make_button(target.nickname,self.evthandler.targetbuttonfunc,params={"scene":scene,"beasts":[target]}) for target in validtargets]
                 [but.set_painter(CUSTOMPAINTERS.choicebutton) for but in targetbuttons]
                 [but.finish() for but in targetbuttons]
                 targetbutcols = [thorpy.make_group(targetbuttons[col*UICONST.CHOICEBUTTONSPERCOL:(col+1)*UICONST.CHOICEBUTTONSPERCOL-1],mode="v") for col in range(ceil(len(targetbuttons)/UICONST.CHOICEBUTTONSPERCOL))]
@@ -322,14 +316,14 @@ class UIHandler:
         return
 
     def movebuttonfunc(self,scene:sm.Scene,atk:c.Attack):
-        activebeast = scene.active_slot.beast
+        activebeast = scene.active_beast
         activebeast.selectattack(atk)
         scene.setstate(SCENESTATES.CHOOSETARGET)
         return
 
-    def targetbuttonfunc(self,scene:sm.Scene,slots:list):
-        activebeast = scene.active_slot.beast
-        activebeast.selecttargets(slots=slots)
+    def targetbuttonfunc(self,scene:sm.Scene,beasts:list[sm.c.Beast]):
+        activebeast = scene.active_beast
+        activebeast.selecttargets(targets=beasts)
         scene.clearactiveflag()
         scene.setstate(SCENESTATES.IDLE)
         return
@@ -362,13 +356,13 @@ def getstatuspanel(beast:c.Beast,painter=CUSTOMPAINTERS.big_textbox) -> thorpy.B
 
 def getturntrackers(scene:sm.Scene)->thorpy.Ghost:
     bars = []
-    for slot in scene.slots:
-        bar = thorpy.LifeBar(   text=slot.beast.nickname,
+    for beast in scene.beasts:
+        bar = thorpy.LifeBar(   text=beast.nickname,
                                 size=(UICONST.TURNTRACKERW,UICONST.TURNTRACKERH),
                                 font_size=10) 
 
-        spefrac = 1-abs(1-2*slot.turntracker/TURNTRACKER_LENGTH)
-        if slot.turntracker < TURNTRACKER_LENGTH/2:
+        spefrac = 1-abs(1-2*beast.turntracker/TURNTRACKER_LENGTH)
+        if beast.turntracker < TURNTRACKER_LENGTH/2:
             bar.life_color = (0,255,0)
         else:
             bar.life_color = (0,100,0)
@@ -379,13 +373,13 @@ def getturntrackers(scene:sm.Scene)->thorpy.Ghost:
 
 def gethealthbars(scene:sm.Scene)->thorpy.Ghost:
     bars = []
-    for slot in scene.slots:
-        bar = thorpy.LifeBar(   text=slot.beast.nickname,
+    for beast in scene.beasts:
+        bar = thorpy.LifeBar(   text=beast.nickname,
                                 size=(UICONST.HEALTHBARW,UICONST.HEALTHBARH),
                                 font_size=10,
                                 type_="v") 
 
-        hpfrac = slot.beast.gethealthfrac()
+        hpfrac = beast.gethealthfrac()
         if hpfrac < 0.25:
             bar.life_color = (210,100,100)
         elif hpfrac < 0.5:
@@ -505,9 +499,8 @@ def getTargetTooltipText(target: c.Beast) -> str:
 
 def getTurntrackerTooltipText(scene: sm.Scene) -> str:
     text = []
-    for slot in scene.slots:
-        beast = slot.beast
-        trackerpercentage = (slot.turntracker % (scene.turnTrackerLength/2))/(scene.turnTrackerLength/2)*100 #0-100 going one way, 0-100 going back
+    for beast in scene.beasts:
+        trackerpercentage = (beast.turntracker % (scene.turnTrackerLength/2))/(scene.turnTrackerLength/2)*100 #0-100 going one way, 0-100 going back
         text.append(beast.nickname + ": " + str(round(trackerpercentage,1)) + "% (" + str(beast.SPE) + " SPE)")
     return text
 

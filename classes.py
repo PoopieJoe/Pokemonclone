@@ -216,13 +216,14 @@ class Beast:
         self.calcRES()
 
         #status
+        self.turntracker = 0
         self.isalive = False
         self.statuseffects = []
         self.equipmentflags = []
         self.equipmenteffects = []
 
         self.attacks = []
-        self.selected_attack = SelectedAtk(None,None)
+        self.selected_attack = SelectedAtk()
 
         #Equipment
         if (loadout == []): #an empty loadout
@@ -270,11 +271,10 @@ class Beast:
         print(str(self.nickname) + " selected " + str(atk.name) + " as their attack!")
         self.selected_attack.atk = atk
     
-    def selecttargets(self,slots):
-        print(str(self.nickname) + " selected " + " and ".join([slot.beast.nickname for slot in slots]) + " as the target(s)!")
-        self.selected_attack.slots = slots
+    def selecttargets(self,targets:list[Beast]):
+        print(str(self.nickname) + " selected " + " and ".join([target.nickname for target in targets]) + " as the target(s)!")
+        self.selected_attack.targets = targets
         self.clearflag(FLAG_CHOOSEATTACK)
-
     
     def setchainattack(self,atk:Attack):
         self.selected_attack.atk = atk
@@ -295,7 +295,7 @@ class Beast:
         return self.selected_attack.atk
 
     def getselectedtargets(self):
-        return self.selected_attack.slots
+        return self.selected_attack.targets
 
     def getflag(self,flagtype:str):
         for flag in self.flags:
@@ -353,7 +353,7 @@ class Beast:
 
 class Flag:
     def __init__(self, type:str, raised:bool):
-        self.slot = -1
+        self.beast = None
         self.type = type
         self.raised = raised
 
@@ -367,15 +367,21 @@ class Flag:
         return self.raised
 
 class SelectedAtk:
-    def __init__(self, attack:Attack=None, slots:list[Slot]=None):
+    def __init__(self, attack:Attack=None, targets:list[Beast]=None):
         self.atk = attack
-        self.slots = slots
+        self.targets = targets
+
+    def getattack(self):
+        return self.atk
+    
+    def gettargets(self):
+        return self.targets
 
     def setattack(self,attack:Attack):
         self.atk = attack
 
-    def setslots(self,slots:list[Slot]):
-        self.slots = slots
+    def settargets(self,beasts:list[Beast]):
+        self.targets = beasts
 
 class StaticText:
     def __init__(
@@ -391,13 +397,6 @@ class Team:
         self.beasts = []
         self.subs = []
         self.name = ""
-
-class Slot:
-    def __init__(self, beast:Beast, team:int):
-        self.beast = beast
-        self.team = team
-        self.turntracker = 0
-
 
 
 
@@ -519,7 +518,7 @@ def importStatictext(filepath):
 
     return statictext
 
-def getAttack(ID):
+def getAttack(ID) -> Attack:
     """Returns the attack object by ID or by full name string"""
     if (isinstance(ID,int)):
         return ATTACKS[ID]
@@ -530,7 +529,7 @@ def getAttack(ID):
     else:
         raise Exception("Attack " + ID + " does not exist")
 
-def getEquipment(ID):
+def getEquipment(ID) -> Equipment:
     """Returns the equipment object by ID or by full name string"""
     if (isinstance(ID,int)):
         return EQUIPMENT[ID]
@@ -541,7 +540,7 @@ def getEquipment(ID):
     else:
         raise Exception("Equipment " + ID + " does not exist")
 
-def getAnatomy(ID):
+def getAnatomy(ID) -> Anatomy:
     """Returns the anatomy object by ID or by full name string"""
     if (isinstance(ID,int)):
         return ANATOMIES[ID]
@@ -552,7 +551,7 @@ def getAnatomy(ID):
     else:
         raise Exception("Anatomy " + ID + " does not exist")
 
-def getSpecies(ID):
+def getSpecies(ID) -> Species:
     """Returns the species object by ID or by full name string"""
     if (isinstance(ID,int)):
         return SPECIES[ID]
@@ -563,7 +562,7 @@ def getSpecies(ID):
     else:
         raise Exception("Species " + ID + " does not exist")
 
-def getStaticText(tag):
+def getStaticText(tag) -> str:
     for entry in STATICTEXT:
         if (entry.tag == tag):
             return entry.text
