@@ -14,13 +14,15 @@ class FlagListItem:
 
 class Scene:
     beasts: list[c.Beast]
+    teams: list[c.Team]
     raisedFlags: list[FlagListItem]
     flags: list[list[FlagListItem]]
     attackresult: list[dict]
     active_flag: FlagListItem
     active_beast: c.Beast
 
-    def __init__(self,format:str):
+    def __init__(self,format:str,teams:list[c.Team]=None):
+        self.teams = []
         self.beasts = []
         self.turnTrackerLength = TURNTRACKER_LENGTH
         self.flags = [[]]
@@ -30,6 +32,10 @@ class Scene:
         self.state_changed = False
 
         self.setformat(format)
+
+        if teams != None:
+            for team in teams:
+                self.addTeam(team)
 
         self.active_flag = None
         self.active_beast = None
@@ -46,7 +52,15 @@ class Scene:
     def getformat(self) -> str:
         return self.battleformat
 
-    def addBeast(self, beast:c.Beast, team:c.Team):
+    def addTeam(self,team:c.Team):
+        # team assignment depends on self.format
+        # Default behaviour puts the first team in the first slot, second in the second, etc...
+        self.teams.append(team)
+        for beast in team.beasts:
+            self.beasts.append(beast)
+        return
+
+    def addBeast(self, beast:c.Beast):
         self.beasts.append(beast)
     
     def removeBeast(self, beast: c.Beast):

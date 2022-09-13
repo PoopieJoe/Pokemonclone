@@ -10,19 +10,10 @@ class SceneController:
     
     def addscene(self,teams:list[sm.c.Team],format:str,setactive:bool = True):
         """ Creates a new Scene object and adds it to the scene list \n
-            teams:list[Team]        : SHOULD be a list of teams that are initiated in the scene. Number of teams depends on "format" \n
+            teams:list[Team]        : a list of teams that are initiated in the scene. Number of teams, and which team slot they get depends on "format" \n
             format:str              : battle format \n
             setactive:bool = True   : Immediately set the created scene as the active scene \n"""
-        newscene = sm.Scene(format)
-        tmpbeasts = []
-        for team in teams:
-            for beast in team.beasts:
-                tmpbeasts.append(beast)
-
-        for n,beast in enumerate(tmpbeasts):
-            newscene.addBeast(beast=beast,team=n)
-
-        newscene.setformat(format=format)
+        newscene = sm.Scene(format,teams)
         newscene.setupBattle()
         self.scenes.append(newscene)
         if setactive:
