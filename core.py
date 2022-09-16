@@ -1,6 +1,7 @@
 from pathlib import Path
 import pygame
 import gamecontrol as gc
+import teamcontrol as tc
 import ui
 from globalconstants import *
 
@@ -17,5 +18,6 @@ class CoreGame:
 
     def launch(self):
         self.gamecontrol = gc.GameController()
-        self.gui = ui.GameGui(self.gamecontrol)
+        self.teamcontrol = tc.TeamController()
+        self.gui = ui.GameGui(self.gamecontrol,self.teamcontrol)
         self.gui.launchmenu(self.gui.mainmenu)

@@ -1,4 +1,3 @@
-from distutils.debug import DEBUG
 import sys
 import pygame
 import thorpy
@@ -6,7 +5,7 @@ import core
 from globalconstants import *
 #from pygame.locals import *
 
-DEBUG = True
+DEBUG = False
 
 def main():
     pygame.init()

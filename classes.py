@@ -1,5 +1,6 @@
 from __future__ import annotations
 import csv
+from itertools import chain
 from math import floor
 from fnmatch import fnmatch
 from globalconstants import *
@@ -92,6 +93,15 @@ class Equipment:
             self.effects.append(neweffect)
 
 class Attack:
+    id:int
+    name:str
+    power:list[float]
+    accuracy:float
+    critRate:float
+    chainID:int
+    flags:list[dict]
+    effects:list[dict]
+    tooltip:list[str]
     def __init__(
         self, 
         atkid, 
@@ -194,6 +204,7 @@ class Species:
 
 class Beast:
     "Describes an ingame beast, complete with stats and equipment"
+    attacks:list[Attack]
     def __init__(self, species, nickname = None, loadout = []):
         #details
         self.species = getSpecies(species)

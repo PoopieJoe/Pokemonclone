@@ -10,6 +10,9 @@ class CONSTOBJ:
                 return False
         return True
 
+    def getlist(self):
+        return self.__dict__.values()
+
 
 
 #### Gameplay-related constants

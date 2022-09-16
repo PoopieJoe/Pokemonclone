@@ -1,3 +1,4 @@
+from __future__ import annotations
 from pathlib import Path
 from globalconstants import *
 import scenecontrol as sc
@@ -22,12 +23,8 @@ class GameController:
         else:
             return False
 
-    def makeScene(self,setactive:bool=True):
-        # TODO SHOULD JUST BE A WRAPPER FOR SCONTROL.ADDSCENE
-        # TODO NEEDS SUBMENU FOR OVERVIEW OF MADE SCENES
-        Team1 = self.tcontrol.fetchteam(Path("./teams/Test_3.txt"))
-        Team2 = self.tcontrol.fetchteam(Path("./teams/Test_1.txt"))
-        self.scontrol.addscene([Team1,Team2],format=BATTLEFORMATS.FREEFORALL,setactive=setactive)
+    def makeScene(self,teams:list[sc.sm.c.Team],format:str,setactive:bool = True):
+        self.scontrol.addscene(teams,format,setactive)
 
     def getactivescene(self) -> sc.sm.Scene:
         return self.scontrol.activescene

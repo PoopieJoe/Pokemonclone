@@ -1,13 +1,12 @@
 from __future__ import annotations
+from xml.etree.ElementTree import PI
 import pygame
 import thorpy
 from pygame.locals import *
 from math import floor,ceil
 from globalconstants import *
-from uiElements import *
-import classes as c
-import scenemanager as sm
 import gamecontrol as gc
+import teamcontrol as tc
 import misc
 
 pygame.init()
@@ -144,8 +143,8 @@ class MenuContainer:
         self.background.unblit_and_reblit()
 
 class GameGui:
-    def __init__(self,gcontrol:gc.GameController):
-        self.evthandler = UIHandler(self,gcontrol)
+    def __init__(self,gcontrol:gc.GameController,tcontrol:tc.TeamController):
+        self.evthandler = UIHandler(self,gcontrol,tcontrol)
         ## Main menu
         self.genmainmenu()
 
@@ -158,7 +157,7 @@ class GameGui:
     def genmainmenu(self):
         thorpy.style.FONT_SIZE = 48
 
-        startbutton = thorpy.make_button("Battle",func=self.evthandler.startbuttonfunc)
+        startbutton = thorpy.make_button("Battle",func=self.evthandler.mainmenu.startbuttonfunc)
         startbutton.set_painter(CUSTOMPAINTERS.menubutton)
         startbutton.finish()
 
@@ -179,13 +178,50 @@ class GameGui:
         thorpy.style.FONT_SIZE = 18
         self.mainmenu = MenuContainer({"bar":mainmenubar},build=True,image=pygame.image.load(SCENEBG))
 
-    def gensceneview(self,scene:sm.Scene):
-        reac_time = thorpy.ConstantReaction(thorpy.constants.THORPY_EVENT, self.evthandler.updatescene,
+    def genpicksceneview(self):
+        thorpy.style.FONT_SIZE = 48
+        backbutton = thorpy.make_button("Back",self.evthandler.pickscenemenu.returntomainmenu)
+        backbutton.set_painter(CUSTOMPAINTERS.menubutton)
+        backbutton.finish()
+        backbutton.set_center((SCREENW*0.8,SCREENH*0.1))
+
+        addscenebutton = thorpy.make_button("Add Scene",self.evthandler.pickscenemenu.buildscene)
+        addscenebutton.set_painter(CUSTOMPAINTERS.menubutton)
+        addscenebutton.finish()
+        addscenebutton.set_center((SCREENW*0.2,SCREENH*0.9))
+        thorpy.style.FONT_SIZE = 18
+
+        self.picksceneview = MenuContainer(elements={"backbutton":backbutton,"addscenebutton":addscenebutton})
+        
+        self.picksceneview.build(image=pygame.image.load(SCENEBG))
+        return
+
+    def genbuildsceneview(self):
+        thorpy.style.FONT_SIZE = 48
+        backbutton = thorpy.make_button("Back",self.evthandler.buildscenemenu.returntopickscene)
+        backbutton.set_painter(CUSTOMPAINTERS.menubutton)
+        backbutton.finish()
+        backbutton.set_center((SCREENW*0.8,SCREENH*0.1))
+        thorpy.style.FONT_SIZE = 18
+
+        formatdropdown = thorpy.DropDownList(BATTLEFORMATS.getlist(),size=(SCREENW*0.2,SCREENH*0.3))
+        formatdropdown.finish()
+        formatdropdown.set_center((SCREENW*0.2,SCREENH*0.5))
+
+        self.buildsceneview = MenuContainer(elements={"backbutton":backbutton,"formatdropdown":formatdropdown})
+        self.buildsceneview.build(image=pygame.image.load(SCENEBG))
+
+
+    def gensceneview(self,scene:gc.sc.sm.Scene):
+        reac_time = thorpy.ConstantReaction(thorpy.constants.THORPY_EVENT, self.evthandler.scenemenu.updatescene,
                                             {"id":thorpy.constants.EVENT_TIME})
 
         turntracker = getturntrackers(scene)
+        
+        turntracker.finish()
         turntracker.set_center((SCREENW*0.5,SCREENH*0.1))
         healthbars = gethealthbars(scene)
+        healthbars.finish()
         healthbars.set_center(UICONST.HEALTHBARGROUPPOS)
 
         self.sceneview = MenuContainer(elements={"turntracker":turntracker,"healthbars":healthbars},reactions={"reac_time":reac_time})
@@ -193,7 +229,8 @@ class GameGui:
         self.sceneview.build(image=pygame.image.load(SCENEBG))
         return
 
-    def updatesceneview(self,scene:sm.Scene):
+
+    def updatesceneview(self,scene:gc.sc.sm.Scene):
         turntracker = getturntrackers(scene)
         turntracker.set_center((SCREENW*0.5,SCREENH*0.1))
         self.sceneview.updateelements({"turntracker":turntracker})
@@ -209,7 +246,7 @@ class GameGui:
             losers = scene.rankings["losers"]
             victorytext = ' and '.join(beast.nickname for beast in winners) + " win(s)!\n" + ' and '.join(beast.nickname for beast in losers) + " lose(s)!"
             bottomtext = thorpy.make_text(text=victorytext,font_size=UICONST.STATUSPANELFONTSIZE,font_color=(0,0,0))
-            returnbutton = thorpy.make_button("Return to menu",self.evthandler.endactivebattleandreturn)
+            returnbutton = thorpy.make_button("Return to menu",self.evthandler.scenemenu.endactivebattleandreturn)
             returnbutton.set_painter(CUSTOMPAINTERS.choicebutton)
             returnbutton.finish()
             boxgroup = thorpy.make_group([bottomtext,returnbutton],mode="v")
@@ -228,7 +265,7 @@ class GameGui:
 
             if scene.getstate() == SCENESTATES.CHOOSEATTACK:
                 # generate movebuttons
-                movebuttons = [thorpy.make_button(atk.name,self.evthandler.movebuttonfunc,params={"scene":scene,"atk":atk}) for atk in activebeast.attacks]
+                movebuttons = [thorpy.make_button(atk.name,self.evthandler.scenemenu.movebutton,params={"scene":scene,"atk":atk}) for atk in activebeast.attacks]
                 [but.set_painter(CUSTOMPAINTERS.choicebutton) for but in movebuttons]
                 [but.finish() for but in movebuttons]
                 movebutcols = [thorpy.make_group(movebuttons[col*UICONST.CHOICEBUTTONSPERCOL:(col+1)*UICONST.CHOICEBUTTONSPERCOL-1],mode="v") for col in range(ceil(len(movebuttons)/UICONST.CHOICEBUTTONSPERCOL))]
@@ -259,7 +296,7 @@ class GameGui:
                     if (not beast.isalive):
                         validtargets.remove(beast) #remove dead things
 
-                targetbuttons = [thorpy.make_button(target.nickname,self.evthandler.targetbuttonfunc,params={"scene":scene,"beasts":[target]}) for target in validtargets]
+                targetbuttons = [thorpy.make_button(target.nickname,self.evthandler.scenemenu.targetbutton,params={"scene":scene,"beasts":[target]}) for target in validtargets]
                 [but.set_painter(CUSTOMPAINTERS.choicebutton) for but in targetbuttons]
                 [but.finish() for but in targetbuttons]
                 targetbutcols = [thorpy.make_group(targetbuttons[col*UICONST.CHOICEBUTTONSPERCOL:(col+1)*UICONST.CHOICEBUTTONSPERCOL-1],mode="v") for col in range(ceil(len(targetbuttons)/UICONST.CHOICEBUTTONSPERCOL))]
@@ -272,7 +309,7 @@ class GameGui:
             elif scene.getstate() == SCENESTATES.EXECUTEATTACK:
                 attacks = scene.attackresult
                 boxtitle = thorpy.make_text(getattackresulttext(attacks),font_size=UICONST.STATUSPANELFONTSIZE,font_color=(0,0,0))
-                continuebutton = thorpy.make_button("Continue",self.evthandler.executeattackcontinue,params={"scene":scene})
+                continuebutton = thorpy.make_button("Continue",self.evthandler.scenemenu.executeattackcontinue,params={"scene":scene})
                 continuebutton.set_painter(CUSTOMPAINTERS.choicebutton)
                 continuebutton.finish()
                 boxgroup = thorpy.make_group([boxtitle,continuebutton],mode="v")
@@ -303,58 +340,108 @@ class GameGui:
         return
 
 class UIHandler:
-    def __init__(self,gui:GameGui,gcontrol:gc.GameController) -> None:
+    def __init__(self,gui:GameGui,gcontrol:gc.GameController,tcontrol:tc.TeamController) -> None:
         self.gui = gui
         self.gcontrol = gcontrol
+        self.tcontrol = tcontrol
 
-    def startbuttonfunc(self):
-        # normally swap to scene selection, but now we just skip to the scene view
-        self.gcontrol.makeScene()
-        self.gcontrol.setstate(GAMESTATES.SCENE)
-        self.gui.gensceneview(self.gcontrol.scontrol.activescene)
-        self.gui.launchmenu(self.gui.sceneview)
+        class MainMenu:
+            def __init__(self,parent:UIHandler) -> None:
+                self.handler = parent
+                return
+            
+            def startbuttonfunc(self):
+                self.handler.gui.genpicksceneview()
+                self.handler.gui.launchmenu(self.handler.gui.picksceneview)
+                return
+
+        class PickSceneMenu:
+            def __init__(self,parent:UIHandler) -> None:
+                self.handler = parent
+                return
+
+            def buildscene(self):
+                self.handler.gui.genbuildsceneview()
+                self.handler.gui.launchmenu(self.handler.gui.buildsceneview)
+
+            def returntomainmenu(self):
+                self.handler.gui.launchmenu(self.handler.gui.mainmenu)
+
+        class BuildSceneMenu:
+            def __init__(self,parent:UIHandler) -> None:
+                self.handler = parent
+                return
+
+            def addscenebutton(self,teams:list[gc.sc.sm.c.Team],format:str):
+                Team1 = self.handler.tcontrol.fetchteam(Path("./teams/Test_3.txt"))
+                Team2 = self.handler.tcontrol.fetchteam(Path("./teams/Test_1.txt")) 
+                teams = [Team1,Team2]
+                format = BATTLE_FORMATS.FREEFORALL
+                self.handler.gcontrol.makeScene(teams,format)
+                self.handler.gcontrol.setstate(GAMESTATES.SCENE)
+                self.handler.gui.gensceneview(self.handler.gcontrol.scontrol.activescene)
+                self.handler.gui.launchmenu(self.handler.gui.sceneview)
+
+            def returntopickscene(self):
+                self.handler.gui.launchmenu(self.handler.gui.picksceneview)
+
+        class SceneMenu:
+            def __init__(self,parent:UIHandler) -> None:
+                self.handler = parent
+                return
+
+            def movebutton(self,scene:gc.sc.sm.Scene,atk:gc.sc.sm.c.Attack):
+                activebeast = scene.active_beast
+                activebeast.selectattack(atk)
+                scene.setstate(SCENESTATES.CHOOSETARGET)
+                return
+
+            def targetbutton(self,scene:gc.sc.sm.Scene,beasts:list[gc.sc.sm.c.Beast]):
+                activebeast = scene.active_beast
+                activebeast.selecttargets(targets=beasts)
+                scene.clearactiveflag()
+                scene.setstate(SCENESTATES.IDLE)
+                return
+
+            def executeattackcontinue(self,scene:gc.sc.sm.Scene):
+                scene.clearactiveflag()
+                scene.setstate(SCENESTATES.IDLE)
+                return
+
+            def endactivebattleandreturn(self):
+                self.handler.gcontrol.scontrol.endactivescene()
+                self.returntomainmenu()
+
+            def returntomainmenu(self):
+                self.handler.gui.launchmenu(self.handler.gui.mainmenu)
+
+            def updatescene(self):
+                activescene = self.handler.gcontrol.getactivescene()
+                activescene.run()
+                if activescene.statechanged() or activescene.getstate() == SCENESTATES.IDLE:
+                    self.handler.gui.updatesceneview(activescene)
+                    thorpy.functions.refresh_current_menu()
+
+        self.mainmenu = MainMenu(self)
+        self.scenemenu = SceneMenu(self)
+        self.pickscenemenu = PickSceneMenu(self)
+        self.buildscenemenu = BuildSceneMenu(self)
         return
 
-    def movebuttonfunc(self,scene:sm.Scene,atk:c.Attack):
-        activebeast = scene.active_beast
-        activebeast.selectattack(atk)
-        scene.setstate(SCENESTATES.CHOOSETARGET)
-        return
 
-    def targetbuttonfunc(self,scene:sm.Scene,beasts:list[sm.c.Beast]):
-        activebeast = scene.active_beast
-        activebeast.selecttargets(targets=beasts)
-        scene.clearactiveflag()
-        scene.setstate(SCENESTATES.IDLE)
-        return
 
-    def executeattackcontinue(self,scene:sm.Scene):
-        scene.clearactiveflag()
-        scene.setstate(SCENESTATES.IDLE)
-        return
+    
 
-    def endactivebattleandreturn(self):
-        self.gcontrol.scontrol.endactivescene()
-        self.returntomainmenu()
-
-    def returntomainmenu(self):
-        self.gui.launchmenu(self.gui.mainmenu)
-
-    def updatescene(self):
-        activescene = self.gcontrol.getactivescene()
-        activescene.run()
-        if activescene.statechanged() or activescene.getstate() == SCENESTATES.IDLE:
-            self.gui.updatesceneview(activescene)
-            thorpy.functions.refresh_current_menu()
+    
         
 
-def getstatuspanel(beast:c.Beast,painter=CUSTOMPAINTERS.big_textbox) -> thorpy.Box:
+def getstatuspanel(beast:gc.sc.sm.c.Beast,painter=CUSTOMPAINTERS.big_textbox) -> thorpy.Box:
     statustext = thorpy.make_text(text=getStatusText(beast),font_size=UICONST.STATUSPANELFONTSIZE,font_color=(0,0,0))
     statuspanel = thorpy.Box(elements=[statustext],size=(UICONST.STATUSPANELW,UICONST.STATUSPANELH))
     statuspanel.set_painter(painter)
     return statuspanel
 
-def getturntrackers(scene:sm.Scene)->thorpy.Ghost:
+def getturntrackers(scene:gc.sc.sm.Scene)->thorpy.Ghost:
     bars = []
     for beast in scene.beasts:
         bar = thorpy.LifeBar(   text=beast.nickname,
@@ -371,7 +458,7 @@ def getturntrackers(scene:sm.Scene)->thorpy.Ghost:
     bargroup = thorpy.make_group(bars,mode="v")
     return bargroup
 
-def gethealthbars(scene:sm.Scene)->thorpy.Ghost:
+def gethealthbars(scene:gc.sc.sm.Scene)->thorpy.Ghost:
     bars = []
     for beast in scene.beasts:
         bar = thorpy.LifeBar(   text=beast.nickname,
@@ -391,7 +478,7 @@ def gethealthbars(scene:sm.Scene)->thorpy.Ghost:
     bargroup = thorpy.make_group(bars,mode="h")
     return bargroup
 
-def getStatusText(beast:c.Beast) -> str:
+def getStatusText(beast:gc.sc.sm.c.Beast) -> str:
     statustext = [beast.nickname,""]
     #print HP total
     hptext = str(beast.HP) + "/" + str(beast.maxHP) + " HP (" + str(max(round(beast.HP/beast.maxHP*100),1)) + "%)"
@@ -426,7 +513,7 @@ def getattackresulttext(result:list[dict]) -> str:
 # DECPRECATED CODE THAT MIGHT STILL BE USEFUL
 #########################################################
 
-def getShortStatusText(beast: c.Beast) -> str:
+def getShortStatusText(beast: gc.sc.sm.c.Beast) -> str:
     statustext = [beast.nickname]
     #print HP total
     hptext = str(beast.HP) + "/" + str(beast.maxHP) + " HP (" + str(max(round(beast.HP/beast.maxHP*100),1)) + "%)"
@@ -440,7 +527,7 @@ def getShortStatusText(beast: c.Beast) -> str:
                 statustext.append(SLOWNAME + " (" + str(ceil(status["trackleft"]/TURNTRACKER_LENGTH)) + " turns left)")
     return statustext
 
-def getAttackTooltipText(attack: c.Attack) -> str:
+def getAttackTooltipText(attack: gc.sc.sm.c.Attack) -> str:
     statustext = attack.tooltip.copy()
 
     #Flags
@@ -466,10 +553,10 @@ def getAttackTooltipText(attack: c.Attack) -> str:
 
     #Chains
     if attack.chainID != NOCHAINID:
-        nextatk = c.getAttack(attack.chainID)
+        nextatk = gc.sc.sm.c.getAttack(attack.chainID)
         chainatks = [nextatk]
         while nextatk.chainID != NOCHAINID:
-            nextatk = c.getAttack(nextatk.chainID)
+            nextatk = gc.sc.sm.c.getAttack(nextatk.chainID)
             chainatks.append(nextatk)
             
         statustext.append("Chains into:")
@@ -494,10 +581,10 @@ def getAttackTooltipText(attack: c.Attack) -> str:
             statustext.append(str(int(effect["chance"]*100)) + "% Chance to apply " + effect["name"] + " " + str(effect["value"]))
     return statustext
 
-def getTargetTooltipText(target: c.Beast) -> str:
+def getTargetTooltipText(target: gc.sc.sm.c.Beast) -> str:
     return getShortStatusText(target)
 
-def getTurntrackerTooltipText(scene: sm.Scene) -> str:
+def getTurntrackerTooltipText(scene: gc.sc.sm.Scene) -> str:
     text = []
     for beast in scene.beasts:
         trackerpercentage = (beast.turntracker % (scene.turnTrackerLength/2))/(scene.turnTrackerLength/2)*100 #0-100 going one way, 0-100 going back
