@@ -92,6 +92,9 @@ class CustomPainters:
         self.menubutton = MenuButtonPainter(    size=(400,80),
                                                 rectcolor=(55,255,55),
                                                 presscolor=(20,180,20))
+        self.smallmenubutton = MenuButtonPainter(   size=(150,80),
+                                                    rectcolor=(230,150,55),
+                                                    presscolor=(20,180,20))
         self.choicebutton = MenuButtonPainter(  size=(UICONST.CHOICEBUTTONW,UICONST.CHOICEBUTTONH),
                                                 rectcolor=(230,200,100),
                                                 presscolor=(180,160,100))
@@ -136,7 +139,7 @@ class MenuContainer:
             for key in self.reactions:
                 self.background.add_reaction(self.reactions[key])
 
-    def updateelements(self,elements:dict={}):
+    def updateelements(self,elements:dict):
         for key in elements:
             if key in self.elements:
                 self.background.remove_elements([self.elements[key]])
@@ -149,8 +152,6 @@ class MenuContainer:
 
 class GameGui:
     def __init__(self,gcontrol:gc.GameController,tcontrol:tc.TeamController):
-        self.evthandler = UIHandler(self,gcontrol,tcontrol)
-
         class MainMenu:
             def __init__(self,parent:GameGui,gcontrol:gc.GameController,tcontrol:tc.TeamController) -> None:
                 self.gui = parent
@@ -212,9 +213,39 @@ class GameGui:
                 thorpy.style.FONT_SIZE = 18
 
                 self.menu = MenuContainer(elements={"backbutton":backbutton,"addscenebutton":addscenebutton})
-                
                 self.menu.build(image=pygame.image.load(SCENEBG))
+                self.update()
                 return
+
+            def update(self):
+                scenebuttonlist = []
+                if self.gcontrol.scontrol.scenes != None:
+                    for scene in self.gcontrol.scontrol.scenes:
+                        buttonstring = scene.getformat() + " - " + " vs ".join([team.name for team in scene.teams])
+                        newbutton = thorpy.make_button(buttonstring,self.scenepick,params={"scene":scene})
+                        newbutton.set_painter(CUSTOMPAINTERS.menubutton)
+                        newbutton.finish()
+
+                        delbutton = thorpy.make_button("Remove")
+                        delbutton.set_painter(CUSTOMPAINTERS.smallmenubutton)
+                        delbutton.finish()
+
+                        row = thorpy.make_group([newbutton,delbutton],mode="h")
+                        scenebuttonlist.append(row)
+                scenelist = thorpy.make_group(scenebuttonlist,mode="v")
+                scenelist.finish()
+                scenelist.set_topleft((SCREENW*0.1,SCREENH*0.2))
+                self.menu.updateelements({"scenelist":scenelist})
+                self.menu.reblit()
+
+            def scenepick(self,scene):
+                self.gcontrol.scontrol.setactivescene(scene)
+                self.gui.sceneview.updatescene()
+                self.gui.launchmenu(self.gui.sceneview.menu)
+
+            def removescene(self,scene):
+                self.gcontrol.scontrol.endscene(scene)
+                self.update()
 
             def buildscene(self):
                 self.gui.buildsceneview.generate()
@@ -244,23 +275,23 @@ class GameGui:
                 backbutton.set_painter(CUSTOMPAINTERS.menubutton)
                 backbutton.finish()
                 backbutton.set_center((SCREENW*0.8,SCREENH*0.1))
-                thorpy.style.FONT_SIZE = 18
-
-                formatdropdown = thorpy.DropDownList(BATTLEFORMATS.getlist(),size=(SCREENW*0.2,SCREENH*0.3))
-                formatdropdown.finish()
-                formatdropdown.set_center((SCREENW*0.2,SCREENH*0.5))
-
-                team1browser = thorpy.Browser(BASETEAMS,text="Choose a team file")
-                team1browser.set_center((SCREENW*0.5,SCREENH*0.5))
-
-                team2browser = thorpy.Browser(BASETEAMS,text="Choose a team file")
-                team2browser.set_center((SCREENW*0.8,SCREENH*0.5))
 
                 addscene = thorpy.make_button("Start!",self.addscenebutton)
                 addscene.set_painter(CUSTOMPAINTERS.menubutton)
                 addscene.set_visible(False)
                 addscene.finish()
                 addscene.set_center((SCREENW*0.5,SCREENH*0.8))
+                thorpy.style.FONT_SIZE = 18
+
+                formatdropdown = thorpy.DropDownList(BATTLEFORMATS.getlist(),size=(SCREENW*0.2,SCREENH*0.3))
+                formatdropdown.finish()
+                formatdropdown.set_center((SCREENW*0.2,SCREENH*0.5))
+
+                team1browser = thorpy.Browser(BASETEAMS,text="Choose Team 1")
+                team1browser.set_center((SCREENW*0.5,SCREENH*0.5))
+
+                team2browser = thorpy.Browser(BASETEAMS,text="Choose Team 2")
+                team2browser.set_center((SCREENW*0.8,SCREENH*0.5))
 
                 reac_formatdorpdown = thorpy.Reaction(thorpy.constants.THORPY_EVENT,self.dropdownevent,{"id":thorpy.constants.EVENT_DDL})
 
@@ -288,11 +319,9 @@ class GameGui:
                 if (self.format != None
                     and self.team1path != None
                     and self.team2path != None ):
-                    # make addscenebutton
-
                     self.menu.elements["addscene"].set_visible(True)
                     self.menu.updateelements({"addscene":self.menu.elements["addscene"]})
-                    thorpy.functions.refresh_current_menu()
+                    self.menu.reblit()
                 return
 
             def addscenebutton(self):
@@ -318,23 +347,27 @@ class GameGui:
 
             def generate(self):
                 reac_time = thorpy.ConstantReaction(thorpy.constants.THORPY_EVENT, self.updatescene,{"id":thorpy.constants.EVENT_TIME})
-
+                thorpy.style.FONT_SIZE = 18
+                backbutton = thorpy.make_button("Back",self.returntopickscene)
+                backbutton.set_painter(CUSTOMPAINTERS.choicebutton)
+                backbutton.finish()
+                backbutton.set_center((SCREENW*0.9,SCREENH*0.1))
+                
                 turntracker =   thorpy.LifeBar( text="",
                                                 size=(UICONST.TURNTRACKERW,UICONST.TURNTRACKERH),
                                                 font_size=10) 
-                
                 turntracker.finish()
                 turntracker.set_center(UICONST.TURNTRACKERPOS)
-
                 healthbars = thorpy.LifeBar(    text="",
                                                 size=(UICONST.HEALTHBARW,UICONST.HEALTHBARH),
                                                 font_size=10,
                                                 type_="v") 
                 healthbars.finish()
                 healthbars.set_center(UICONST.HEALTHBARGROUPPOS)
-
-                self.menu = MenuContainer(elements={"turntracker":turntracker,"healthbars":healthbars},reactions={"reac_time":reac_time})
-
+                self.menu = MenuContainer(  elements={  "backbutton":backbutton,
+                                                        "turntracker":turntracker,
+                                                        "healthbars":healthbars},
+                                            reactions={ "reac_time":reac_time})
                 self.menu.build(image=pygame.image.load(SCENEBG))
                 return
 
@@ -447,8 +480,9 @@ class GameGui:
                 self.menu.reblit()
                 return
 
-            def setscene(scene:gc.sc.sm.Scene):
-                self.scene = scene
+            def returntopickscene(self):
+                self.gui.pickscenemenu.update()
+                self.gui.launchmenu(self.gui.pickscenemenu.menu)
 
             def movebutton(self,scene:gc.sc.sm.Scene,atk:gc.sc.sm.c.Attack):
                 activebeast = scene.active_beast
@@ -489,18 +523,6 @@ class GameGui:
 
         menu = thorpy.Menu(menucontainer.background,fps=FPS)
         menu.play()
-
-
-    
-
-class UIHandler:
-    def __init__(self,gui:GameGui,gcontrol:gc.GameController,tcontrol:tc.TeamController) -> None:
-        self.gui = gui
-        self.gcontrol = gcontrol
-        self.tcontrol = tcontrol
-
-        return
-
 
 
     

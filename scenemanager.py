@@ -71,7 +71,7 @@ class Scene:
             if (beast != None):
                 beast.clearALLflags()
                 beast.isalive = True
-                beast.HP = 1#beast.maxHP
+                beast.HP = beast.maxHP
                 beast.setflag(FLAG_CHOOSEATTACK)
                 beast.turntracker = 0
 

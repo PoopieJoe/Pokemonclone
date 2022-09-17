@@ -4,6 +4,7 @@ import scenemanager as sm
 
 class SceneController:
     "High level controller that can create, destroy and run scenes"
+    scenes:list[sm.Scene]
     def __init__(self):
         self.scenes = []
         self.activescene = None
