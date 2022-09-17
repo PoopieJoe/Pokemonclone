@@ -20,4 +20,4 @@ class CoreGame:
         self.gamecontrol = gc.GameController()
         self.teamcontrol = tc.TeamController()
         self.gui = ui.GameGui(self.gamecontrol,self.teamcontrol)
-        self.gui.launchmenu(self.gui.mainmenu)
+        self.gui.launchmenu(self.gui.mainmenu.menu)
