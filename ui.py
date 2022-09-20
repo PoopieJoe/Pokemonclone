@@ -226,7 +226,7 @@ class GameGui:
                         newbutton.set_painter(CUSTOMPAINTERS.menubutton)
                         newbutton.finish()
 
-                        delbutton = thorpy.make_button("Remove")
+                        delbutton = thorpy.make_button("Remove",self.removescene,params={"scene":scene})
                         delbutton.set_painter(CUSTOMPAINTERS.smallmenubutton)
                         delbutton.finish()
 
@@ -270,14 +270,13 @@ class GameGui:
                 return
 
             def generate(self):
+                reac_formatdorpdown = thorpy.Reaction(thorpy.constants.THORPY_EVENT,self.dropdownevent,{"id":thorpy.constants.EVENT_DDL})
                 thorpy.style.FONT_SIZE = 48
                 backbutton = thorpy.make_button("Back",self.returntopickscene)
                 backbutton.set_painter(CUSTOMPAINTERS.menubutton)
                 backbutton.finish()
                 backbutton.set_center((SCREENW*0.8,SCREENH*0.1))
-
-                addscene = thorpy.make_button("Start!",self.addscenebutton)
-                addscene.set_painter(CUSTOMPAINTERS.menubutton)
+                addscene = thorpy.make_button("Start!")
                 addscene.set_visible(False)
                 addscene.finish()
                 addscene.set_center((SCREENW*0.5,SCREENH*0.8))
@@ -292,8 +291,6 @@ class GameGui:
 
                 team2browser = thorpy.Browser(BASETEAMS,text="Choose Team 2")
                 team2browser.set_center((SCREENW*0.8,SCREENH*0.5))
-
-                reac_formatdorpdown = thorpy.Reaction(thorpy.constants.THORPY_EVENT,self.dropdownevent,{"id":thorpy.constants.EVENT_DDL})
 
                 self.menu = MenuContainer(  elements={  "backbutton":backbutton,
                                                         "formatdropdown":formatdropdown,
@@ -319,8 +316,15 @@ class GameGui:
                 if (self.format != None
                     and self.team1path != None
                     and self.team2path != None ):
-                    self.menu.elements["addscene"].set_visible(True)
-                    self.menu.updateelements({"addscene":self.menu.elements["addscene"]})
+
+                    thorpy.style.FONT_SIZE = 48
+                    addscene = thorpy.make_button("Start!",self.addscenebutton)
+                    addscene.set_painter(CUSTOMPAINTERS.menubutton)
+                    addscene.finish()
+                    addscene.set_center((SCREENW*0.5,SCREENH*0.8))
+                    thorpy.style.FONT_SIZE = 18
+
+                    self.menu.updateelements({"addscene":addscene})
                     self.menu.reblit()
                 return
 

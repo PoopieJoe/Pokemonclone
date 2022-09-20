@@ -386,13 +386,13 @@ class Scene:
             self.tick()
 
         #check win/lose condition
-        if self.getformat() == BATTLEFORMATS.FREEFORALL:
-            # Last man standing
-            livingbeasts = [beast for beast in self.beasts if beast.isalive]
-            deadbeasts = [beast for beast in self.beasts if not beast.isalive]
-            if len(livingbeasts) == 1:
-                self.rankings = {"winners":livingbeasts,"losers":deadbeasts}
-                self.setstate(SCENESTATES.DONE)
+        # if self.getformat() == BATTLEFORMATS.FREEFORALL:
+        #     # Last man standing
+        #     livingbeasts = [beast for beast in self.beasts if beast.isalive]
+        #     deadbeasts = [beast for beast in self.beasts if not beast.isalive]
+        #     if len(livingbeasts) == 1:
+        #         self.rankings = {"winners":livingbeasts,"losers":deadbeasts}
+        #         self.setstate(SCENESTATES.DONE)
 
 
     def tick(self):

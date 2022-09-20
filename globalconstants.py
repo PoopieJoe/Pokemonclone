@@ -96,9 +96,9 @@ SCENESTATES = SCENE_STATES()
 class BATTLE_FORMATS(CONSTOBJ):
     def __init__(self) -> None:
         super().__init__()
-        self.FREEFORALL = "Free for all"
+        #self.FREEFORALL = "Free for all" 
         self.TWOVTWO = "2v2"
-        self.THREEVTHREE = "3v3"
+        #self.THREEVTHREE = "3v3"
 BATTLEFORMATS = BATTLE_FORMATS()
 
 # Files
