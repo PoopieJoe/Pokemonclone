@@ -393,6 +393,15 @@ class Scene:
         #     if len(livingbeasts) == 1:
         #         self.rankings = {"winners":livingbeasts,"losers":deadbeasts}
         #         self.setstate(SCENESTATES.DONE)
+        if self.getformat() == BATTLEFORMATS.TWOVTWO:
+            #2v2
+            livingteams = [team for team in self.teams if team.isalive()]
+            deadteams = [team for team in self.teams if not team.isalive()]
+            if len(deadteams) > 0:
+                self.rankings = {"winners":livingteams,"losers":deadteams}
+                self.setstate(SCENESTATES.DONE)
+                    
+
 
 
     def tick(self):

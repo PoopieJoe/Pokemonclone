@@ -404,10 +404,19 @@ class StaticText:
         self.text = text
 
 class Team:
+    beasts:list[Beast]
+    subs:list[Beast]
+    name:str
     def __init__(self):
         self.beasts = []
         self.subs = []
         self.name = ""
+
+    def isalive(self):
+        for beast in self.beasts:
+            if beast.isalive:
+                return True
+        return False
 
 
 

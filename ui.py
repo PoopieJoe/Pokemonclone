@@ -389,7 +389,9 @@ class GameGui:
 
                     winners = scene.rankings["winners"]
                     losers = scene.rankings["losers"]
-                    victorytext = ' and '.join(beast.nickname for beast in winners) + " win(s)!\n" + ' and '.join(beast.nickname for beast in losers) + " lose(s)!"
+                    if scene.getformat() == BATTLEFORMATS.TWOVTWO:
+                        victorytext = ' and '.join(team.name for team in winners) + " win(s)!\n" + ' and '.join(team.name for team in losers) + " lose(s)!"  
+                    # victorytext = ' and '.join(beast.nickname for beast in winners) + " win(s)!\n" + ' and '.join(beast.nickname for beast in losers) + " lose(s)!"
                     bottomtext = thorpy.make_text(text=victorytext,font_size=UICONST.STATUSPANELFONTSIZE,font_color=(0,0,0))
                     returnbutton = thorpy.make_button("Return to menu",self.endactivebattleandreturn)
                     returnbutton.set_painter(CUSTOMPAINTERS.choicebutton)
