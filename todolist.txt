@@ -1,11 +1,9 @@
 Priority:
+- Team builder/editor
 - Team viewer/picker
-- Victory screen
-- Title screen
 
 Other:
 - Implement instant attack effects (can I even do animations?)
 - Predictive damage calc
-- Team builder
 - Advanced string processing (e.g. colors, italics, bold, different fonts, etc.)
 - Make some proper goddamn comments, especially for the ui and class methods, they're a mess
