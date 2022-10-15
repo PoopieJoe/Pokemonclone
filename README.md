@@ -1,5 +1,11 @@
+# On fresh clone
+
+Install Python 3 or higher  
+Create venv with `python -m venv .venv`
+Install dependencies with `pip install -r requirements.txt`
+
 # Pokemonclone (initial draft)
- 
+
 Beasts:
 
 Description:
